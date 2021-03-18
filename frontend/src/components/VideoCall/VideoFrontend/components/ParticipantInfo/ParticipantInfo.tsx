@@ -5,6 +5,7 @@ import {
   LocalAudioTrack, LocalVideoTrack, Participant, RemoteAudioTrack, RemoteVideoTrack,
 } from 'twilio-video';
 
+import { Button, Container } from "@chakra-ui/react"
 import Typography from '@material-ui/core/Typography';
 import AudioLevelIndicator from '../AudioLevelIndicator/AudioLevelIndicator';
 import AvatarIcon from '../../icons/AvatarIcon';
@@ -251,6 +252,7 @@ export default function ParticipantInfo({
           </a>
         </div>
         <div>{isSelected && <PinIcon />}</div>
+        {isLocalParticipant && <Button colorScheme="teal" size="sm" width="100px">Invite to race</Button>}
       </div>
       <div className={classes.innerContainer}>
         {(!isVideoEnabled || isVideoSwitchedOff) && (
