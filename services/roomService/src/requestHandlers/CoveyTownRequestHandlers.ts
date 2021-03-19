@@ -4,6 +4,7 @@ import Player from '../types/Player';
 import { CoveyTownList, UserLocation } from '../CoveyTypes';
 import CoveyTownListener from '../types/CoveyTownListener';
 import CoveyTownsStore from '../lib/CoveyTownsStore';
+import GamePlayer from '../types/GamePlayer';
 
 /**
  * The format of a request to join a Town in Covey.Town, as dispatched by the server middleware
@@ -106,7 +107,7 @@ export async function townJoinHandler(requestData: TownJoinRequest): Promise<Res
       message: 'Error: No such town',
     };
   }
-  const newPlayer = new Player(requestData.userName);
+  const newPlayer = new GamePlayer(requestData.userName);
   const newSession = await coveyTownController.addPlayer(newPlayer);
   assert(newSession.videoToken);
   return {
