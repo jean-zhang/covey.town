@@ -41,4 +41,9 @@ export default class Maze {
    * Adds a game to the Maze
    */
   // addGame(game: Game): void {}
+
+  /**
+   * Removes a game from the Maze
+   */
+  // removeGame(game: Game): void {}
 }

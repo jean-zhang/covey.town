@@ -21,11 +21,15 @@ export default class GamePlayer extends Player {
   /** The Game that this Player is part of */
   private _game?: Game;
 
+  /** Whether this GamePlayer has won the Game */
+  private _hasWon: boolean;
+
   constructor(userName: string) {
     super(userName);
     this._enableInvite = true;
     this._inMaze = false;
     this._invitePending = false;
+    this._hasWon = false;
   }
 
   /**
@@ -48,4 +52,9 @@ export default class GamePlayer extends Player {
    * Accepts an invite to a Game
    */ 
   // acceptInvite(inviter: Player): Game {}
+
+  /**
+   * Resets fields of this player
+   */ 
+  // ResetPlayer(): Game {}
 }
