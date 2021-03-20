@@ -141,6 +141,11 @@ const useStyles = makeStyles((theme: Theme) => createStyles<any, {}>({
   highlightParticipant: {
     border: `${BORDER_SIZE}px solid ${theme.palette.primary.main}`,
   },
+  buttonContainer: {
+    position: 'absolute',
+    right: '0px',
+    display: 'block',
+  }
 }));
 
 interface ParticipantInfoProps {
@@ -252,7 +257,9 @@ export default function ParticipantInfo({
           </a>
         </div>
         <div>{isSelected && <PinIcon />}</div>
-        {isLocalParticipant && <Button colorScheme="teal" size="sm" width="100px">Invite to race</Button>}
+        {!isLocalParticipant && <div className={classes.buttonContainer}>
+                                  <Button colorScheme="teal" size="sm" width="100px">Invite to race</Button>
+                                  </div>}
       </div>
       <div className={classes.innerContainer}>
         {(!isVideoEnabled || isVideoSwitchedOff) && (
