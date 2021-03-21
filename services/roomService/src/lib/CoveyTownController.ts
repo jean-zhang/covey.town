@@ -5,6 +5,7 @@ import Player from '../types/Player';
 import PlayerSession from '../types/PlayerSession';
 import TwilioVideo from './TwilioVideo';
 import IVideoClient from './IVideoClient';
+import Maze from './Maze';
 
 const friendlyNanoID = customAlphabet('1234567890ABCDEF', 8);
 
@@ -47,6 +48,9 @@ export default class CoveyTownController {
   get coveyTownID(): string {
     return this._coveyTownID;
   }
+
+  /** The maze in the town */
+  private _maze: Maze = Maze.getInstance();
 
   /** The list of players currently in the town * */
   private _players: Player[] = [];
