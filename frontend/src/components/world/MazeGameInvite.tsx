@@ -41,7 +41,6 @@ export default function MazeGameInvite(): JSX.Element {
         toast({
           render: renderToast,
           duration: null,
-          isClosable: true,
         })
       }
     >
