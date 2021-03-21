@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import { Box, useToast, Button, RenderProps, SimpleGrid } from '@chakra-ui/react';
 
-export default function MazeGame(): JSX.Element {
+export default function MazeGameInvite(): JSX.Element {
   const INVITING_PLAYER = 'player1'; // TODO: This is just a placeholder, remove when invite logic gets added
   const toast = useToast();
 
@@ -39,9 +39,6 @@ export default function MazeGame(): JSX.Element {
     <Button
       onClick={() =>
         toast({
-          title: "Account created.",
-          description: "We've created your account for you.",
-          status: "success",
           render: renderToast,
           duration: null,
           isClosable: true,
