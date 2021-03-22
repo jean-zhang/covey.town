@@ -4,7 +4,8 @@ import React, {
 import './App.css';
 import { BrowserRouter } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
-import { ChakraProvider } from '@chakra-ui/react';
+import { ChakraProvider, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, Button, Text, ModalFooter,
+} from '@chakra-ui/react';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import assert from 'assert';
 import WorldMap from './components/world/WorldMap';
@@ -26,6 +27,7 @@ import Player, { ServerPlayer, UserLocation } from './classes/Player';
 import TownsServiceClient, { TownJoinResponse } from './classes/TownsServiceClient';
 import Video from './classes/Video/Video';
 
+const INSTRUCTIONS_LOCATION = {xUpperLim: 440, xLowerLim: 420, yUpperLim: 1140, yLowerLim: 1120};
 type CoveyAppUpdate =
   | { action: 'doConnect'; data: { userName: string, townFriendlyName: string, townID: string,townIsPubliclyListed:boolean, sessionToken: string, myPlayerID: string, socket: Socket, players: Player[], emitMovement: (location: UserLocation) => void } }
   | { action: 'addPlayer'; player: Player }
@@ -52,6 +54,7 @@ function defaultAppState(): CoveyAppState {
     emitMovement: () => {
     },
     apiClient: new TownsServiceClient(),
+    showInstructions: false,
   };
 }
 function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyAppState {
@@ -68,6 +71,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     socket: state.socket,
     emitMovement: state.emitMovement,
     apiClient: state.apiClient,
+    showInstructions: state.showInstructions,
   };
 
   function calculateNearbyPlayers(players: Player[], currentLocation: UserLocation) {
@@ -126,6 +130,11 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       if (samePlayers(nextState.nearbyPlayers, state.nearbyPlayers)) {
         nextState.nearbyPlayers = state.nearbyPlayers;
       }
+      nextState.showInstructions = 
+        (update.location.x > INSTRUCTIONS_LOCATION.xLowerLim 
+        && update.location.x < INSTRUCTIONS_LOCATION.xUpperLim 
+        && update.location.y > INSTRUCTIONS_LOCATION.yLowerLim 
+        && update.location.y < INSTRUCTIONS_LOCATION.yUpperLim);
 
       break;
     case 'playerDisconnect':
@@ -201,6 +210,11 @@ async function GameController(initData: TownJoinResponse,
 
 function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefined>> }) {
   const [appState, dispatchAppUpdate] = useReducer(appStateReducer, defaultAppState());
+  const [instructions, setShowInstructions] = useState<boolean>(appState.showInstructions);
+   useEffect(() => {
+    setShowInstructions(appState.showInstructions);
+  }, [appState.showInstructions]);
+  const onClose = () => setShowInstructions(false);
 
   const setupGameController = useCallback(async (initData: TownJoinResponse) => {
     await GameController(initData, dispatchAppUpdate);
@@ -226,9 +240,26 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
       <div>
         <WorldMap />
         <VideoOverlay preferredMode="fullwidth" />
+        <Modal isOpen={instructions} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Welcome!</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+          <Text color="gray.500">
+            Find your way out of the corn maze before your opponent does!
+          </Text>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={onClose}>
+              Ok!
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
       </div>
     );
-  }, [setupGameController, appState.sessionToken, videoInstance]);
+  }, [setupGameController, appState.sessionToken, videoInstance, instructions]);
   return (
 
     <CoveyAppContext.Provider value={appState}>
