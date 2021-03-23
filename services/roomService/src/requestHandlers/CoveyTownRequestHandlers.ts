@@ -93,6 +93,12 @@ export interface MazeCompletionTimeCreateRequest {
   time: number;
 }
 
+export interface MazeCompletionTimeRow {
+  player_id: string;
+  username: string;
+  time: number;
+}
+
 /**
  * Envelope that wraps any response from the server
  */
@@ -269,10 +275,10 @@ export async function mazeTimeHandler(): Promise<ResponseEnvelope<MazeCompletion
     return {
       isOK: true,
       response: {
-        mazeCompletionTimes: results.rows.map(value => ({
-          playerID: value.player_id,
-          username: value.username,
-          time: value.time,
+        mazeCompletionTimes: results.rows.map((row: MazeCompletionTimeRow) => ({
+          playerID: row.player_id,
+          username: row.username,
+          time: row.time,
         })),
       },
     };
