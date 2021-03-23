@@ -4,6 +4,7 @@ import { CoveyTownList, MazeCompletionTimeList, UserLocation } from '../CoveyTyp
 import pool from '../dbconnector/pool';
 import CoveyTownsStore from '../lib/CoveyTownsStore';
 import CoveyTownListener from '../types/CoveyTownListener';
+import GamePlayer from '../types/GamePlayer';
 import Player from '../types/Player';
 import { getMazeCompletionTime, insertMazeCompletionTime } from '../utils/queries';
 
@@ -121,7 +122,7 @@ export async function townJoinHandler(
       message: 'Error: No such town',
     };
   }
-  const newPlayer = new Player(requestData.userName);
+  const newPlayer = new GamePlayer(requestData.userName);
   const newSession = await coveyTownController.addPlayer(newPlayer);
   assert(newSession.videoToken);
   return {

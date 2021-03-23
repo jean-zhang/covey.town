@@ -5,6 +5,12 @@ export type UserLocation = {
   rotation: Direction;
   moving: boolean;
 };
+
+export type PlayerInfo = {
+  userName: string;
+  userID: string;
+};
+
 export type CoveyTownList = {
   friendlyName: string;
   coveyTownID: string;
