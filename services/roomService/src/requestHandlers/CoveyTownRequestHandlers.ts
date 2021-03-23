@@ -278,6 +278,7 @@ export async function mazeTimeHandler(): Promise<ResponseEnvelope<MazeCompletion
   } catch (error) {
     return {
       isOK: false,
+      message: `Error: ${error.message}`,
     };
   }
 }
