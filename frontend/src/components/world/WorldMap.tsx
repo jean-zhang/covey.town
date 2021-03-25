@@ -4,6 +4,8 @@ import Player, { UserLocation } from '../../classes/Player';
 import Video from '../../classes/Video/Video';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 
+const INSTRUCTIONS_LOCATION = {x: 1455, y: 40};
+const START = {x: 352, y: 1216};
 // https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
 class CoveyGameScene extends Phaser.Scene {
   private player?: {
@@ -42,7 +44,7 @@ class CoveyGameScene extends Phaser.Scene {
   preload() {
     // this.load.image("logo", logoImg);
     this.load.image('tiles', '/assets/tilesets/tuxmon-sample-32px-extruded.png');
-    this.load.tilemapTiledJSON('map', '/assets/tilemaps/tuxemon-town.json');
+    this.load.tilemapTiledJSON('map', '/assets/tilemaps/tuxemon-town-maze-F.json');
     this.load.atlas('atlas', '/assets/atlas/atlas.png', '/assets/atlas/atlas.json');
   }
 
@@ -423,6 +425,20 @@ class CoveyGameScene extends Phaser.Scene {
     this.paused = false;
     this.input.keyboard.addCapture(this.previouslyCapturedKeys);
     this.previouslyCapturedKeys = [];
+  }
+
+  teleport(intoMaze: boolean) {
+    if(this.player) {
+      const body = this.player.sprite.body as Phaser.Physics.Arcade.Body;
+      let teleportLocation;
+      if(intoMaze) {
+        teleportLocation = INSTRUCTIONS_LOCATION;
+      } else {
+        teleportLocation = START;
+      }
+      body.x = teleportLocation.x;
+      body.y = teleportLocation.y;
+    }
   }
 }
 
