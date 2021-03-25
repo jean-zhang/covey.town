@@ -99,6 +99,12 @@ export interface MazeCompletionTimeRow {
   time: number;
 }
 
+export interface MazeInviteRequest {
+  inviter_playerId: string;
+  invitee_playerId: string;
+  coveyTownId: string;
+}
+
 /**
  * Envelope that wraps any response from the server
  */
@@ -329,5 +335,32 @@ export async function mazeTimeCreateHandler(
       isOK: false,
       message: `Error: ${error.message}`,
     };
+  }
+}
+
+export async function mazeInviteAcceptHandler(requestData: MazeInviteRequest): Promise<ResponseEnvelope<null>> {
+  const { inviter_playerId, invitee_playerId, coveyTownId } = requestData;
+  if (!inviter_playerId || !invitee_playerId || !coveyTownId) {
+    return {
+      isOK: false,
+      message: 'Include an inviter, invitee, and covey town',
+    };
+  }
+  const townController = CoveyTownsStore.getInstance().getControllerForTown(coveyTownId);
+  if (!townController) {
+    return {
+      isOK: false,
+      message: 'Invalid town'
+    }
+  }
+  if (townController.acceptPlayerInvite(inviter_playerId, invitee_playerId)) {
+    return {
+      isOK: true
+    }
+  } else {
+    return {
+      isOK: false,
+      message: 'Could not create invite'
+    }
   }
 }

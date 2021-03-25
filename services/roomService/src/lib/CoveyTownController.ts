@@ -1,6 +1,7 @@
 import { customAlphabet, nanoid } from 'nanoid';
 import { UserLocation } from '../CoveyTypes';
 import CoveyTownListener from '../types/CoveyTownListener';
+import GamePlayer from '../types/GamePlayer';
 import Player from '../types/Player';
 import PlayerSession from '../types/PlayerSession';
 import IVideoClient from './IVideoClient';
@@ -54,7 +55,7 @@ export default class CoveyTownController {
   private _maze: Maze = Maze.getInstance();
 
   /** The list of players currently in the town * */
-  private _players: Player[] = [];
+  private _players: GamePlayer[] = [];
 
   /** The list of valid sessions for this town * */
   private _sessions: PlayerSession[] = [];
@@ -89,7 +90,7 @@ export default class CoveyTownController {
    *
    * @param newPlayer The new player to add to the town
    */
-  async addPlayer(newPlayer: Player): Promise<PlayerSession> {
+  async addPlayer(newPlayer: GamePlayer): Promise<PlayerSession> {
     const theSession = new PlayerSession(newPlayer);
 
     this._sessions.push(theSession);
@@ -164,5 +165,18 @@ export default class CoveyTownController {
 
   hasPlayer(playerID: string): boolean {
     return this._players.some((player: Player) => player.id === playerID);
+  }
+
+  /**
+   * returns true if succeeded
+   */
+  acceptPlayerInvite(inviterPlayerId: string, inviteePlayerId: string): boolean {
+    const inviter = this._players.find(player => {player.id === inviterPlayerId});
+    const invitee = this._players.find(player => {player.id === inviteePlayerId});
+    if (!inviter || !invitee) {
+      return false;
+    }
+    invitee.acceptInvite(inviter);
+    return true;
   }
 }

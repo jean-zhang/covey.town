@@ -1,5 +1,6 @@
 import Player from './Player';
 import Game from './Game';
+import Maze from '../lib/Maze';
 
 /**
  * Each Player who is in a Game is represented by a GamePlayer object
@@ -21,40 +22,73 @@ export default class GamePlayer extends Player {
   /** The Game that this Player is part of */
   private _game?: Game;
 
-  /** Whether this GamePlayer has won the Game */
-  private _hasWon: boolean;
-
   constructor(userName: string) {
     super(userName);
     this._enableInvite = true;
     this._inMaze = false;
     this._invitePending = false;
-    this._hasWon = false;
   }
 
   /**
    * Sends an invite to a player within the town
    * @param player Player to invite
    */  
-  // sendInvite(invitee: Player): void {}
+  // sendInvite(invitee: GamePlayer): void {}
+
+  /**
+   * Start the maze
+   */
+  startGame() {
+    this._startTime = new Date();
+  }
 
   /**
    * Removes player from Game
    */ 
-  // giveUp(): void {}
+  async giveUp() {
+    if (this._game) {
+      await this._game.updateScore({ userID: this.id, userName: this.userName}, -1);
+      this.resetPlayer();
+    } else {
+      throw new Error('game not defined');
+    }
+  }
 
   /**
-   * Returns whether this player has completed the maze
+   * Called when player has completed the maze
    */ 
-  // finish(): boolean {}
+  async finish() {
+    if (this._startTime && this._game) {
+      const score = new Date().getTime() - this._startTime.getTime();
+      await this._game.updateScore({ userID: this.id, userName: this.userName}, score);
+      this.resetPlayer();
+    } else {
+      throw new Error('start time and game not defined');
+    }
+  }
 
   /**
    * Accepts an invite to a Game
    */ 
-  // acceptInvite(inviter: Player): Game {}
+  acceptInvite(inviter: GamePlayer): void {
+    const newGame = new Game(this.id, inviter.id);
+    this._game = newGame;
+    inviter.onInviteAccepted(newGame);
+    Maze.getInstance().addGame(newGame.getGameId());
+  }
+
+  onInviteAccepted(game: Game): void {
+    this._invitePending = false;
+    this._game = game;
+  }
 
   /**
    * Resets fields of this player
    */ 
-  // ResetPlayer(): Game {}
+  resetPlayer(): void {
+    this._startTime = undefined;
+    this._inMaze = false;
+    this._inMaze = false;
+    this._game = undefined;
+  }
 }

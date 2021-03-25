@@ -4,6 +4,7 @@ import { Server } from 'http';
 import { StatusCodes } from 'http-status-codes';
 import io from 'socket.io';
 import {
+  mazeInviteAcceptHandler,
   mazeTimeCreateHandler,
   mazeTimeHandler,
   townCreateHandler,
@@ -125,6 +126,18 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
       res.status(StatusCodes.CREATED).send(result);
     } catch (err) {
       logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: 'Internal server error, please see log in server for more details',
+      });
+    }
+  });
+
+  app.post('/maze-invite-accept', BodyParser.json(), async (req, res) => {
+    try {
+      const result = await mazeInviteAcceptHandler(req.body);
+      res.status(StatusCodes.OK).send(result);
+    } catch (e) {
+      logError(e);
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: 'Internal server error, please see log in server for more details',
       });
