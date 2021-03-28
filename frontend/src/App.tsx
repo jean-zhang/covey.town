@@ -35,6 +35,7 @@ type CoveyAppUpdate =
   | { action: 'playerDisconnect'; player: Player }
   | { action: 'weMoved'; location: UserLocation }
   | { action: 'disconnect' }
+  | { action: 'closeInstructions'}
   ;
 
 function defaultAppState(): CoveyAppState {
@@ -57,6 +58,7 @@ function defaultAppState(): CoveyAppState {
     showInstructions: false,
   };
 }
+let closedInstructions = false;
 function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyAppState {
   const nextState = {
     sessionToken: state.sessionToken,
@@ -130,12 +132,13 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       if (samePlayers(nextState.nearbyPlayers, state.nearbyPlayers)) {
         nextState.nearbyPlayers = state.nearbyPlayers;
       }
+      if(!closedInstructions) {
       nextState.showInstructions = 
         (update.location.x > INSTRUCTIONS_LOCATION.xLowerLim 
         && update.location.x < INSTRUCTIONS_LOCATION.xUpperLim 
         && update.location.y > INSTRUCTIONS_LOCATION.yLowerLim 
         && update.location.y < INSTRUCTIONS_LOCATION.yUpperLim);
-
+      }
       break;
     case 'playerDisconnect':
       nextState.players = nextState.players.filter((player) => player.id !== update.player.id);
@@ -145,6 +148,10 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       if (samePlayers(nextState.nearbyPlayers, state.nearbyPlayers)) {
         nextState.nearbyPlayers = state.nearbyPlayers;
       }
+      break;
+    case 'closeInstructions':
+      nextState.showInstructions = false;
+      closedInstructions = true;
       break;
     case 'disconnect':
       state.socket?.disconnect();
@@ -210,11 +217,7 @@ async function GameController(initData: TownJoinResponse,
 
 function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefined>> }) {
   const [appState, dispatchAppUpdate] = useReducer(appStateReducer, defaultAppState());
-  const [instructions, setShowInstructions] = useState<boolean>(appState.showInstructions);
-   useEffect(() => {
-    setShowInstructions(appState.showInstructions);
-  }, [appState.showInstructions]);
-  const onClose = () => setShowInstructions(false);
+  const onClose = () => dispatchAppUpdate({ action: 'closeInstructions' });
 
   const setupGameController = useCallback(async (initData: TownJoinResponse) => {
     await GameController(initData, dispatchAppUpdate);
@@ -240,7 +243,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
       <div>
         <WorldMap />
         <VideoOverlay preferredMode="fullwidth" />
-        <Modal isOpen={instructions} onClose={onClose}>
+        <Modal isOpen={appState.showInstructions} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Welcome!</ModalHeader>
@@ -259,7 +262,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
       </Modal>
       </div>
     );
-  }, [setupGameController, appState.sessionToken, videoInstance, instructions]);
+  }, [setupGameController, appState.sessionToken, videoInstance, appState.showInstructions]);
   return (
 
     <CoveyAppContext.Provider value={appState}>
