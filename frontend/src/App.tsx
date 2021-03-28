@@ -155,6 +155,8 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       break;
     case 'exitMaze':
       nextState.toggleQuit = false;
+      // TODO: have this call Player.giveUp() in the backend
+      // state.socket?.emit('giveUp');
       break;
     default:
       throw new Error('Unexpected state request');
