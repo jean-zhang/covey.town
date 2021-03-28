@@ -4,8 +4,7 @@ import React, {
 import './App.css';
 import { BrowserRouter } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
-import { ChakraProvider, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, Button, Text, ModalFooter,
-} from '@chakra-ui/react';
+import { ChakraProvider } from '@chakra-ui/react';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import assert from 'assert';
 import WorldMap from './components/world/WorldMap';
@@ -26,6 +25,8 @@ import { Callback } from './components/VideoCall/VideoFrontend/types';
 import Player, { ServerPlayer, UserLocation } from './classes/Player';
 import TownsServiceClient, { TownJoinResponse } from './classes/TownsServiceClient';
 import Video from './classes/Video/Video';
+import MazeGameInvite from './components/world/MazeGameInvite';
+import Instructions from './components/world/Instructions';
 
 const INSTRUCTIONS_LOCATION = {xUpperLim: 440, xLowerLim: 420, yUpperLim: 1140, yLowerLim: 1120};
 type CoveyAppUpdate =
@@ -217,7 +218,6 @@ async function GameController(initData: TownJoinResponse,
 
 function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefined>> }) {
   const [appState, dispatchAppUpdate] = useReducer(appStateReducer, defaultAppState());
-  const onClose = () => dispatchAppUpdate({ action: 'closeInstructions' });
 
   const setupGameController = useCallback(async (initData: TownJoinResponse) => {
     await GameController(initData, dispatchAppUpdate);
@@ -243,23 +243,8 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
       <div>
         <WorldMap />
         <VideoOverlay preferredMode="fullwidth" />
-        <Modal isOpen={appState.showInstructions} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Welcome!</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-          <Text color="gray.500">
-            Find your way out of the corn maze before your opponent does!
-          </Text>
-          </ModalBody>
-          <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={onClose}>
-              Ok!
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+        <Instructions isOpen = { appState.showInstructions } onClose = { () => dispatchAppUpdate({ action: 'closeInstructions' }) } />
+        <MazeGameInvite/>
       </div>
     );
   }, [setupGameController, appState.sessionToken, videoInstance, appState.showInstructions]);
