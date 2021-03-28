@@ -70,8 +70,8 @@ export interface TownDeleteRequest {
 }
 
 export interface MazeInviteRequest {
-  inviter_playerId: string;
-  invitee_playerId: string;
+  inviter_playerID: string;
+  invitee_playerID: string;
   coveyTownId: string;
 }
 
@@ -105,14 +105,14 @@ export interface MazeCompletionTimeRow {
 }
 
 export interface MazeInviteRequest {
-  inviter_playerId: string;
-  invitee_playerId: string;
+  inviter_playerID: string;
+  invitee_playerID: string;
   coveyTownId: string;
 }
 
 export interface StartGameRequest {
   /** id of player whose game is to start */
-  playerId: string;
+  playerID: string;
   /** id of covey town where the game is starting */
   coveyTownID: string;
 }
@@ -357,8 +357,8 @@ export async function mazeTimeCreateHandler(
 }
 
 export async function mazeInviteAcceptHandler(requestData: MazeInviteRequest): Promise<ResponseEnvelope<null>> {
-  const { inviter_playerId, invitee_playerId, coveyTownId } = requestData;
-  if (!inviter_playerId || !invitee_playerId || !coveyTownId) {
+  const { inviter_playerID, invitee_playerID, coveyTownId } = requestData;
+  if (!inviter_playerID || !invitee_playerID || !coveyTownId) {
     return {
       isOK: false,
       message: 'Include an inviter, invitee, and covey town',
@@ -371,7 +371,7 @@ export async function mazeInviteAcceptHandler(requestData: MazeInviteRequest): P
       message: 'Invalid town'
     }
   }
-  if (townController.acceptPlayerInvite(inviter_playerId, invitee_playerId)) {
+  if (townController.acceptPlayerInvite(inviter_playerID, invitee_playerID)) {
     return {
       isOK: true
     }
@@ -383,8 +383,8 @@ export async function mazeInviteAcceptHandler(requestData: MazeInviteRequest): P
   }
 }
 
-export async function mazeStartGameHandler(startGameRequest: StartGameRequest) {
-  const {playerId, coveyTownID} = startGameRequest;
+export async function mazeStartGameHandler(startGameRequest: StartGameRequest): Promise<ResponseEnvelope<null>> {
+  const { playerID, coveyTownID } = startGameRequest;
   const townController = CoveyTownsStore.getInstance().getControllerForTown(coveyTownID);
   if (!townController) {
     return {
@@ -392,7 +392,7 @@ export async function mazeStartGameHandler(startGameRequest: StartGameRequest) {
       message: 'Invalid town'
     }
   }
-  if (townController.playerStartGame(playerId)) {
+  if (townController.playerStartGame(playerID)) {
     return {
       isOK: true
     }

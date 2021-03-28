@@ -30,8 +30,8 @@ export default class Game {
     return this._player1ID + this._player2ID;
   }
   
-  async updateScore(playerId: PlayerInfo, score: number) {
-    this._pair.push({ player: playerId, score: score});
+  async updateScore(playerID: PlayerInfo, score: number) {
+    this._pair.push({ player: playerID, score: score});
     if (this._pair.length >= 2) {
       await this.registerScore();
     }

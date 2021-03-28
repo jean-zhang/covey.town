@@ -14,7 +14,7 @@ export interface TownJoinRequest {
 
 export interface StartGameRequest {
   /** id of player whose game is to start */
-  playerId: string;
+  playerID: string;
   /** id of covey town where the game is starting */
   coveyTownID: string;
 }
