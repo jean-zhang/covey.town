@@ -287,7 +287,6 @@ class CoveyGameScene extends Phaser.Scene {
     }, false) as Phaser.Types.Input.Keyboard.CursorKeys);
 
     // non-cursor keybinds
-    // this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
     this.quitKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
     this.quitKey.on('down', () => {
       this.quitGame();
