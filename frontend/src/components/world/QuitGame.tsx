@@ -1,11 +1,17 @@
-import React, { ReactNode } from 'react';
-import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, Button, UseDisclosureProps } from '@chakra-ui/react';
+import React from 'react';
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, Button } from '@chakra-ui/react';
 
-export default function QuitGame(props: UseDisclosureProps): JSX.Element {
-    const { isOpen } = props;
+interface QuitGameProps {
+    isOpen: boolean,
+    onClose: () => void,
+    onQuit: () => void,
+}
+
+export default function QuitGame(props: QuitGameProps): JSX.Element {
+    const { isOpen, onClose, onQuit } = props;
     return (
         <>
-            <Modal isOpen={isOpen || false} onClose={() => console.log('close')} >
+            <Modal isOpen={isOpen || false} onClose={() => onClose()} >
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>Quit the Corn Maze</ModalHeader>
@@ -15,10 +21,10 @@ export default function QuitGame(props: UseDisclosureProps): JSX.Element {
                     </ModalBody>
 
                     <ModalFooter>
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={() => onClose()}>
                             Resume
                         </Button>
-                        <Button colorScheme="red">
+                        <Button colorScheme="red" onClick={() => onQuit()}>
                             Quit
                         </Button>
                     </ModalFooter>

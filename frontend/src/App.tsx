@@ -36,6 +36,7 @@ type CoveyAppUpdate =
   | { action: 'weMoved'; location: UserLocation }
   | { action: 'disconnect' }
   | { action: 'toggleQuit' }
+  | { action: 'exitMaze' }
   ;
 
 function defaultAppState(): CoveyAppState {
@@ -152,6 +153,9 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     case 'toggleQuit':
       nextState.toggleQuit = !state.toggleQuit;
       break;
+    case 'exitMaze':
+      nextState.toggleQuit = false;
+      break;
     default:
       throw new Error('Unexpected state request');
   }
@@ -244,7 +248,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
         <WorldMap />
         <VideoOverlay preferredMode="fullwidth" />
         <MazeGameInvite />
-        <QuitGame isOpen={appState.toggleQuit} />
+        <QuitGame isOpen={appState.toggleQuit} onClose={() => dispatchAppUpdate({ action: 'toggleQuit' })} onQuit={() => dispatchAppUpdate({ action: 'exitMaze' })} />
       </div>
     );
   }, [setupGameController, appState.sessionToken, videoInstance, appState.toggleQuit]);
