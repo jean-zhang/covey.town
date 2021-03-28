@@ -9,7 +9,7 @@ type finishedPlayer = {
 }
 
 /**
- * Two GamePlayers competing in the Maze is represented by a Game object
+ * Two Players competing in the Maze is represented by a Game object
  */
 export default class Game {
 
