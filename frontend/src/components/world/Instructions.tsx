@@ -23,3 +23,4 @@ export default function Instructions(props: {isOpen: boolean, onClose: () => voi
             </Modal>
     )
   }
+  
