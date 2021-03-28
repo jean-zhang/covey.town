@@ -487,7 +487,7 @@ export default function WorldMap(): JSX.Element {
     return () => {
       game.destroy(true);
     };
-  }, [video, emitMovement]);
+  }, [video, emitMovement, quitGame]);
 
   const deepPlayers = JSON.stringify(players);
   useEffect(() => {
