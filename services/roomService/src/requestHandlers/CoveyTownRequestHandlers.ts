@@ -4,7 +4,6 @@ import { CoveyTownList, MazeCompletionTimeList, UserLocation } from '../CoveyTyp
 import pool from '../dbconnector/pool';
 import CoveyTownsStore from '../lib/CoveyTownsStore';
 import CoveyTownListener from '../types/CoveyTownListener';
-import GamePlayer from '../types/GamePlayer';
 import Player from '../types/Player';
 import { getMazeCompletionTime, insertMazeCompletionTime } from '../utils/queries';
 
@@ -70,6 +69,12 @@ export interface TownDeleteRequest {
   coveyTownPassword: string;
 }
 
+export interface MazeInviteRequest {
+  inviter_playerID: string;
+  invitee_playerID: string;
+  coveyTownId: string;
+}
+
 /**
  * Payload sent by the client to update a Town.
  * N.B., JavaScript is terrible, so:
@@ -91,6 +96,25 @@ export interface MazeCompletionTimeCreateRequest {
   playerID: string;
   username: string;
   time: number;
+}
+
+export interface MazeCompletionTimeRow {
+  player_id: string;
+  username: string;
+  time: number;
+}
+
+export interface MazeInviteRequest {
+  inviter_playerID: string;
+  invitee_playerID: string;
+  coveyTownId: string;
+}
+
+export interface StartGameRequest {
+  /** id of player whose game is to start */
+  playerID: string;
+  /** id of covey town where the game is starting */
+  coveyTownID: string;
 }
 
 export interface MazeCompletionTimeRow {
@@ -128,7 +152,7 @@ export async function townJoinHandler(
       message: 'Error: No such town',
     };
   }
-  const newPlayer = new GamePlayer(requestData.userName);
+  const newPlayer = new Player(requestData.userName);
   const newSession = await coveyTownController.addPlayer(newPlayer);
   assert(newSession.videoToken);
   return {
@@ -329,5 +353,53 @@ export async function mazeTimeCreateHandler(
       isOK: false,
       message: `Error: ${error.message}`,
     };
+  }
+}
+
+export async function mazeInviteAcceptHandler(requestData: MazeInviteRequest): Promise<ResponseEnvelope<null>> {
+  const { inviter_playerID, invitee_playerID, coveyTownId } = requestData;
+  if (!inviter_playerID || !invitee_playerID || !coveyTownId) {
+    return {
+      isOK: false,
+      message: 'Include an inviter, invitee, and covey town',
+    };
+  }
+  const townController = CoveyTownsStore.getInstance().getControllerForTown(coveyTownId);
+  if (!townController) {
+    return {
+      isOK: false,
+      message: 'Invalid town'
+    }
+  }
+  if (townController.acceptPlayerInvite(inviter_playerID, invitee_playerID)) {
+    return {
+      isOK: true
+    }
+  } else {
+    return {
+      isOK: false,
+      message: 'Could not create invite'
+    }
+  }
+}
+
+export async function mazeStartGameHandler(startGameRequest: StartGameRequest): Promise<ResponseEnvelope<null>> {
+  const { playerID, coveyTownID } = startGameRequest;
+  const townController = CoveyTownsStore.getInstance().getControllerForTown(coveyTownID);
+  if (!townController) {
+    return {
+      isOK: false,
+      message: 'Invalid town'
+    }
+  }
+  if (townController.playerStartGame(playerID)) {
+    return {
+      isOK: true
+    }
+  } else {
+    return {
+      isOK: false,
+      message: 'Could not start game'
+    }
   }
 }

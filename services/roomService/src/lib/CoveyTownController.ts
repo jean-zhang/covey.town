@@ -165,4 +165,30 @@ export default class CoveyTownController {
   hasPlayer(playerID: string): boolean {
     return this._players.some((player: Player) => player.id === playerID);
   }
+
+  /**
+   * returns true if succeeded
+   */
+  acceptPlayerInvite(inviterPlayerID: string, inviteePlayerID: string): boolean {
+    const inviter = this._players.find(player => {player.id === inviterPlayerID});
+    const invitee = this._players.find(player => {player.id === inviteePlayerID});
+    if (!inviter || !invitee) {
+      return false;
+    }
+    invitee.acceptInvite(inviter);
+    return true;
+  }
+
+  /**
+   * Returns true if succeeded
+   */
+  playerStartGame(playerID: string): boolean {
+    const player = this._players.find(player => {player.id === playerID});
+    if (!player) {
+      return false;
+    } else {
+      player.startGame();
+      return true;
+    }
+  }
 }

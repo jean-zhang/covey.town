@@ -1,7 +1,5 @@
-import Game from '../types/Game';
-
 /**
- * Each Player who is in a Game is represented by a GamePlayer object
+ * Each Player who is in a Game is represented by a Player object
  */
 export default class Maze {
 
@@ -9,7 +7,7 @@ export default class Maze {
   public static readonly CAPACITY : number = 10;
 
   /** The Games in this Maze * */
-  private _games: Game[] = [];
+  private _gameIds = new Set<string>();
 
   /** The leaderboard that keeps track of the Player username and Score * */
   private _leaderboard: Map<string, number>;
@@ -30,20 +28,30 @@ export default class Maze {
   /**
    * Checks whether the maze is full
    */  
-  // reachedCapacity(): boolean {}
+  reachedCapacity(): boolean {
+    return this._gameIds.size >= (Maze.CAPACITY / 2);
+  }
 
   /**
    * Updates the scores on the leaderboard
    */ 
-  // updateLeaderboard(): void {}
+  // updateLeaderboard(player1ID: string, player1Score: number, player2ID: string, player2Score: number): void {}
 
   /**
    * Adds a game to the Maze
    */
-  // addGame(game: Game): void {}
+  addGame(gameId: string): void {
+    if (!this.reachedCapacity()) {
+      this._gameIds.add(gameId);
+    } else {
+      throw new Error('Maze is over capacity');
+    }
+  }
 
   /**
    * Removes a game from the Maze
    */
-  // removeGame(game: Game): void {}
+  removeGame(gameId: string): void {
+    this._gameIds.delete(gameId);
+  }
 }
