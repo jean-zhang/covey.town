@@ -70,6 +70,12 @@ export interface TownDeleteRequest {
   coveyTownPassword: string;
 }
 
+export interface MazeInviteRequest {
+  inviter_playerId: string;
+  invitee_playerId: string;
+  coveyTownId: string;
+}
+
 /**
  * Payload sent by the client to update a Town.
  * N.B., JavaScript is terrible, so:
@@ -103,6 +109,19 @@ export interface MazeInviteRequest {
   inviter_playerId: string;
   invitee_playerId: string;
   coveyTownId: string;
+}
+
+export interface StartGameRequest {
+  /** id of player whose game is to start */
+  playerId: string;
+  /** id of covey town where the game is starting */
+  coveyTownID: string;
+}
+
+export interface MazeCompletionTimeRow {
+  player_id: string;
+  username: string;
+  time: number;
 }
 
 /**
@@ -361,6 +380,27 @@ export async function mazeInviteAcceptHandler(requestData: MazeInviteRequest): P
     return {
       isOK: false,
       message: 'Could not create invite'
+    }
+  }
+}
+
+export async function mazeStartGameHandler(startGameRequest: StartGameRequest) {
+  const {playerId, coveyTownID} = startGameRequest;
+  const townController = CoveyTownsStore.getInstance().getControllerForTown(coveyTownID);
+  if (!townController) {
+    return {
+      isOK: false,
+      message: 'Invalid town'
+    }
+  }
+  if (townController.playerStartGame(playerId)) {
+    return {
+      isOK: true
+    }
+  } else {
+    return {
+      isOK: false,
+      message: 'Could not start game'
     }
   }
 }

@@ -1,7 +1,8 @@
 import { nanoid } from "nanoid";
 import pool from "../dbconnector/pool";
-import { deleteMazeCompletionTime, selectPlayerCompletionTime } from "../utils/queries";
+import { deleteMazeCompletionTime, getMazeCompletionTime, selectPlayerCompletionTime } from "../utils/queries";
 import GamePlayer from "./GamePlayer";
+import { MazeCompletionTimeRow } from "../requestHandlers/CoveyTownRequestHandlers"
 
 describe('Maze game tests', () => {
   it('Race where both give up should not push anything to database', async () => {
@@ -14,7 +15,12 @@ describe('Maze game tests', () => {
     player2.startGame();
     player1.giveUp();
     player2.giveUp();
-    await expect(pool.query(selectPlayerCompletionTime, [player1Name])).rejects.toBeDefined();
+    const results = await pool.query(getMazeCompletionTime);
+    results.rows.map((row: MazeCompletionTimeRow) => ({
+          playerID: row.player_id,
+          username: row.username,
+          time: row.time,
+        }));
     
     await expect(pool.query(selectPlayerCompletionTime, [player2Name])).rejects.toBeDefined();
   });

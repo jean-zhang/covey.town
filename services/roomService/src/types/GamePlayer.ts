@@ -57,11 +57,12 @@ export default class GamePlayer extends Player {
   /**
    * Called when player has completed the maze
    */ 
-  async finish() {
+  async finish(): Promise<number> {
     if (this._startTime && this._game) {
       const score = new Date().getTime() - this._startTime.getTime();
       await this._game.updateScore({ userID: this.id, userName: this.userName}, score);
       this.resetPlayer();
+      return score;
     } else {
       throw new Error('start time and game not defined');
     }
