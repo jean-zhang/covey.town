@@ -290,7 +290,6 @@ class CoveyGameScene extends Phaser.Scene {
     // this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
     this.quitKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
     this.quitKey.on('down', () => {
-      console.log('Pressed Q!');
       this.quitGame();
     })
 
