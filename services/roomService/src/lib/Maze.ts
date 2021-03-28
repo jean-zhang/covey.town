@@ -1,5 +1,5 @@
 /**
- * Each Player who is in a Game is represented by a GamePlayer object
+ * Each Player who is in a Game is represented by a Player object
  */
 export default class Maze {
 

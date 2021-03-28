@@ -1,7 +1,6 @@
 import { customAlphabet, nanoid } from 'nanoid';
 import { UserLocation } from '../CoveyTypes';
 import CoveyTownListener from '../types/CoveyTownListener';
-import GamePlayer from '../types/GamePlayer';
 import Player from '../types/Player';
 import PlayerSession from '../types/PlayerSession';
 import IVideoClient from './IVideoClient';
@@ -55,7 +54,7 @@ export default class CoveyTownController {
   private _maze: Maze = Maze.getInstance();
 
   /** The list of players currently in the town * */
-  private _players: GamePlayer[] = [];
+  private _players: Player[] = [];
 
   /** The list of valid sessions for this town * */
   private _sessions: PlayerSession[] = [];
@@ -90,7 +89,7 @@ export default class CoveyTownController {
    *
    * @param newPlayer The new player to add to the town
    */
-  async addPlayer(newPlayer: GamePlayer): Promise<PlayerSession> {
+  async addPlayer(newPlayer: Player): Promise<PlayerSession> {
     const theSession = new PlayerSession(newPlayer);
 
     this._sessions.push(theSession);
