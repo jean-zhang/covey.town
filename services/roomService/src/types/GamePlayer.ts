@@ -89,7 +89,6 @@ export default class GamePlayer extends Player {
   resetPlayer(): void {
     this._startTime = undefined;
     this._inMaze = false;
-    this._inMaze = false;
     this._game = undefined;
   }
 }
