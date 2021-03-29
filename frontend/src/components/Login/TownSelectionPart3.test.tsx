@@ -103,6 +103,7 @@ function wrappedTownSelection() {
     toggleQuit: false,
     quitGame: () => {},
     showInstructions: false,
+    finishGame: () => {},
   }}>
     <TownSelection doLogin={doLoginMock}/></CoveyAppContext.Provider></ChakraProvider>;
 }
