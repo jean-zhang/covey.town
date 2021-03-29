@@ -11,7 +11,8 @@ export default function Instructions(props: {isOpen: boolean, onClose: () => voi
                 <ModalCloseButton />
                 <ModalBody>
                 <Text color="gray.500">
-                    Find your way out of the corn maze before your opponent does!
+                    Find your way out of the corn maze before your opponent does! 
+                    The timer will start once you click ok. 
                 </Text>
                 </ModalBody>
                 <ModalFooter>
@@ -23,4 +24,3 @@ export default function Instructions(props: {isOpen: boolean, onClose: () => voi
             </Modal>
     )
   }
-  

@@ -28,7 +28,7 @@ import Video from './classes/Video/Video';
 import MazeGameInvite from './components/world/MazeGameInvite';
 import Instructions from './components/world/Instructions';
 
-const INSTRUCTIONS_LOCATION = {xUpperLim: 440, xLowerLim: 420, yUpperLim: 1140, yLowerLim: 1120};
+const INSTRUCTIONS_LOCATION = {x: 1455, y: 40};
 type CoveyAppUpdate =
   | { action: 'doConnect'; data: { userName: string, townFriendlyName: string, townID: string,townIsPubliclyListed:boolean, sessionToken: string, myPlayerID: string, socket: Socket, players: Player[], emitMovement: (location: UserLocation) => void } }
   | { action: 'addPlayer'; player: Player }
@@ -135,10 +135,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       }
       if(!closedInstructions) {
       nextState.showInstructions = 
-        (update.location.x > INSTRUCTIONS_LOCATION.xLowerLim 
-        && update.location.x < INSTRUCTIONS_LOCATION.xUpperLim 
-        && update.location.y > INSTRUCTIONS_LOCATION.yLowerLim 
-        && update.location.y < INSTRUCTIONS_LOCATION.yUpperLim);
+        (update.location.x === INSTRUCTIONS_LOCATION.x && update.location.y === INSTRUCTIONS_LOCATION.y);
       }
       break;
     case 'playerDisconnect':
