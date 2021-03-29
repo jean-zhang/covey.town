@@ -31,4 +31,5 @@ export type CoveyAppState = {
   toggleQuit: boolean,
   quitGame: () => void,
   showInstructions: boolean,
+  finishGame: () => void,
 };

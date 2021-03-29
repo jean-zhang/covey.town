@@ -31,7 +31,19 @@ import QuitGame from './components/world/QuitGame';
 
 const INSTRUCTIONS_LOCATION = {x: 1455, y: 40};
 type CoveyAppUpdate =
-  | { action: 'doConnect'; data: { userName: string, townFriendlyName: string, townID: string,townIsPubliclyListed:boolean, sessionToken: string, myPlayerID: string, socket: Socket, players: Player[], emitMovement: (location: UserLocation) => void, toggleQuit: boolean, quitGame: () => void } }
+  | { action: 'doConnect'; 
+      data: { userName: string,
+              townFriendlyName: string, 
+              townID: string,
+              townIsPubliclyListed:boolean, 
+              sessionToken: string, 
+              myPlayerID: string, 
+              socket: Socket, 
+              players: Player[], 
+              emitMovement: (location: UserLocation) => void, 
+              toggleQuit: boolean, 
+              quitGame: () => void,
+              finishGame: () => void, } }
   | { action: 'addPlayer'; player: Player }
   | { action: 'playerMoved'; player: Player }
   | { action: 'playerDisconnect'; player: Player }
@@ -62,6 +74,7 @@ function defaultAppState(): CoveyAppState {
     toggleQuit: false,
     quitGame: () => {},
     showInstructions: false,
+    finishGame: () => {},
   };
 }
 let closedInstructions = false;
@@ -82,6 +95,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     toggleQuit: state.toggleQuit,
     quitGame: state.quitGame,
     showInstructions: state.showInstructions,
+    finishGame: state.finishGame,
   };
 
   function calculateNearbyPlayers(players: Player[], currentLocation: UserLocation) {
@@ -118,6 +132,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.players = update.data.players;
       nextState.toggleQuit = update.data.toggleQuit;
       nextState.quitGame = update.data.quitGame;
+      nextState.finishGame = update.data.finishGame;
       break;
     case 'addPlayer':
       nextState.players = nextState.players.concat([update.player]);
@@ -215,6 +230,9 @@ async function GameController(initData: TownJoinResponse,
   const quitGame = () => {
     dispatchAppUpdate({ action: 'toggleQuit' });
   };
+  const finishGame = () => {
+    console.log('finish game');
+  }
 
   dispatchAppUpdate({
     action: 'doConnect',
@@ -230,6 +248,7 @@ async function GameController(initData: TownJoinResponse,
       players: initData.currentPlayers.map((sp) => Player.fromServerPlayer(sp)),
       toggleQuit: false,
       quitGame,
+      finishGame,
     },
   });
   return true;

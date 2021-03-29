@@ -243,6 +243,20 @@ class CoveyGameScene extends Phaser.Scene {
       Phaser.GameObjects.Components.Transform;
 
 
+    // maze start
+    const mazeStart = map.findObject('Objects', 
+    (obj) => obj.name === 'Maze Start') as unknown as
+    Phaser.GameObjects.Components.Transform;
+
+    // maze finish
+    const mazeFinish = map.findObject('Objects', 
+    (obj) => obj.name === 'Maze Finish') as unknown as
+    Phaser.GameObjects.Components.Transform;
+    // this.physics.world.enable(mazeFinish);
+    // const mazeFinishSprite = mazeFinish as unknown as Phaser.GameObjects.Sprite;
+    // mazeFinishSprite.y += 2 * mazeFinishSprite.height;
+
+
     // Find all of the transporters, add them to the physics engine
     const transporters = map.createFromObjects('Objects',
       { name: 'transporter' })
@@ -298,8 +312,8 @@ class CoveyGameScene extends Phaser.Scene {
     // player's body.
     const sprite = this.physics.add
       .sprite(spawnPoint.x, spawnPoint.y, 'atlas', 'misa-front')
-      .setSize(30, 40)
-      .setOffset(0, 24);
+      .setSize(30, 30)
+      .setOffset(0, 30);
     const label = this.add.text(spawnPoint.x, spawnPoint.y - 20, '(You)', {
       font: '18px monospace',
       color: '#000000',
@@ -311,31 +325,42 @@ class CoveyGameScene extends Phaser.Scene {
       label
     };
 
+    // Press space to teleport to maze start
+    cursorKeys.space.on('down', () => {
+      if (this.player && this.lastLocation && mazeStart) {
+        this.player.sprite.x = mazeStart.x;
+        this.player.sprite.y = mazeStart.y;
+        this.lastLocation.x = mazeStart.x;
+        this.lastLocation.y = mazeStart.y;
+        this.emitMovement(this.lastLocation);
+      }
+    })
+
     /* Configure physics overlap behavior for when the player steps into
     a transporter area. If you enter a transporter and press 'space', you'll
     transport to the location on the map that is referenced by the 'target' property
     of the transporter.
      */
-    this.physics.add.overlap(sprite, transporters,
-      (overlappingObject, transporter)=>{
-      if(cursorKeys.space.isDown && this.player){
-        // In the tiled editor, set the 'target' to be an *object* pointer
-        // Here, we'll see just the ID, then find the object by ID
-        const transportTargetID = transporter.getData('target') as number;
-        const target = map.findObject('Objects', obj => (obj as unknown as Phaser.Types.Tilemaps.TiledObject).id === transportTargetID);
-        if(target && target.x && target.y && this.lastLocation){
-          // Move the player to the target, update lastLocation and send it to other players
-          this.player.sprite.x = target.x;
-          this.player.sprite.y = target.y;
-          this.lastLocation.x = target.x;
-          this.lastLocation.y = target.y;
-          this.emitMovement(this.lastLocation);
-        }
-        else{
-          throw new Error(`Unable to find target object ${target}`);
-        }
-      }
-    })
+    // this.physics.add.overlap(sprite, transporters,
+    //   (overlappingObject, transporter)=>{
+    //   if(cursorKeys.space.isDown && this.player){
+    //     // In the tiled editor, set the 'target' to be an *object* pointer
+    //     // Here, we'll see just the ID, then find the object by ID
+    //     const transportTargetID = transporter.getData('target') as number;
+    //     const target = map.findObject('Objects', obj => (obj as unknown as Phaser.Types.Tilemaps.TiledObject).id === transportTargetID);
+    //     if(target && target.x && target.y && this.lastLocation){
+    //       // Move the player to the target, update lastLocation and send it to other players
+    //       this.player.sprite.x = target.x;
+    //       this.player.sprite.y = target.y;
+    //       this.lastLocation.x = target.x;
+    //       this.lastLocation.y = target.y;
+    //       this.emitMovement(this.lastLocation);
+    //     }
+    //     else{
+    //       throw new Error(`Unable to find target object ${target}`);
+    //     }
+    //   }
+    // })
 
     this.emitMovement({
       rotation: 'front',
@@ -405,7 +430,7 @@ class CoveyGameScene extends Phaser.Scene {
 
     // Help text that has a "fixed" position on the screen
     this.add
-      .text(16, 16, `Arrow keys to move, space to transport\nCurrent town: ${this.video.townFriendlyName} (${this.video.coveyTownID})`, {
+      .text(16, 16, `Arrow keys to move, space to teleport\nCurrent town: ${this.video.townFriendlyName} (${this.video.coveyTownID})`, {
         font: '18px monospace',
         color: '#000000',
         padding: {
