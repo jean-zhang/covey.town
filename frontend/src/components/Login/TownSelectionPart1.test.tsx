@@ -99,6 +99,8 @@ function wrappedTownSelection() {
     emitMovement: () => {
     },
     apiClient: new TownsServiceClient(),
+    toggleQuit: false,
+    quitGame: () => {},
     showInstructions: false,
   }}>
     <TownSelection doLogin={doLoginMock}/></CoveyAppContext.Provider></ChakraProvider>;

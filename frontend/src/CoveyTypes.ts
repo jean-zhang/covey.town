@@ -28,5 +28,7 @@ export type CoveyAppState = {
   emitMovement: (location: UserLocation) => void,
   socket: Socket | null,
   apiClient: TownsServiceClient,
+  toggleQuit: boolean,
+  quitGame: () => void,
   showInstructions: boolean,
 };
