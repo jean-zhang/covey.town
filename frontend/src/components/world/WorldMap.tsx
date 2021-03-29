@@ -35,10 +35,15 @@ class CoveyGameScene extends Phaser.Scene {
 
   private emitMovement: (loc: UserLocation) => void;
 
-  constructor(video: Video, emitMovement: (loc: UserLocation) => void) {
+  private quitKey?: Phaser.Input.Keyboard.Key;
+
+  private quitGame: () => void;
+
+  constructor(video: Video, emitMovement: (loc: UserLocation) => void, quitGame: () => void) {
     super('PlayGame');
     this.video = video;
     this.emitMovement = emitMovement;
+    this.quitGame = quitGame;
   }
 
   preload() {
@@ -142,6 +147,7 @@ class CoveyGameScene extends Phaser.Scene {
     if (this.paused) {
       return;
     }
+
     if (this.player && this.cursors) {
       const speed = 175;
       const prevVelocity = this.player.sprite.body.velocity.clone();
@@ -280,7 +286,11 @@ class CoveyGameScene extends Phaser.Scene {
       'right': Phaser.Input.Keyboard.KeyCodes.L
     }, false) as Phaser.Types.Input.Keyboard.CursorKeys);
 
-
+    // non-cursor keybinds
+    this.quitKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
+    this.quitKey.on('down', () => {
+      this.quitGame();
+    })
 
 
     // Create a sprite with physics enabled via the physics system. The image used for the sprite
@@ -445,7 +455,7 @@ class CoveyGameScene extends Phaser.Scene {
 export default function WorldMap(): JSX.Element {
   const video = Video.instance();
   const {
-    emitMovement, players,
+    emitMovement, players, quitGame
   } = useCoveyAppState();
   const [gameScene, setGameScene] = useState<CoveyGameScene>();
   useEffect(() => {
@@ -464,7 +474,7 @@ export default function WorldMap(): JSX.Element {
 
     const game = new Phaser.Game(config);
     if (video) {
-      const newGameScene = new CoveyGameScene(video, emitMovement);
+      const newGameScene = new CoveyGameScene(video, emitMovement, quitGame);
       setGameScene(newGameScene);
       game.scene.add('coveyBoard', newGameScene, true);
       video.pauseGame = () => {
@@ -477,7 +487,7 @@ export default function WorldMap(): JSX.Element {
     return () => {
       game.destroy(true);
     };
-  }, [video, emitMovement]);
+  }, [video, emitMovement, quitGame]);
 
   const deepPlayers = JSON.stringify(players);
   useEffect(() => {
