@@ -26,7 +26,9 @@ import Player, { ServerPlayer, UserLocation } from './classes/Player';
 import TownsServiceClient, { TownJoinResponse } from './classes/TownsServiceClient';
 import Video from './classes/Video/Video';
 import MazeGameInvite from './components/world/MazeGameInvite';
+import Instructions from './components/world/Instructions';
 
+const INSTRUCTIONS_LOCATION = {x: 1455, y: 40};
 type CoveyAppUpdate =
   | { action: 'doConnect'; data: { userName: string, townFriendlyName: string, townID: string,townIsPubliclyListed:boolean, sessionToken: string, myPlayerID: string, socket: Socket, players: Player[], emitMovement: (location: UserLocation) => void } }
   | { action: 'addPlayer'; player: Player }
@@ -34,6 +36,7 @@ type CoveyAppUpdate =
   | { action: 'playerDisconnect'; player: Player }
   | { action: 'weMoved'; location: UserLocation }
   | { action: 'disconnect' }
+  | { action: 'closeInstructions'}
   ;
 
 function defaultAppState(): CoveyAppState {
@@ -53,8 +56,10 @@ function defaultAppState(): CoveyAppState {
     emitMovement: () => {
     },
     apiClient: new TownsServiceClient(),
+    showInstructions: false,
   };
 }
+let closedInstructions = false;
 function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyAppState {
   const nextState = {
     sessionToken: state.sessionToken,
@@ -69,6 +74,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     socket: state.socket,
     emitMovement: state.emitMovement,
     apiClient: state.apiClient,
+    showInstructions: state.showInstructions,
   };
 
   function calculateNearbyPlayers(players: Player[], currentLocation: UserLocation) {
@@ -127,7 +133,10 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       if (samePlayers(nextState.nearbyPlayers, state.nearbyPlayers)) {
         nextState.nearbyPlayers = state.nearbyPlayers;
       }
-
+      if(!closedInstructions) {
+      nextState.showInstructions = 
+        (update.location.x === INSTRUCTIONS_LOCATION.x && update.location.y === INSTRUCTIONS_LOCATION.y);
+      }
       break;
     case 'playerDisconnect':
       nextState.players = nextState.players.filter((player) => player.id !== update.player.id);
@@ -137,6 +146,10 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       if (samePlayers(nextState.nearbyPlayers, state.nearbyPlayers)) {
         nextState.nearbyPlayers = state.nearbyPlayers;
       }
+      break;
+    case 'closeInstructions':
+      nextState.showInstructions = false;
+      closedInstructions = true;
       break;
     case 'disconnect':
       state.socket?.disconnect();
@@ -227,10 +240,11 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
       <div>
         <WorldMap />
         <VideoOverlay preferredMode="fullwidth" />
+        <Instructions isOpen = { appState.showInstructions } onClose = { () => dispatchAppUpdate({ action: 'closeInstructions' }) } />
         <MazeGameInvite/>
       </div>
     );
-  }, [setupGameController, appState.sessionToken, videoInstance]);
+  }, [setupGameController, appState.sessionToken, videoInstance, appState.showInstructions]);
   return (
 
     <CoveyAppContext.Provider value={appState}>
