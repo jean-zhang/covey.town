@@ -53,6 +53,9 @@ function wrappedTownSettings() {
     emitMovement: () => {
     },
     apiClient: new TownsServiceClient(),
+    toggleQuit: false,
+    quitGame: () => {},
+    showInstructions: false,
   }}>
     <TownSettings/></CoveyAppContext.Provider></ChakraProvider>;
 }

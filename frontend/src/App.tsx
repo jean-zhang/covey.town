@@ -25,13 +25,16 @@ import theme from './components/VideoCall/VideoFrontend/theme';
 import { Callback } from './components/VideoCall/VideoFrontend/types';
 import useConnectionOptions from './components/VideoCall/VideoFrontend/utils/useConnectionOptions/useConnectionOptions';
 import VideoOverlay from './components/VideoCall/VideoOverlay/VideoOverlay';
+import Instructions from './components/world/Instructions';
 import MazeGameInvite from './components/world/MazeGameInvite';
+import QuitGame from './components/world/QuitGame';
 import WorldMap from './components/world/WorldMap';
 import CoveyAppContext from './contexts/CoveyAppContext';
 import NearbyPlayersContext from './contexts/NearbyPlayersContext';
 import VideoContext from './contexts/VideoContext';
 import { CoveyAppState, NearbyPlayers } from './CoveyTypes';
 
+const INSTRUCTIONS_LOCATION = { x: 1455, y: 40 };
 type CoveyAppUpdate =
   | {
       action: 'doConnect';
@@ -45,13 +48,18 @@ type CoveyAppUpdate =
         socket: Socket;
         players: Player[];
         emitMovement: (location: UserLocation) => void;
+        toggleQuit: boolean;
+        quitGame: () => void;
       };
     }
   | { action: 'addPlayer'; player: Player }
   | { action: 'playerMoved'; player: Player }
   | { action: 'playerDisconnect'; player: Player }
   | { action: 'weMoved'; location: UserLocation }
-  | { action: 'disconnect' };
+  | { action: 'disconnect' }
+  | { action: 'toggleQuit' }
+  | { action: 'exitMaze' }
+  | { action: 'closeInstructions' };
 
 function defaultAppState(): CoveyAppState {
   return {
@@ -72,8 +80,12 @@ function defaultAppState(): CoveyAppState {
     },
     emitMovement: () => {},
     apiClient: new TownsServiceClient(),
+    toggleQuit: false,
+    quitGame: () => {},
+    showInstructions: false,
   };
 }
+let closedInstructions = false;
 function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyAppState {
   const nextState = {
     sessionToken: state.sessionToken,
@@ -88,6 +100,9 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     socket: state.socket,
     emitMovement: state.emitMovement,
     apiClient: state.apiClient,
+    toggleQuit: state.toggleQuit,
+    quitGame: state.quitGame,
+    showInstructions: state.showInstructions,
   };
 
   function calculateNearbyPlayers(players: Player[], currentLocation: UserLocation) {
@@ -122,6 +137,8 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.emitMovement = update.data.emitMovement;
       nextState.socket = update.data.socket;
       nextState.players = update.data.players;
+      nextState.toggleQuit = update.data.toggleQuit;
+      nextState.quitGame = update.data.quitGame;
       break;
     case 'addPlayer':
       nextState.players = nextState.players.concat([update.player]);
@@ -150,7 +167,11 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       if (samePlayers(nextState.nearbyPlayers, state.nearbyPlayers)) {
         nextState.nearbyPlayers = state.nearbyPlayers;
       }
-
+      if (!closedInstructions) {
+        nextState.showInstructions =
+          update.location.x === INSTRUCTIONS_LOCATION.x &&
+          update.location.y === INSTRUCTIONS_LOCATION.y;
+      }
       break;
     case 'playerDisconnect':
       nextState.players = nextState.players.filter(player => player.id !== update.player.id);
@@ -163,9 +184,21 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
         nextState.nearbyPlayers = state.nearbyPlayers;
       }
       break;
+    case 'closeInstructions':
+      nextState.showInstructions = false;
+      closedInstructions = true;
+      break;
     case 'disconnect':
       state.socket?.disconnect();
       return defaultAppState();
+    case 'toggleQuit':
+      nextState.toggleQuit = !state.toggleQuit;
+      break;
+    case 'exitMaze':
+      nextState.toggleQuit = false;
+      // TODO: have this call Player.giveUp() in the backend
+      // state.socket?.emit('giveUp');
+      break;
     default:
       throw new Error('Unexpected state request');
   }
@@ -209,6 +242,9 @@ async function GameController(
     socket.emit('playerMovement', location);
     dispatchAppUpdate({ action: 'weMoved', location });
   };
+  const quitGame = () => {
+    dispatchAppUpdate({ action: 'toggleQuit' });
+  };
 
   dispatchAppUpdate({
     action: 'doConnect',
@@ -222,6 +258,8 @@ async function GameController(
       emitMovement,
       socket,
       players: initData.currentPlayers.map(sp => Player.fromServerPlayer(sp)),
+      toggleQuit: false,
+      quitGame,
     },
   });
   return true;
@@ -259,10 +297,25 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
       <div>
         <WorldMap />
         <VideoOverlay preferredMode='fullwidth' />
+        <QuitGame
+          isOpen={appState.toggleQuit}
+          onClose={() => dispatchAppUpdate({ action: 'toggleQuit' })}
+          onQuit={() => dispatchAppUpdate({ action: 'exitMaze' })}
+        />
+        <Instructions
+          isOpen={appState.showInstructions}
+          onClose={() => dispatchAppUpdate({ action: 'closeInstructions' })}
+        />
         <MazeGameInvite />
       </div>
     );
-  }, [setupGameController, appState.sessionToken, videoInstance]);
+  }, [
+    setupGameController,
+    appState.sessionToken,
+    videoInstance,
+    appState.showInstructions,
+    appState.toggleQuit,
+  ]);
   return (
     <CoveyAppContext.Provider value={appState}>
       <VideoContext.Provider value={Video.instance()}>
