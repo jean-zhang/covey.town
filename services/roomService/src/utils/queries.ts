@@ -8,7 +8,8 @@ VALUES ($1, $2, $3)
 
 export const deleteMazeCompletionTime = `
 DELETE FROM maze_completion_time WHERE username=$1
-`
+`;
+
 export const selectPlayerCompletionTime = `
 SELECT time FROM maze_completion_time WHERE username=$1
-`
+`;
