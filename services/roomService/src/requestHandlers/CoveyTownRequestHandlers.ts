@@ -104,13 +104,6 @@ export interface MazeInviteRequest {
   coveyTownId: string;
 }
 
-export interface StartGameRequest {
-  /** id of player whose game is to start */
-  playerID: string;
-  /** id of covey town where the game is starting */
-  coveyTownID: string;
-}
-
 /**
  * Envelope that wraps any response from the server
  */
@@ -367,25 +360,5 @@ export async function mazeInviteAcceptHandler(requestData: MazeInviteRequest): P
   return {
     isOK: false,
     message: 'Could not create invite',
-  };
-}
-
-export async function mazeStartGameHandler(startGameRequest: StartGameRequest): Promise<ResponseEnvelope<null>> {
-  const { playerID, coveyTownID } = startGameRequest;
-  const townController = CoveyTownsStore.getInstance().getControllerForTown(coveyTownID);
-  if (!townController) {
-    return {
-      isOK: false,
-      message: 'Invalid town',
-    };
-  }
-  if (townController.playerStartGame(playerID)) {
-    return {
-      isOK: true,
-    };
-  }
-  return {
-    isOK: false,
-    message: 'Could not start game',
   };
 }
