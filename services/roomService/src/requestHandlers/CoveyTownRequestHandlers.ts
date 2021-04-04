@@ -238,6 +238,9 @@ function townSocketAdapter(socket: Socket): CoveyTownListener {
       socket.emit('townClosing');
       socket.disconnect(true);
     },
+    onMazeGameRequested(invitedPlayer: Player) {
+      socket.emit('mazeGameRequested', invitedPlayer);
+    },
   };
 }
 
@@ -344,7 +347,9 @@ export async function mazeTimeCreateHandler(
   }
 }
 
-export async function mazeInviteAcceptHandler(requestData: MazeInviteRequest): Promise<ResponseEnvelope<null>> {
+export async function mazeInviteAcceptHandler(
+  requestData: MazeInviteRequest,
+): Promise<ResponseEnvelope<null>> {
   const { inviterPlayerID, inviteePlayerID, coveyTownId } = requestData;
   if (!inviterPlayerID || !inviteePlayerID || !coveyTownId) {
     return {
@@ -370,7 +375,9 @@ export async function mazeInviteAcceptHandler(requestData: MazeInviteRequest): P
   };
 }
 
-export async function mazeStartGameHandler(startGameRequest: StartGameRequest): Promise<ResponseEnvelope<null>> {
+export async function mazeStartGameHandler(
+  startGameRequest: StartGameRequest,
+): Promise<ResponseEnvelope<null>> {
   const { playerID, coveyTownID } = startGameRequest;
   const townController = CoveyTownsStore.getInstance().getControllerForTown(coveyTownID);
   if (!townController) {

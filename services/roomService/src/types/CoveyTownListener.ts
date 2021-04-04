@@ -26,4 +26,10 @@ export default interface CoveyTownListener {
    * Called when a town is destroyed, causing all players to disconnect
    */
   onTownDestroyed(): void;
+
+  /**
+   * Called when a player has a been request to play a game
+   * @param invitedPlayer the player that has been invited
+   */
+  onMazeGameRequested(invitedPlayer: Player): void;
 }

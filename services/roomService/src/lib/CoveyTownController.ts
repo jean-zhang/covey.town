@@ -183,11 +183,11 @@ export default class CoveyTownController {
    * Returns true if succeeded
    */
   playerStartGame(playerID: string): boolean {
-    const player = this._players.find(playerToCheck => playerToCheck.id === playerID);
-    if (!player) {
+    const startGamePlayer = this._players.find(player => player.id === playerID);
+    if (!startGamePlayer) {
       return false;
     }
-    player.startGame();
+    startGamePlayer.startGame();
     return true;
   }
 }

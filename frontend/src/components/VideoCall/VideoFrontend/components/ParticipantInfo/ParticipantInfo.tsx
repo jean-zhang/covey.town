@@ -264,7 +264,11 @@ export default function ParticipantInfo({
         <div>{isSelected && <PinIcon />}</div>
         {!isLocalParticipant && (
           <div className={classes.buttonContainer}>
-            <Button colorScheme='teal' size='sm' width='100px'>
+            <Button
+              colorScheme='teal'
+              onClick={event => event.stopPropagation()}
+              size='sm'
+              width='100px'>
               Invite to race
             </Button>
           </div>
