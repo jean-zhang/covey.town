@@ -326,13 +326,6 @@ class CoveyGameScene extends Phaser.Scene {
       this.quitGame();
     })
 
-    // TODO: REMOVE
-    console.log('yo remove this')
-    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E).on('down', () => {
-      this.teleport(true);
-    });
-
-
     // Create a sprite with physics enabled via the physics system. The image used for the sprite
     // has a bit of whitespace, so I'm using setSize & setOffset to control the size of the
     // player's body.
