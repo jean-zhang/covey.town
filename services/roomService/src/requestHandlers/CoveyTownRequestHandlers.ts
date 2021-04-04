@@ -69,12 +69,6 @@ export interface TownDeleteRequest {
   coveyTownPassword: string;
 }
 
-export interface MazeInviteRequest {
-  inviter_playerID: string;
-  invitee_playerID: string;
-  coveyTownId: string;
-}
-
 /**
  * Payload sent by the client to update a Town.
  * N.B., JavaScript is terrible, so:
@@ -105,8 +99,8 @@ export interface MazeCompletionTimeRow {
 }
 
 export interface MazeInviteRequest {
-  inviter_playerID: string;
-  invitee_playerID: string;
+  inviterPlayerID: string;
+  inviteePlayerID: string;
   coveyTownId: string;
 }
 
@@ -115,12 +109,6 @@ export interface StartGameRequest {
   playerID: string;
   /** id of covey town where the game is starting */
   coveyTownID: string;
-}
-
-export interface MazeCompletionTimeRow {
-  player_id: string;
-  username: string;
-  time: number;
 }
 
 /**
@@ -357,8 +345,8 @@ export async function mazeTimeCreateHandler(
 }
 
 export async function mazeInviteAcceptHandler(requestData: MazeInviteRequest): Promise<ResponseEnvelope<null>> {
-  const { inviter_playerID, invitee_playerID, coveyTownId } = requestData;
-  if (!inviter_playerID || !invitee_playerID || !coveyTownId) {
+  const { inviterPlayerID, inviteePlayerID, coveyTownId } = requestData;
+  if (!inviterPlayerID || !inviteePlayerID || !coveyTownId) {
     return {
       isOK: false,
       message: 'Include an inviter, invitee, and covey town',
@@ -368,19 +356,18 @@ export async function mazeInviteAcceptHandler(requestData: MazeInviteRequest): P
   if (!townController) {
     return {
       isOK: false,
-      message: 'Invalid town'
-    }
+      message: 'Invalid town',
+    };
   }
-  if (townController.acceptPlayerInvite(inviter_playerID, invitee_playerID)) {
+  if (townController.acceptPlayerInvite(inviterPlayerID, inviteePlayerID)) {
     return {
-      isOK: true
-    }
-  } else {
-    return {
-      isOK: false,
-      message: 'Could not create invite'
-    }
+      isOK: true,
+    };
   }
+  return {
+    isOK: false,
+    message: 'Could not create invite',
+  };
 }
 
 export async function mazeStartGameHandler(startGameRequest: StartGameRequest): Promise<ResponseEnvelope<null>> {
@@ -389,17 +376,16 @@ export async function mazeStartGameHandler(startGameRequest: StartGameRequest): 
   if (!townController) {
     return {
       isOK: false,
-      message: 'Invalid town'
-    }
+      message: 'Invalid town',
+    };
   }
   if (townController.playerStartGame(playerID)) {
     return {
-      isOK: true
-    }
-  } else {
-    return {
-      isOK: false,
-      message: 'Could not start game'
-    }
+      isOK: true,
+    };
   }
+  return {
+    isOK: false,
+    message: 'Could not start game',
+  };
 }

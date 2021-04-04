@@ -67,14 +67,14 @@ export default class Player {
   /**
    * Start the maze
    */
-   startGame() {
+  startGame(): void {
     this._startTime = new Date();
   }
 
   /**
    * Removes player from Game
    */ 
-  async giveUp() {
+  async giveUp(): Promise<void> {
     if (this._game) {
       await this._game.updateScore({ userID: this.id, userName: this.userName}, -1);
       this.resetPlayer();
@@ -92,9 +92,8 @@ export default class Player {
       await this._game.updateScore({ userID: this.id, userName: this.userName}, score);
       this.resetPlayer();
       return score;
-    } else {
-      throw new Error('start time and game not defined');
     }
+    throw new Error('start time and game not defined');
   }
 
   /**
