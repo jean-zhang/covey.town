@@ -56,6 +56,7 @@ function wrappedTownSettings() {
     toggleQuit: false,
     quitGame: () => {},
     showInstructions: false,
+    gameStarted: false,
   }}>
     <TownSettings/></CoveyAppContext.Provider></ChakraProvider>;
 }

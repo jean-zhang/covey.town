@@ -178,16 +178,4 @@ export default class CoveyTownController {
     invitee.acceptInvite(inviter);
     return true;
   }
-
-  /**
-   * Returns true if succeeded
-   */
-  playerStartGame(playerID: string): boolean {
-    const player = this._players.find(playerToCheck => playerToCheck.id === playerID);
-    if (!player) {
-      return false;
-    }
-    player.startGame();
-    return true;
-  }
 }
