@@ -52,6 +52,14 @@ class CoveyGameScene extends Phaser.Scene {
     this.load.atlas('atlas', '/assets/atlas/atlas.png', '/assets/atlas/atlas.json');
   }
 
+  isPaused() {
+    return this.paused;
+  }
+
+  isReady() {
+    return this.ready;
+  }
+
   updatePlayersLocations(players: Player[]) {
     if (!this.ready) {
       this.players = players;
@@ -440,7 +448,7 @@ class CoveyGameScene extends Phaser.Scene {
 export default function WorldMap(): JSX.Element {
   const video = Video.instance();
   const {
-    emitMovement, players, quitGame
+    emitMovement, players, quitGame, showInstructions
   } = useCoveyAppState();
   const [gameScene, setGameScene] = useState<CoveyGameScene>();
   useEffect(() => {
@@ -478,6 +486,19 @@ export default function WorldMap(): JSX.Element {
   useEffect(() => {
     gameScene?.updatePlayersLocations(players);
   }, [players, deepPlayers, gameScene]);
+
+  useEffect(() => {
+    if (gameScene) {
+      if (gameScene.isReady()) {
+        if (gameScene.isPaused() && !showInstructions) {
+          gameScene.resume();
+        }
+        if (showInstructions) {
+          gameScene.pause();
+        }
+      }
+    }
+  });
 
   return <div id="map-container"/>;
 }
