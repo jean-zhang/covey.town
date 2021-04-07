@@ -4,6 +4,8 @@ import TownsServiceClient from './classes/TownsServiceClient';
 
 export type CoveyEvent = 'playerMoved' | 'playerAdded' | 'playerRemoved';
 
+export type TeleportType = 'none' | 'intoMaze' | 'intoStart';
+
 export type VideoRoom = {
   twilioID: string,
   id: string
@@ -25,7 +27,7 @@ export type CoveyAppState = {
   players: Player[],
   currentLocation: UserLocation,
   nearbyPlayers: NearbyPlayers,
-  emitMovement: (location: UserLocation) => void,
+  emitMovement: (location: UserLocation, teleportType: TeleportType) => void,
   socket: Socket | null,
   apiClient: TownsServiceClient,
   toggleQuit: boolean,

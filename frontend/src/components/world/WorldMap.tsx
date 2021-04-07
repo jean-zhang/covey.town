@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 import Player, { UserLocation } from '../../classes/Player';
 import Video from '../../classes/Video/Video';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
+import { TeleportType } from '../../CoveyTypes';
 
 const INSTRUCTIONS_LOCATION = {x: 1455, y: 40};
 const START = {x: 352, y: 1216};
@@ -33,13 +34,13 @@ class CoveyGameScene extends Phaser.Scene {
 
   private video: Video;
 
-  private emitMovement: (loc: UserLocation) => void;
+  private emitMovement: (loc: UserLocation, teleportType: TeleportType) => void;
 
   private quitKey?: Phaser.Input.Keyboard.Key;
 
   private quitGame: () => void;
 
-  constructor(video: Video, emitMovement: (loc: UserLocation) => void, quitGame: () => void) {
+  constructor(video: Video, emitMovement: (loc: UserLocation, teleportType: TeleportType) => void, quitGame: () => void) {
     super('PlayGame');
     this.video = video;
     this.emitMovement = emitMovement;
@@ -197,7 +198,8 @@ class CoveyGameScene extends Phaser.Scene {
       this.player.label.setY(body.y - 20);
       if (!this.lastLocation
         || this.lastLocation.x !== body.x
-        || this.lastLocation.y !== body.y || this.lastLocation.rotation !== primaryDirection
+        || this.lastLocation.y !== body.y
+        || (isMoving && this.lastLocation.rotation !== primaryDirection)
         || this.lastLocation.moving !== isMoving) {
         if (!this.lastLocation) {
           this.lastLocation = {
@@ -211,7 +213,7 @@ class CoveyGameScene extends Phaser.Scene {
         this.lastLocation.y = body.y;
         this.lastLocation.rotation = primaryDirection || 'front';
         this.lastLocation.moving = isMoving;
-        this.emitMovement(this.lastLocation);
+        this.emitMovement(this.lastLocation, 'none');
       }
     }
   }
@@ -332,35 +334,9 @@ class CoveyGameScene extends Phaser.Scene {
         this.player.sprite.y = mazeStart.y;
         this.lastLocation.x = mazeStart.x;
         this.lastLocation.y = mazeStart.y;
-        this.emitMovement(this.lastLocation);
+        this.emitMovement(this.lastLocation, 'intoMaze');
       }
     })
-
-    /* Configure physics overlap behavior for when the player steps into
-    a transporter area. If you enter a transporter and press 'space', you'll
-    transport to the location on the map that is referenced by the 'target' property
-    of the transporter.
-     */
-    // this.physics.add.overlap(sprite, transporters,
-    //   (overlappingObject, transporter)=>{
-    //   if(cursorKeys.space.isDown && this.player){
-    //     // In the tiled editor, set the 'target' to be an *object* pointer
-    //     // Here, we'll see just the ID, then find the object by ID
-    //     const transportTargetID = transporter.getData('target') as number;
-    //     const target = map.findObject('Objects', obj => (obj as unknown as Phaser.Types.Tilemaps.TiledObject).id === transportTargetID);
-    //     if(target && target.x && target.y && this.lastLocation){
-    //       // Move the player to the target, update lastLocation and send it to other players
-    //       this.player.sprite.x = target.x;
-    //       this.player.sprite.y = target.y;
-    //       this.lastLocation.x = target.x;
-    //       this.lastLocation.y = target.y;
-    //       this.emitMovement(this.lastLocation);
-    //     }
-    //     else{
-    //       throw new Error(`Unable to find target object ${target}`);
-    //     }
-    //   }
-    // })
 
     this.emitMovement({
       rotation: 'front',
@@ -369,7 +345,7 @@ class CoveyGameScene extends Phaser.Scene {
       // @ts-ignore - JB todo
       x: spawnPoint.x,
       y: spawnPoint.y,
-    });
+    }, 'none');
 
     // Watch the player and worldLayer for collisions, for the duration of the scene:
     this.physics.add.collider(sprite, worldLayer);

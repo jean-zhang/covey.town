@@ -9,7 +9,7 @@ import { MuiThemeProvider } from '@material-ui/core/styles';
 import assert from 'assert';
 import WorldMap from './components/world/WorldMap';
 import VideoOverlay from './components/VideoCall/VideoOverlay/VideoOverlay';
-import { CoveyAppState, NearbyPlayers } from './CoveyTypes';
+import { CoveyAppState, NearbyPlayers, TeleportType } from './CoveyTypes';
 import VideoContext from './contexts/VideoContext';
 import Login from './components/Login/Login';
 import CoveyAppContext from './contexts/CoveyAppContext';
@@ -40,14 +40,14 @@ type CoveyAppUpdate =
               myPlayerID: string, 
               socket: Socket, 
               players: Player[], 
-              emitMovement: (location: UserLocation) => void, 
+              emitMovement: (location: UserLocation, teleportType: TeleportType) => void, 
               toggleQuit: boolean, 
               quitGame: () => void,
               finishGame: () => void, } }
   | { action: 'addPlayer'; player: Player }
   | { action: 'playerMoved'; player: Player }
   | { action: 'playerDisconnect'; player: Player }
-  | { action: 'weMoved'; location: UserLocation }
+  | { action: 'weMoved'; location: UserLocation; teleportType: TeleportType }
   | { action: 'disconnect' }
   | { action: 'toggleQuit' }
   | { action: 'exitMaze' }
@@ -159,7 +159,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       }
       if(!closedInstructions) {
       nextState.showInstructions = 
-        (update.location.x === INSTRUCTIONS_LOCATION.x && update.location.y === INSTRUCTIONS_LOCATION.y);
+        state.showInstructions || (update.teleportType === 'intoMaze')
       }
       break;
     case 'playerDisconnect':
@@ -223,9 +223,9 @@ async function GameController(initData: TownJoinResponse,
   socket.on('disconnect', () => {
     dispatchAppUpdate({ action: 'disconnect' });
   });
-  const emitMovement = (location: UserLocation) => {
+  const emitMovement = (location: UserLocation, teleportType: TeleportType) => {
     socket.emit('playerMovement', location);
-    dispatchAppUpdate({ action: 'weMoved', location });
+    dispatchAppUpdate({ action: 'weMoved', location, teleportType });
   };
   const quitGame = () => {
     dispatchAppUpdate({ action: 'toggleQuit' });
