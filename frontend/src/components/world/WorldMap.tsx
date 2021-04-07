@@ -5,8 +5,6 @@ import Video from '../../classes/Video/Video';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 import { TeleportType } from '../../CoveyTypes';
 
-const INSTRUCTIONS_LOCATION = {x: 1455, y: 40};
-const START = {x: 352, y: 1216};
 // https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
 class CoveyGameScene extends Phaser.Scene {
   private player?: {
@@ -436,20 +434,6 @@ class CoveyGameScene extends Phaser.Scene {
     this.paused = false;
     this.input.keyboard.addCapture(this.previouslyCapturedKeys);
     this.previouslyCapturedKeys = [];
-  }
-
-  teleport(intoMaze: boolean) {
-    if(this.player) {
-      const body = this.player.sprite.body as Phaser.Physics.Arcade.Body;
-      let teleportLocation;
-      if(intoMaze) {
-        teleportLocation = INSTRUCTIONS_LOCATION;
-      } else {
-        teleportLocation = START;
-      }
-      body.x = teleportLocation.x;
-      body.y = teleportLocation.y;
-    }
   }
 }
 

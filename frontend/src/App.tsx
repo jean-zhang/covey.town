@@ -29,7 +29,6 @@ import Instructions from './components/world/Instructions';
 import MazeGameInvite from './components/world/MazeGameInvite';
 import QuitGame from './components/world/QuitGame';
 
-const INSTRUCTIONS_LOCATION = {x: 1455, y: 40};
 type CoveyAppUpdate =
   | { action: 'doConnect'; 
       data: { userName: string,
