@@ -104,6 +104,7 @@ function defaultAppState(): CoveyAppState {
     toggleQuit: false,
     quitGame: () => {},
     showInstructions: false,
+    gameStarted: false,
   };
 }
 let closedInstructions = false;
@@ -127,6 +128,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     toggleQuit: state.toggleQuit,
     quitGame: state.quitGame,
     showInstructions: state.showInstructions,
+    gameStarted: state.gameStarted,
   };
 
   function calculateNearbyPlayers(players: Player[], currentLocation: UserLocation) {
@@ -214,6 +216,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     case 'closeInstructions':
       nextState.showInstructions = false;
       closedInstructions = true;
+      nextState.gameStarted = true;
       break;
     case 'disconnect':
       state.socket?.disconnect();

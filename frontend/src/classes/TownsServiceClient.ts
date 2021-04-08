@@ -12,13 +12,6 @@ export interface TownJoinRequest {
   coveyTownID: string;
 }
 
-export interface StartGameRequest {
-  /** id of player whose game is to start */
-  playerID: string;
-  /** id of covey town where the game is starting */
-  coveyTownID: string;
-}
-
 /**
  * The format of a response to join a Town in Covey.Town, as returned by the handler to the server
  * middleware

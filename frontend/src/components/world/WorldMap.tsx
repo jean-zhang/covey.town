@@ -39,11 +39,26 @@ class CoveyGameScene extends Phaser.Scene {
 
   private quitGame: () => void;
 
+  private timeLabel?: Phaser.GameObjects.Text;
+
+  private mazeStartTime: number;
+
+  private readonly textStyle = {
+    font: '18px monospace',
+    color: '#000000',
+    padding: {
+      x: 20,
+      y: 10
+    },
+    backgroundColor: '#ffffff',
+  };
+
   constructor(video: Video, emitMovement: (loc: UserLocation) => void, quitGame: () => void) {
     super('PlayGame');
     this.video = video;
     this.emitMovement = emitMovement;
     this.quitGame = quitGame;
+    this.mazeStartTime = -1;
   }
 
   preload() {
@@ -143,9 +158,22 @@ class CoveyGameScene extends Phaser.Scene {
     return undefined;
   }
 
-  update() {
+  update(time: number) {
     if (this.paused) {
       return;
+    }
+    if (this.mazeStartTime >= 0) {
+      const timeTaken = Number.parseFloat(((time - this.mazeStartTime) / 1000).toString()).toFixed(2);
+      const timeTakenString = `TIME TAKEN: ${timeTaken}s`
+      if (!this.timeLabel) {
+        this.timeLabel = this.add
+        .text(16, 100, timeTakenString, this.textStyle)
+        .setScrollFactor(0)
+        .setDepth(31);
+      }
+      else {
+        this.timeLabel.setText(timeTakenString);
+      }
     }
 
     if (this.player && this.cursors) {
@@ -213,6 +241,12 @@ class CoveyGameScene extends Phaser.Scene {
         this.lastLocation.moving = isMoving;
         this.emitMovement(this.lastLocation);
       }
+    }
+  }
+
+  startMazeTimer() {
+    if (this.mazeStartTime < 0) {
+      this.mazeStartTime = this.time.now;
     }
   }
 
@@ -291,7 +325,6 @@ class CoveyGameScene extends Phaser.Scene {
     this.quitKey.on('down', () => {
       this.quitGame();
     })
-
 
     // Create a sprite with physics enabled via the physics system. The image used for the sprite
     // has a bit of whitespace, so I'm using setSize & setOffset to control the size of the
@@ -401,19 +434,9 @@ class CoveyGameScene extends Phaser.Scene {
     camera.startFollow(this.player.sprite);
     camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
 
-
-
     // Help text that has a "fixed" position on the screen
     this.add
-      .text(16, 16, `Arrow keys to move, space to transport\nCurrent town: ${this.video.townFriendlyName} (${this.video.coveyTownID})`, {
-        font: '18px monospace',
-        color: '#000000',
-        padding: {
-          x: 20,
-          y: 10
-        },
-        backgroundColor: '#ffffff',
-      })
+      .text(16, 16, `Arrow keys to move, space to transport\nCurrent town: ${this.video.townFriendlyName} (${this.video.coveyTownID})`, this.textStyle)
       .setScrollFactor(0)
       .setDepth(30);
 
@@ -455,7 +478,7 @@ class CoveyGameScene extends Phaser.Scene {
 export default function WorldMap(): JSX.Element {
   const video = Video.instance();
   const {
-    emitMovement, players, quitGame
+    emitMovement, players, quitGame, gameStarted,
   } = useCoveyAppState();
   const [gameScene, setGameScene] = useState<CoveyGameScene>();
   useEffect(() => {
@@ -493,6 +516,11 @@ export default function WorldMap(): JSX.Element {
   useEffect(() => {
     gameScene?.updatePlayersLocations(players);
   }, [players, deepPlayers, gameScene]);
+  useEffect(() => {
+    if (gameStarted) {
+    gameScene?.startMazeTimer();
+    }
+  }, [gameStarted, gameScene]);
 
   return <div id="map-container"/>;
 }

@@ -16,9 +16,6 @@ export default class Player {
   /** The player's username, which is not guaranteed to be unique within the town * */
   private readonly _userName: string;
 
-  /** The start time of the Player * */
-  private _startTime?: Date;
-
   /** Whether the Player is in the Maze * */
   private _inMaze: boolean;
 
@@ -64,13 +61,6 @@ export default class Player {
   // sendInvite(recipient: Player): void {}
 
   /**
-   * Start the maze
-   */
-  startGame(): void {
-    this._startTime = new Date();
-  }
-
-  /**
    * Removes player from Game
    */
   async giveUp(): Promise<void> {
@@ -85,12 +75,10 @@ export default class Player {
   /**
    * Called when player has completed the maze
    */
-  async finish(): Promise<number> {
-    if (this._startTime && this._game) {
-      const score = new Date().getTime() - this._startTime.getTime();
-      await this._game.updateScore({ userID: this.id, userName: this.userName }, score);
+  async finish(timeScore: number): Promise<void> {
+    if (timeScore > 0 && this._game) {
+      await this._game.updateScore({ userID: this.id, userName: this.userName }, timeScore);
       this.resetPlayer();
-      return score;
     }
     throw new Error('start time and game not defined');
   }
@@ -114,7 +102,6 @@ export default class Player {
    * Resets fields of this player
    */
   resetPlayer(): void {
-    this._startTime = undefined;
     this._inMaze = false;
     this._game = undefined;
   }

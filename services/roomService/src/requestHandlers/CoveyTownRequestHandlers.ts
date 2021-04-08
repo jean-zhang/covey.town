@@ -105,13 +105,6 @@ export interface MazeInviteAcceptRequest {
   gameAcceptance: boolean;
 }
 
-export interface StartGameRequest {
-  /** id of player whose game is to start */
-  playerID: string;
-  /** id of covey town where the game is starting */
-  coveyTownID: string;
-}
-
 /**
  * Envelope that wraps any response from the server
  */
