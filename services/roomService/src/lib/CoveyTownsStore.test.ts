@@ -20,6 +20,12 @@ function mockCoveyListener(): CoveyTownListener {
     onPlayerJoined(newPlayer: Player) {
       mockCoveyListenerOtherFns(newPlayer);
     },
+    onMazeGameRequested(senderPlayer: Player, recipientPlayer: Player) {
+      mockCoveyListenerOtherFns(senderPlayer, recipientPlayer);
+    },
+    onMazeGameResponded(senderPlayer: Player, recipientPlayer: Player, gameAcceptance: boolean) {
+      mockCoveyListenerOtherFns(senderPlayer, recipientPlayer, gameAcceptance);
+    },
   };
 }
 

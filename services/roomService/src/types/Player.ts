@@ -57,12 +57,11 @@ export default class Player {
     this.location = location;
   }
 
-  
   /**
    * Sends an invite to a player within the town
    * @param player Player to invite
-   */  
-  // sendInvite(invitee: Player): void {}
+   */
+  // sendInvite(recipient: Player): void {}
 
   /**
    * Start the maze
@@ -73,10 +72,10 @@ export default class Player {
 
   /**
    * Removes player from Game
-   */ 
+   */
   async giveUp(): Promise<void> {
     if (this._game) {
-      await this._game.updateScore({ userID: this.id, userName: this.userName}, -1);
+      await this._game.updateScore({ userID: this.id, userName: this.userName }, -1);
       this.resetPlayer();
     } else {
       throw new Error('game not defined');
@@ -85,11 +84,11 @@ export default class Player {
 
   /**
    * Called when player has completed the maze
-   */ 
+   */
   async finish(): Promise<number> {
     if (this._startTime && this._game) {
       const score = new Date().getTime() - this._startTime.getTime();
-      await this._game.updateScore({ userID: this.id, userName: this.userName}, score);
+      await this._game.updateScore({ userID: this.id, userName: this.userName }, score);
       this.resetPlayer();
       return score;
     }
@@ -98,11 +97,11 @@ export default class Player {
 
   /**
    * Accepts an invite to a Game
-   */ 
-  acceptInvite(inviter: Player): void {
-    const newGame = new Game(this.id, inviter.id);
+   */
+  acceptInvite(sender: Player): void {
+    const newGame = new Game(this.id, sender.id);
     this._game = newGame;
-    inviter.onInviteAccepted(newGame);
+    sender.onInviteAccepted(newGame);
     Maze.getInstance().addGame(newGame.getGameId());
   }
 
@@ -113,7 +112,7 @@ export default class Player {
 
   /**
    * Resets fields of this player
-   */ 
+   */
   resetPlayer(): void {
     this._startTime = undefined;
     this._inMaze = false;

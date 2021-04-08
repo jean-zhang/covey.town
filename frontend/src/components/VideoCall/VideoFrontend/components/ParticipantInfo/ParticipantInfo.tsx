@@ -1,4 +1,4 @@
-import { Button } from '@chakra-ui/react';
+import { Button, useToast } from '@chakra-ui/react';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import clsx from 'clsx';
@@ -11,6 +11,7 @@ import {
   RemoteVideoTrack,
 } from 'twilio-video';
 import { UserProfile } from '../../../../../CoveyTypes';
+import useCoveyAppState from '../../../../../hooks/useCoveyAppState';
 import useIsTrackSwitchedOff from '../../hooks/useIsTrackSwitchedOff/useIsTrackSwitchedOff';
 import useParticipantIsReconnecting from '../../hooks/useParticipantIsReconnecting/useParticipantIsReconnecting';
 import usePublications from '../../hooks/usePublications/usePublications';
@@ -179,6 +180,8 @@ export default function ParticipantInfo({
   highlight,
 }: ParticipantInfoProps) {
   const publications = usePublications(participant);
+  const appState = useCoveyAppState();
+  const toast = useToast();
 
   const audioPublication = publications.find(p => p.kind === 'audio');
   const videoPublication = publications.find(p => p.trackName.includes('camera'));
@@ -264,7 +267,31 @@ export default function ParticipantInfo({
         <div>{isSelected && <PinIcon />}</div>
         {!isLocalParticipant && (
           <div className={classes.buttonContainer}>
-            <Button colorScheme='teal' size='sm' width='100px'>
+            <Button
+              colorScheme='teal'
+              onClick={event => {
+                event.stopPropagation();
+                if (profile) {
+                  const senderPlayer = appState.players.find(
+                    player => player.id === appState.myPlayerID,
+                  );
+                  const recipientPlayer = appState.players.find(player => player.id === profile.id);
+                  if (senderPlayer && recipientPlayer) {
+                    appState.emitGameInvite(senderPlayer, recipientPlayer);
+                    if (!toast.isActive(profile.id)) {
+                      toast({
+                        id: profile.id,
+                        title: `Invited ${recipientPlayer.userName} to race`,
+                        status: 'info',
+                        duration: 2000,
+                        isClosable: true,
+                      });
+                    }
+                  }
+                }
+              }}
+              size='sm'
+              width='100px'>
               Invite to race
             </Button>
           </div>

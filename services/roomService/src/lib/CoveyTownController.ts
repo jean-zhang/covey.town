@@ -169,25 +169,48 @@ export default class CoveyTownController {
   /**
    * returns true if succeeded
    */
-  acceptPlayerInvite(inviterPlayerID: string, inviteePlayerID: string): boolean {
-    const inviter = this._players.find(player => player.id === inviterPlayerID);
-    const invitee = this._players.find(player => player.id === inviteePlayerID);
-    if (!inviter || !invitee) {
+  respondToGameInvite(
+    senderPlayerID: string,
+    recipientPlayerID: string,
+    gameAcceptance: boolean,
+  ): boolean {
+    const sender = this._players.find(player => player.id === senderPlayerID);
+    const recipient = this._players.find(player => player.id === recipientPlayerID);
+
+    if (!sender || !recipient) {
       return false;
     }
-    invitee.acceptInvite(inviter);
+    this._listeners
+      .filter(
+        listener =>
+          listener.listeningPlayerID === senderPlayerID ||
+          listener.listeningPlayerID === recipientPlayerID,
+      )
+      .forEach(listener => listener.onMazeGameResponded(sender, recipient, gameAcceptance));
+
+    if (gameAcceptance) {
+      recipient.acceptInvite(sender);
+    }
     return true;
   }
 
   /**
-   * Returns true if succeeded
+   * returns true if succeeded
    */
-  playerStartGame(playerID: string): boolean {
-    const startGamePlayer = this._players.find(player => player.id === playerID);
-    if (!startGamePlayer) {
+  onGameRequested(senderPlayerID: string, recipientPlayerID: string): boolean {
+    const sender = this._players.find(player => player.id === senderPlayerID);
+    const recipient = this._players.find(player => player.id === recipientPlayerID);
+
+    if (!sender || !recipient) {
       return false;
     }
-    startGamePlayer.startGame();
+
+    const listeners = this._listeners.filter(
+      listener => listener.listeningPlayerID === recipientPlayerID,
+    );
+
+    listeners.forEach(listener => listener.onMazeGameRequested(sender, recipient));
+
     return true;
   }
 }
