@@ -233,16 +233,11 @@ function townSocketAdapter(socket: Socket, listeningPlayerID?: string): CoveyTow
       socket.emit('townClosing');
       socket.disconnect(true);
     },
-<<<<<<< HEAD
     onMazeGameRequested(senderPlayer: Player, recipientPlayer: Player) {
       socket.emit('receivedGameInvite', senderPlayer, recipientPlayer);
     },
     onMazeGameResponded(senderPlayer: Player, recipientPlayer: Player, gameAcceptance: boolean) {
       socket.emit('mazeGameResponse', senderPlayer, recipientPlayer, gameAcceptance);
-=======
-    onMazeGameRequested(invitedPlayer: Player) {
-      socket.emit('mazeGameRequested', invitedPlayer);
->>>>>>> 80daff021944139d36bc7a0fbf3b5dad6a1715ab
     },
   };
 }
