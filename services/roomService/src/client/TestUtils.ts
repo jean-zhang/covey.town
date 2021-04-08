@@ -52,7 +52,7 @@ export function createSocketClient(
   playerDisconnected: Promise<RemoteServerPlayer>;
 } {
   const address = server.address() as AddressInfo;
-  const socket = io(`http://localhost`, {
+  const socket = io(`http://localhost:${address.port}`, {
     auth: { token: sessionToken, coveyTownID },
     reconnection: false,
     timeout: 5000,
