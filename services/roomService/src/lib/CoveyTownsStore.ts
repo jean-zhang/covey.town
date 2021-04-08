@@ -1,5 +1,5 @@
-import CoveyTownController from './CoveyTownController';
 import { CoveyTownList } from '../CoveyTypes';
+import CoveyTownController from './CoveyTownController';
 
 function passwordMatches(provided: string, expected: string): boolean {
   if (provided === expected) {
@@ -28,7 +28,8 @@ export default class CoveyTownsStore {
   }
 
   getTowns(): CoveyTownList {
-    return this._towns.filter(townController => townController.isPubliclyListed)
+    return this._towns
+      .filter(townController => townController.isPubliclyListed)
       .map(townController => ({
         coveyTownID: townController.coveyTownID,
         friendlyName: townController.friendlyName,
@@ -43,7 +44,12 @@ export default class CoveyTownsStore {
     return newTown;
   }
 
-  updateTown(coveyTownID: string, coveyTownPassword: string, friendlyName?: string, makePublic?: boolean): boolean {
+  updateTown(
+    coveyTownID: string,
+    coveyTownPassword: string,
+    friendlyName?: string,
+    makePublic?: boolean,
+  ): boolean {
     const existingTown = this.getControllerForTown(coveyTownID);
     if (existingTown && passwordMatches(coveyTownPassword, existingTown.townUpdatePassword)) {
       if (friendlyName !== undefined) {
@@ -69,5 +75,4 @@ export default class CoveyTownsStore {
     }
     return false;
   }
-
 }

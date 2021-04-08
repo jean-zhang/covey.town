@@ -1,12 +1,10 @@
+import { FormControl, Grid, MenuItem, Select, Typography } from '@material-ui/core';
 import React, { useCallback, useState } from 'react';
-import {
-  FormControl, MenuItem, Typography, Select, Grid,
-} from '@material-ui/core';
-import AudioLevelIndicator from '../../AudioLevelIndicator/AudioLevelIndicator';
+import LocalStorage_TwilioVideo from '../../../../../../classes/LocalStorage/TwilioVideo';
 import { useAudioInputDevices } from '../../../hooks/deviceHooks/deviceHooks';
 import useMediaStreamTrack from '../../../hooks/useMediaStreamTrack/useMediaStreamTrack';
 import useVideoContext from '../../../hooks/useVideoContext/useVideoContext';
-import LocalStorage_TwilioVideo from '../../../../../../classes/LocalStorage/TwilioVideo';
+import AudioLevelIndicator from '../../AudioLevelIndicator/AudioLevelIndicator';
 
 export default function AudioInputList() {
   const audioInputDevices = useAudioInputDevices();
@@ -30,19 +28,18 @@ export default function AudioInputList() {
 
   return (
     <div>
-      <Typography variant="subtitle2" gutterBottom>
+      <Typography variant='subtitle2' gutterBottom>
         Audio Input
       </Typography>
-      <Grid container alignItems="center" justify="space-between">
-        <div className="inputSelect">
+      <Grid container alignItems='center' justify='space-between'>
+        <div className='inputSelect'>
           {audioInputDevices.length > 1 ? (
             <FormControl fullWidth>
               <Select
-                onChange={(e) => replaceTrack(e.target.value as string)}
+                onChange={e => replaceTrack(e.target.value as string)}
                 value={localAudioInputDeviceId || lastAudioDeviceId}
-                variant="outlined"
-              >
-                {audioInputDevices.map((device) => (
+                variant='outlined'>
+                {audioInputDevices.map(device => (
                   <MenuItem value={device.deviceId} key={device.deviceId}>
                     {device.label}
                   </MenuItem>
@@ -53,7 +50,7 @@ export default function AudioInputList() {
             <Typography>{localAudioTrack?.mediaStreamTrack.label || 'No Local Audio'}</Typography>
           )}
         </div>
-        <AudioLevelIndicator audioTrack={localAudioTrack} color="black" />
+        <AudioLevelIndicator audioTrack={localAudioTrack} color='black' />
       </Grid>
     </div>
   );

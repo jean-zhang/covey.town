@@ -1,9 +1,12 @@
 import { useCallback, useState } from 'react';
-import Video, { LocalVideoTrack, LocalAudioTrack, CreateLocalTrackOptions } from 'twilio-video';
 import { useMutex } from 'react-context-mutex';
-import { useHasAudioInputDevices, useHasVideoInputDevices } from '../../../hooks/deviceHooks/deviceHooks';
-import { DEFAULT_VIDEO_CONSTRAINTS } from '../../../constants';
+import Video, { CreateLocalTrackOptions, LocalAudioTrack, LocalVideoTrack } from 'twilio-video';
 import LocalStorage_TwilioVideo from '../../../../../../classes/LocalStorage/TwilioVideo';
+import { DEFAULT_VIDEO_CONSTRAINTS } from '../../../constants';
+import {
+  useHasAudioInputDevices,
+  useHasVideoInputDevices,
+} from '../../../hooks/deviceHooks/deviceHooks';
 
 export default function useLocalTracks() {
   const [audioTrack, setAudioTrack] = useState<LocalAudioTrack>();
@@ -37,7 +40,7 @@ export default function useLocalTracks() {
       ...newOptions,
     };
 
-    return Video.createLocalVideoTrack(options).then((newTrack) => {
+    return Video.createLocalVideoTrack(options).then(newTrack => {
       setVideoTrack(newTrack);
       return newTrack;
     });
@@ -59,44 +62,45 @@ export default function useLocalTracks() {
 
   const MutexRunner = useMutex();
   const getAudioAndVideoTracksMutex = new MutexRunner('getAudioAndVideoTracks');
-  const getAudioAndVideoTracks = async () => getAudioAndVideoTracksMutex.run(
-    async () => {
-      getAudioAndVideoTracksMutex.lock();
-      try {
-        if (!hasAudio && !hasVideo) return Promise.resolve();
-        if (audioTrack || videoTrack) return Promise.resolve();
+  const getAudioAndVideoTracks = async () =>
+    getAudioAndVideoTracksMutex.run(
+      async () => {
+        getAudioAndVideoTracksMutex.lock();
+        try {
+          if (!hasAudio && !hasVideo) return Promise.resolve();
+          if (audioTrack || videoTrack) return Promise.resolve();
 
-        console.log('Running getAudioAndVideoTracks');
+          console.log('Running getAudioAndVideoTracks');
 
-        setIsAcquiringLocalTracks(true);
-        const tracks = await Video.createLocalTracks({
-          video: hasVideo && {
-            ...(DEFAULT_VIDEO_CONSTRAINTS as {}),
-            name: `camera-${Date.now()}`,
-            deviceId: LocalStorage_TwilioVideo.twilioVideoLastCamera ?? undefined,
-          },
-          audio: hasAudio && {
-            deviceId: LocalStorage_TwilioVideo.twilioVideoLastMic ?? undefined,
-          },
-        });
+          setIsAcquiringLocalTracks(true);
+          const tracks = await Video.createLocalTracks({
+            video: hasVideo && {
+              ...(DEFAULT_VIDEO_CONSTRAINTS as {}),
+              name: `camera-${Date.now()}`,
+              deviceId: LocalStorage_TwilioVideo.twilioVideoLastCamera ?? undefined,
+            },
+            audio: hasAudio && {
+              deviceId: LocalStorage_TwilioVideo.twilioVideoLastMic ?? undefined,
+            },
+          });
 
-        const _videoTrack = tracks.find((track) => track.kind === 'video');
-        const _audioTrack = tracks.find((track) => track.kind === 'audio');
-        if (_videoTrack) {
-          console.log('Running getAudioAndVideoTracks:setVideoTrack');
-          setVideoTrack(_videoTrack as LocalVideoTrack);
+          const _videoTrack = tracks.find(track => track.kind === 'video');
+          const _audioTrack = tracks.find(track => track.kind === 'audio');
+          if (_videoTrack) {
+            console.log('Running getAudioAndVideoTracks:setVideoTrack');
+            setVideoTrack(_videoTrack as LocalVideoTrack);
+          }
+          if (_audioTrack) {
+            console.log('Running getAudioAndVideoTracks:setAudioTrack');
+            setAudioTrack(_audioTrack as LocalAudioTrack);
+          }
+        } finally {
+          setIsAcquiringLocalTracks(false);
+          getAudioAndVideoTracksMutex.unlock();
         }
-        if (_audioTrack) {
-          console.log('Running getAudioAndVideoTracks:setAudioTrack');
-          setAudioTrack(_audioTrack as LocalAudioTrack);
-        }
-      } finally {
-        setIsAcquiringLocalTracks(false);
-        getAudioAndVideoTracksMutex.unlock();
-      }
-    },
-    () => {},
-  );
+      },
+      () => {},
+    );
 
   return {
     audioTrack,

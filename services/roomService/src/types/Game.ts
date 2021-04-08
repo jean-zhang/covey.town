@@ -12,7 +12,6 @@ type FinishedPlayer = {
  * Two Players competing in the Maze is represented by a Game object
  */
 export default class Game {
-
   private _player1ID: string;
 
   private _player2ID: string;
@@ -29,22 +28,32 @@ export default class Game {
   getGameId(): string {
     return this._player1ID + this._player2ID;
   }
-  
+
   async updateScore(playerID: PlayerInfo, score: number): Promise<void> {
-    this._pair.push({ player: playerID, score});
+    this._pair.push({ player: playerID, score });
     if (this._pair.length >= 2) {
       await this.registerScore();
     }
   }
 
   /**
-   * Registers the Winner's and Loser's scores 
-   */ 
+   * Registers the Winner's and Loser's scores
+   */
   async registerScore(): Promise<void> {
     const promises: Promise<QueryResult>[] = [];
     this._pair.forEach(finishedPlayer => {
-      if (finishedPlayer.player !== undefined && finishedPlayer.score !== undefined && finishedPlayer.score > 0) {
-        promises.push(pool.query(insertMazeCompletionTime, [finishedPlayer.player.userID, finishedPlayer.player.userName, finishedPlayer.score]));
+      if (
+        finishedPlayer.player !== undefined &&
+        finishedPlayer.score !== undefined &&
+        finishedPlayer.score > 0
+      ) {
+        promises.push(
+          pool.query(insertMazeCompletionTime, [
+            finishedPlayer.player.userID,
+            finishedPlayer.player.userName,
+            finishedPlayer.score,
+          ]),
+        );
       }
     });
     await Promise.all(promises);

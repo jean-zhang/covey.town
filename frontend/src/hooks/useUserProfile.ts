@@ -1,5 +1,5 @@
-import { useContext } from 'react';
 import assert from 'assert';
+import { useContext } from 'react';
 import UserContext from '../contexts/UserProfileContext';
 import { UserProfile } from '../CoveyTypes';
 

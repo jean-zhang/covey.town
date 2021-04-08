@@ -1,5 +1,5 @@
-import { useContext } from 'react';
 import assert from 'assert';
+import { useContext } from 'react';
 import CoveyAppContext from '../contexts/CoveyAppContext';
 import { CoveyAppState } from '../CoveyTypes';
 

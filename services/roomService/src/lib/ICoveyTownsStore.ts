@@ -10,5 +10,5 @@ export default interface ICoveyTownsStore {
    *
    * @param coveyTownID the ID of the requested town
    */
-  getControllerForTown(coveyTownID: string): CoveyTownController
+  getControllerForTown(coveyTownID: string): CoveyTownController;
 }

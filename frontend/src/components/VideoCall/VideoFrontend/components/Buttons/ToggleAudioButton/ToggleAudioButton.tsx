@@ -1,11 +1,9 @@
-import React, { useCallback, useRef } from 'react';
-
 import Button from '@material-ui/core/Button';
+import React, { useCallback, useRef } from 'react';
+import { useHasAudioInputDevices } from '../../../hooks/deviceHooks/deviceHooks';
+import useLocalAudioToggle from '../../../hooks/useLocalAudioToggle/useLocalAudioToggle';
 import MicIcon from '../../../icons/MicIcon';
 import MicOffIcon from '../../../icons/MicOffIcon';
-
-import useLocalAudioToggle from '../../../hooks/useLocalAudioToggle/useLocalAudioToggle';
-import { useHasAudioInputDevices } from '../../../hooks/deviceHooks/deviceHooks';
 
 export default function ToggleAudioButton(props: {
   disabled?: boolean;
@@ -35,8 +33,7 @@ export default function ToggleAudioButton(props: {
       onClick={toggleAudio}
       disabled={props.disabled || !hasAudioDevices}
       startIcon={isAudioEnabled ? <MicIcon /> : <MicOffIcon />}
-      data-cy-audio-toggle
-    >
+      data-cy-audio-toggle>
       {!hasAudioDevices ? 'No audio devices' : isAudioEnabled ? 'Mute' : 'Unmute'}
     </Button>
   );

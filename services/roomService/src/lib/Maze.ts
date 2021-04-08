@@ -2,9 +2,8 @@
  * Each Player who is in a Game is represented by a Player object
  */
 export default class Maze {
-
   /** The capacity of the Maze * */
-  public static readonly CAPACITY : number = 10;
+  public static readonly CAPACITY: number = 10;
 
   /** The Games in this Maze * */
   private _gameIds = new Set<string>();
@@ -27,14 +26,14 @@ export default class Maze {
 
   /**
    * Checks whether the maze is full
-   */  
+   */
   reachedCapacity(): boolean {
-    return this._gameIds.size >= (Maze.CAPACITY / 2);
+    return this._gameIds.size >= Maze.CAPACITY / 2;
   }
 
   /**
    * Updates the scores on the leaderboard
-   */ 
+   */
   // updateLeaderboard(player1ID: string, player1Score: number, player2ID: string, player2Score: number): void {}
 
   /**

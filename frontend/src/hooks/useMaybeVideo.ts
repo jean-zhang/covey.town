@@ -1,6 +1,6 @@
 import { useContext } from 'react';
-import VideoContext from '../contexts/VideoContext';
 import Video from '../classes/Video/Video';
+import VideoContext from '../contexts/VideoContext';
 
 /**
  * Use this hook to access the video instance.

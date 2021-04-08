@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AudioTrack, VideoTrack } from 'twilio-video';
 
 /*
@@ -21,7 +21,7 @@ export default function useMediaStreamTrack(track?: AudioTrack | VideoTrack) {
         track.off('started', handleStarted);
       };
     }
-    return () => { };
+    return () => {};
   }, [track]);
 
   return mediaStreamTrack;

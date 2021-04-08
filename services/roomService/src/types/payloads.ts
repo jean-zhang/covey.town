@@ -1,6 +1,6 @@
 export interface JoinTownResponse {
-  coveyUserID: string,
-  coveySessionToken: string,
-  providerVideoToken: string,
-  providerRoomID: string
+  coveyUserID: string;
+  coveySessionToken: string;
+  providerVideoToken: string;
+  providerRoomID: string;
 }

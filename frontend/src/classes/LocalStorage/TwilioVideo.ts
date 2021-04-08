@@ -13,7 +13,10 @@ export default class TwilioVideo {
 
   static set twilioVideoCameraEnabled(value: boolean | null) {
     if (value !== null) {
-      localStorage.setItem(TwilioVideo.twilioVideoCameraEnabledKey, value === true ? 'true' : 'false');
+      localStorage.setItem(
+        TwilioVideo.twilioVideoCameraEnabledKey,
+        value === true ? 'true' : 'false',
+      );
     } else {
       localStorage.removeItem(TwilioVideo.twilioVideoCameraEnabledKey);
     }

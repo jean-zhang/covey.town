@@ -1,20 +1,18 @@
-import React, { useCallback, useState } from 'react';
-import {
-  FormControl, MenuItem, Typography, Select,
-} from '@material-ui/core';
+import { FormControl, MenuItem, Select, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import React, { useCallback, useState } from 'react';
+import LocalStorage_TwilioVideo from '../../../../../../classes/LocalStorage/TwilioVideo';
 import { DEFAULT_VIDEO_CONSTRAINTS } from '../../../constants';
-import VideoTrack from '../../VideoTrack/VideoTrack';
+import { useVideoInputDevices } from '../../../hooks/deviceHooks/deviceHooks';
 import useMediaStreamTrack from '../../../hooks/useMediaStreamTrack/useMediaStreamTrack';
 import useVideoContext from '../../../hooks/useVideoContext/useVideoContext';
-import { useVideoInputDevices } from '../../../hooks/deviceHooks/deviceHooks';
-import LocalStorage_TwilioVideo from '../../../../../../classes/LocalStorage/TwilioVideo';
+import VideoTrack from '../../VideoTrack/VideoTrack';
 
 const useStyles = makeStyles({
   preview: {
-    width: '300px',
-    maxHeight: '200px',
-    margin: '0.5em auto',
+    'width': '300px',
+    'maxHeight': '200px',
+    'margin': '0.5em auto',
     '& video': {
       maxHeight: '200px',
     },
@@ -55,15 +53,14 @@ export default function VideoInputList() {
       )}
       {videoInputDevices.length > 1 ? (
         <FormControl fullWidth>
-          <Typography variant="subtitle2" gutterBottom>
+          <Typography variant='subtitle2' gutterBottom>
             Video Input
           </Typography>
           <Select
-            onChange={(e) => replaceTrack(e.target.value as string)}
+            onChange={e => replaceTrack(e.target.value as string)}
             value={localVideoInputDeviceId || lastVideoDeviceId}
-            variant="outlined"
-          >
-            {videoInputDevices.map((device) => (
+            variant='outlined'>
+            {videoInputDevices.map(device => (
               <MenuItem value={device.deviceId} key={device.deviceId}>
                 {device.label}
               </MenuItem>
@@ -72,7 +69,7 @@ export default function VideoInputList() {
         </FormControl>
       ) : (
         <>
-          <Typography variant="subtitle2" gutterBottom>
+          <Typography variant='subtitle2' gutterBottom>
             Video Input
           </Typography>
           <Typography>{localVideoTrack?.mediaStreamTrack.label || 'No Local Video'}</Typography>

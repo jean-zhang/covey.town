@@ -1,6 +1,5 @@
-import { Room } from 'twilio-video';
 import { useEffect } from 'react';
-
+import { Room } from 'twilio-video';
 import { Callback } from '../../../types';
 
 export default function useHandleTrackPublicationFailed(room: Room, onError: Callback) {
@@ -12,6 +11,6 @@ export default function useHandleTrackPublicationFailed(room: Room, onError: Cal
         localParticipant.off('trackPublicationFailed', onError);
       };
     }
-    return () => { };
+    return () => {};
   }, [localParticipant, onError]);
 }

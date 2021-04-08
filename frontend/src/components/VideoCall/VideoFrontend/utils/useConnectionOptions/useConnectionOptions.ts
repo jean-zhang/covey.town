@@ -1,6 +1,5 @@
 import { ConnectOptions } from 'twilio-video';
 import { isMobile, removeUndefineds } from '..';
-import { getResolution } from '../../state/settings/renderDimensions';
 import { useAppState } from '../../state';
 
 export default function useConnectionOptions() {
@@ -35,7 +34,9 @@ export default function useConnectionOptions() {
     // to adapt your encoded video quality for each RemoteParticipant based on
     // their individual bandwidth constraints. Simulcast should be disabled if
     // you are using Peer-to-Peer or 'Go' Rooms.
-    preferredVideoCodecs: [{ codec: 'VP8', simulcast: roomType !== 'peer-to-peer' && roomType !== 'go' }],
+    preferredVideoCodecs: [
+      { codec: 'VP8', simulcast: roomType !== 'peer-to-peer' && roomType !== 'go' },
+    ],
   };
 
   // For mobile browsers, limit the maximum incoming video bitrate to 2.5 Mbps.
