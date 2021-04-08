@@ -283,7 +283,7 @@ export default function ParticipantInfo({
                         id: profile.id,
                         title: `Invited ${recipientPlayer.userName} to race`,
                         status: 'info',
-                        duration: 2000,
+                        duration: 3000,
                         isClosable: true,
                       });
                     }
