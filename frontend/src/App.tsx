@@ -280,7 +280,6 @@ async function GameController(
     dispatchAppUpdate({ action: 'weMoved', location });
   };
   const emitGameInvite = (senderPlayer: Player, recipientPlayer: Player) => {
-    console.log('FE emitting emitGameInvite');
     socket.emit('sendGameInvite', senderPlayer.id, recipientPlayer.id);
     dispatchAppUpdate({
       action: 'updateGameInfo',
@@ -296,14 +295,12 @@ async function GameController(
     recipientPlayer: Player,
     gameAcceptance: boolean,
   ) => {
-    console.log('FE emitting sendGameInviteResponse');
     socket.emit('sendGameInviteResponse', senderPlayer.id, recipientPlayer.id, gameAcceptance);
   };
   const quitGame = () => {
     dispatchAppUpdate({ action: 'toggleQuit' });
   };
   socket.on('receivedGameInvite', (senderPlayer: ServerPlayer, recipientPlayer: ServerPlayer) => {
-    console.log('FE receivedGameInvite');
     const sender = Player.fromServerPlayer(senderPlayer);
     const recipient = Player.fromServerPlayer(recipientPlayer);
     const onGameResponse = (gameAcceptance: boolean) =>
@@ -321,7 +318,6 @@ async function GameController(
   socket.on(
     'mazeGameResponse',
     (senderPlayer: ServerPlayer, recipientPlayer: ServerPlayer, gameAcceptance: boolean) => {
-      console.log('FE mazeGameResponse');
       const sender = Player.fromServerPlayer(senderPlayer);
       const recipient = Player.fromServerPlayer(recipientPlayer);
       displayMazeGameResponseToast(recipient, gameAcceptance);
