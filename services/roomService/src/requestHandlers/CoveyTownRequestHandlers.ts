@@ -98,10 +98,11 @@ export interface MazeCompletionTimeRow {
   time: number;
 }
 
-export interface MazeInviteRequest {
-  inviterPlayerID: string;
-  inviteePlayerID: string;
-  coveyTownId: string;
+export interface MazeInviteAcceptRequest {
+  senderPlayerID: string;
+  recipientPlayerID: string;
+  coveyTownID: string;
+  gameAcceptance: boolean;
 }
 
 /**
@@ -216,8 +217,9 @@ export async function townUpdateHandler(
  *
  * @param socket the Socket object that we will use to communicate with the player
  */
-function townSocketAdapter(socket: Socket): CoveyTownListener {
+function townSocketAdapter(socket: Socket, listeningPlayerID?: string): CoveyTownListener {
   return {
+    listeningPlayerID,
     onPlayerMoved(movedPlayer: Player) {
       socket.emit('playerMoved', movedPlayer);
     },
@@ -230,6 +232,12 @@ function townSocketAdapter(socket: Socket): CoveyTownListener {
     onTownDestroyed() {
       socket.emit('townClosing');
       socket.disconnect(true);
+    },
+    onMazeGameRequested(senderPlayer: Player, recipientPlayer: Player) {
+      socket.emit('receivedGameInvite', senderPlayer, recipientPlayer);
+    },
+    onMazeGameResponded(senderPlayer: Player, recipientPlayer: Player, gameAcceptance: boolean) {
+      socket.emit('mazeGameResponse', senderPlayer, recipientPlayer, gameAcceptance);
     },
   };
 }
@@ -256,7 +264,7 @@ export function townSubscriptionHandler(socket: Socket): void {
 
   // Create an adapter that will translate events from the CoveyTownController into
   // events that the socket protocol knows about
-  const listener = townSocketAdapter(socket);
+  const listener = townSocketAdapter(socket, s.player.id);
   townController.addTownListener(listener);
 
   // Register an event listener for the client socket: if the client disconnects,
@@ -272,6 +280,17 @@ export function townSubscriptionHandler(socket: Socket): void {
   socket.on('playerMovement', (movementData: UserLocation) => {
     townController.updatePlayerLocation(s.player, movementData);
   });
+
+  socket.on('sendGameInvite', (senderPlayerID: string, recipientPlayerID: string) => {
+    townController.onGameRequested(senderPlayerID, recipientPlayerID);
+  });
+
+  socket.on(
+    'sendGameInviteResponse',
+    (senderPlayerID: string, recipientPlayerID: string, gameAcceptance: boolean) => {
+      townController.respondToGameInvite(senderPlayerID, recipientPlayerID, gameAcceptance);
+    },
+  );
 }
 
 export async function mazeTimeHandler(): Promise<ResponseEnvelope<MazeCompletionTimeListResponse>> {
@@ -335,30 +354,4 @@ export async function mazeTimeCreateHandler(
       message: `Error: ${error.message}`,
     };
   }
-}
-
-export async function mazeInviteAcceptHandler(requestData: MazeInviteRequest): Promise<ResponseEnvelope<null>> {
-  const { inviterPlayerID, inviteePlayerID, coveyTownId } = requestData;
-  if (!inviterPlayerID || !inviteePlayerID || !coveyTownId) {
-    return {
-      isOK: false,
-      message: 'Include an inviter, invitee, and covey town',
-    };
-  }
-  const townController = CoveyTownsStore.getInstance().getControllerForTown(coveyTownId);
-  if (!townController) {
-    return {
-      isOK: false,
-      message: 'Invalid town',
-    };
-  }
-  if (townController.acceptPlayerInvite(inviterPlayerID, inviteePlayerID)) {
-    return {
-      isOK: true,
-    };
-  }
-  return {
-    isOK: false,
-    message: 'Could not create invite',
-  };
 }

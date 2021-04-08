@@ -1,5 +1,5 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import assert from 'assert';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { ServerPlayer } from './Player';
 
 /**
@@ -89,7 +89,7 @@ export type CoveyTownInfo = {
   friendlyName: string;
   coveyTownID: string;
   currentOccupancy: number;
-  maximumOccupancy: number
+  maximumOccupancy: number;
 };
 
 export default class TownsServiceClient {
@@ -106,7 +106,10 @@ export default class TownsServiceClient {
     this._axios = axios.create({ baseURL });
   }
 
-  static unwrapOrThrowError<T>(response: AxiosResponse<ResponseEnvelope<T>>, ignoreResponse = false): T {
+  static unwrapOrThrowError<T>(
+    response: AxiosResponse<ResponseEnvelope<T>>,
+    ignoreResponse = false,
+  ): T {
     if (response.data.isOK) {
       if (ignoreResponse) {
         return {} as T;
@@ -118,17 +121,25 @@ export default class TownsServiceClient {
   }
 
   async createTown(requestData: TownCreateRequest): Promise<TownCreateResponse> {
-    const responseWrapper = await this._axios.post<ResponseEnvelope<TownCreateResponse>>('/towns', requestData);
+    const responseWrapper = await this._axios.post<ResponseEnvelope<TownCreateResponse>>(
+      '/towns',
+      requestData,
+    );
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
   async updateTown(requestData: TownUpdateRequest): Promise<void> {
-    const responseWrapper = await this._axios.patch<ResponseEnvelope<void>>(`/towns/${requestData.coveyTownID}`, requestData);
+    const responseWrapper = await this._axios.patch<ResponseEnvelope<void>>(
+      `/towns/${requestData.coveyTownID}`,
+      requestData,
+    );
     return TownsServiceClient.unwrapOrThrowError(responseWrapper, true);
   }
 
   async deleteTown(requestData: TownDeleteRequest): Promise<void> {
-    const responseWrapper = await this._axios.delete<ResponseEnvelope<void>>(`/towns/${requestData.coveyTownID}/${requestData.coveyTownPassword}`);
+    const responseWrapper = await this._axios.delete<ResponseEnvelope<void>>(
+      `/towns/${requestData.coveyTownID}/${requestData.coveyTownPassword}`,
+    );
     return TownsServiceClient.unwrapOrThrowError(responseWrapper, true);
   }
 
