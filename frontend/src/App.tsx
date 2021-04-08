@@ -324,7 +324,7 @@ async function GameController(
       dispatchAppUpdate({
         action: 'updateGameInfo',
         data: {
-          gameStatus: gameAcceptance ? 'playingGame' : 'inviteRejected',
+          gameStatus: gameAcceptance ? 'playingGame' : 'noGame',
           senderPlayer: sender,
           recipientPlayer: recipient,
         },

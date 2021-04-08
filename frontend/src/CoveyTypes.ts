@@ -3,7 +3,7 @@ import Player, { UserLocation } from './classes/Player';
 import TownsServiceClient from './classes/TownsServiceClient';
 
 export type CoveyEvent = 'playerMoved' | 'playerAdded' | 'playerRemoved';
-export type GameStatus = 'invitePending' | 'noGame' | 'playingGame' | 'inviteRejected';
+export type GameStatus = 'invitePending' | 'noGame' | 'playingGame';
 
 export type VideoRoom = {
   twilioID: string;
