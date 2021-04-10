@@ -1,4 +1,4 @@
-import { ChakraProvider } from '@chakra-ui/react';
+import { ChakraProvider, Switch, FormControl, FormLabel } from '@chakra-ui/react';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import assert from 'assert';
 import React, {
@@ -60,6 +60,8 @@ type CoveyAppUpdate =
         gameInfo: GameInfo;
         toggleQuit: boolean;
         quitGame: () => void;
+        enableRace: (playerID: string) => void,
+        toggleRaceSettings: boolean,
       };
     }
   | { action: 'addPlayer'; player: Player }
@@ -70,6 +72,7 @@ type CoveyAppUpdate =
   | { action: 'toggleQuit' }
   | { action: 'exitMaze' }
   | { action: 'closeInstructions' }
+  | { action: 'raceSettings' }
   | {
       action: 'updateGameInfo';
       data: {
@@ -103,8 +106,10 @@ function defaultAppState(): CoveyAppState {
     apiClient: new TownsServiceClient(),
     toggleQuit: false,
     quitGame: () => {},
+    enableRace: () => {},
     showInstructions: false,
     gameStarted: false,
+    toggleRaceSettings: true,
   };
 }
 let closedInstructions = false;
@@ -129,6 +134,8 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     quitGame: state.quitGame,
     showInstructions: state.showInstructions,
     gameStarted: state.gameStarted,
+    toggleRaceSettings: state.toggleRaceSettings,
+    enableRace: state.enableRace,
   };
 
   function calculateNearbyPlayers(players: Player[], currentLocation: UserLocation) {
@@ -224,6 +231,10 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     case 'toggleQuit':
       nextState.toggleQuit = !state.toggleQuit;
       break;
+    case 'raceSettings': 
+      nextState.toggleRaceSettings = !state.toggleRaceSettings;
+      state.socket?.emit('raceSettings', state.myPlayerID, nextState.toggleRaceSettings);
+      break;
     case 'exitMaze':
       nextState.toggleQuit = false;
       // TODO: have this call Player.giveUp() in the backend
@@ -300,20 +311,27 @@ async function GameController(
   const quitGame = () => {
     dispatchAppUpdate({ action: 'toggleQuit' });
   };
+  const enableRace = () => {
+    dispatchAppUpdate({ action: 'raceSettings' });
+  };
   socket.on('receivedGameInvite', (senderPlayer: ServerPlayer, recipientPlayer: ServerPlayer) => {
     const sender = Player.fromServerPlayer(senderPlayer);
     const recipient = Player.fromServerPlayer(recipientPlayer);
-    const onGameResponse = (gameAcceptance: boolean) =>
-      emitInviteResponse(sender, recipient, gameAcceptance);
-    displayMazeGameInviteToast(sender, onGameResponse);
-    dispatchAppUpdate({
-      action: 'updateGameInfo',
-      data: {
-        gameStatus: 'invitePending',
-        senderPlayer: sender,
-        recipientPlayer: recipient,
-      },
-    });
+    if(recipient.racingEnabled) {
+      const onGameResponse = (gameAcceptance: boolean) =>
+        emitInviteResponse(sender, recipient, gameAcceptance);
+      displayMazeGameInviteToast(sender, onGameResponse);
+      dispatchAppUpdate({
+        action: 'updateGameInfo',
+        data: {
+          gameStatus: 'invitePending',
+          senderPlayer: sender,
+          recipientPlayer: recipient,
+        },
+      });
+    } else {
+      emitInviteResponse(sender, recipient, false);
+    }
   });
   socket.on(
     'mazeGameResponse',
@@ -349,6 +367,8 @@ async function GameController(
       players: initData.currentPlayers.map(sp => Player.fromServerPlayer(sp)),
       toggleQuit: false,
       quitGame,
+      toggleRaceSettings: true, 
+      enableRace,
     },
   });
   return true;
@@ -385,6 +405,12 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
     return (
       <div>
         <WorldMap />
+        <FormControl display="flex" alignItems="center">
+        <FormLabel htmlFor="isRacingEnabled-alerts" mb="0">Enable Race Invites</FormLabel>
+        <Switch id="racing-config" 
+            isChecked={appState.toggleRaceSettings}
+            onChange={() => dispatchAppUpdate({ action: 'raceSettings' })}/>
+        </FormControl>
         <VideoOverlay preferredMode='fullwidth' />
         <QuitGame
           isOpen={appState.toggleQuit}
@@ -403,6 +429,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
     videoInstance,
     appState.showInstructions,
     appState.toggleQuit,
+    appState.toggleRaceSettings,
   ]);
   return (
     <CoveyAppContext.Provider value={appState}>

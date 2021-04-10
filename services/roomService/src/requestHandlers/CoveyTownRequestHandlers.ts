@@ -291,6 +291,10 @@ export function townSubscriptionHandler(socket: Socket): void {
       townController.respondToGameInvite(senderPlayerID, recipientPlayerID, gameAcceptance);
     },
   );
+
+  socket.on('raceSettings', (playerId: string, enabled: boolean) => { 
+    townController.updatePlayerRaceSettings(playerId, enabled);
+ });
 }
 
 export async function mazeTimeHandler(): Promise<ResponseEnvelope<MazeCompletionTimeListResponse>> {

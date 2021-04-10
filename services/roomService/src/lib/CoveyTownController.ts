@@ -194,6 +194,13 @@ export default class CoveyTownController {
     return true;
   }
 
+  updatePlayerRaceSettings(playerId: string, enabled: boolean): void {
+    const player = this._players.find(player => player.id === playerId);
+    if (player) {
+      player.enableInvite = enabled;
+    }
+  }
+
   /**
    * returns true if succeeded
    */
