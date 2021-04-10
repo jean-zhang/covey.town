@@ -278,15 +278,6 @@ export default function ParticipantInfo({
                   const recipientPlayer = appState.players.find(player => player.id === profile.id);
                   if (senderPlayer && recipientPlayer) {
                     appState.emitGameInvite(senderPlayer, recipientPlayer);
-                    if (!toast.isActive(profile.id)) {
-                      toast({
-                        id: profile.id,
-                        title: `Invited ${recipientPlayer.userName} to race`,
-                        status: 'info',
-                        duration: 3000,
-                        isClosable: true,
-                      });
-                    }
                   }
                 }
               }}
