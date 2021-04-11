@@ -32,7 +32,7 @@ export type CoveyAppState = {
   players: Player[];
   currentLocation: UserLocation;
   nearbyPlayers: NearbyPlayers;
-  emitMovement: (location: UserLocation, gameStatus: GameStatus) => void;
+  emitMovement: (location: UserLocation) => void;
   emitGameInvite: (senderPlayer: Player, recipientPlayer: Player) => void;
   emitInviteResponse: (
     senderPlayer: Player,

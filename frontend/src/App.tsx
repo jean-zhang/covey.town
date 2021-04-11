@@ -37,7 +37,6 @@ import NearbyPlayersContext from './contexts/NearbyPlayersContext';
 import VideoContext from './contexts/VideoContext';
 import { CoveyAppState, GameInfo, GameStatus, NearbyPlayers } from './CoveyTypes';
 
-const INSTRUCTIONS_LOCATION = { x: 1455, y: 40 };
 type CoveyAppUpdate =
   | {
       action: 'doConnect';
@@ -50,7 +49,7 @@ type CoveyAppUpdate =
         myPlayerID: string;
         socket: Socket;
         players: Player[];
-        emitMovement: (location: UserLocation, status: GameStatus) => void;
+        emitMovement: (location: UserLocation) => void;
         emitGameInvite: (senderPlayer: Player, recipientPlayer: Player) => void;
         emitInviteResponse: (
           senderPlayer: Player,
@@ -65,7 +64,7 @@ type CoveyAppUpdate =
   | { action: 'addPlayer'; player: Player }
   | { action: 'playerMoved'; player: Player }
   | { action: 'playerDisconnect'; player: Player }
-  | { action: 'weMoved'; location: UserLocation; status: GameStatus }
+  | { action: 'weMoved'; location: UserLocation }
   | { action: 'disconnect' }
   | { action: 'toggleQuit' }
   | { action: 'exitMaze' }
@@ -196,12 +195,6 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       if (samePlayers(nextState.nearbyPlayers, state.nearbyPlayers)) {
         nextState.nearbyPlayers = state.nearbyPlayers;
       }
-      if (!closedInstructions) {
-        nextState.showInstructions =
-          // update.location.x === INSTRUCTIONS_LOCATION.x &&
-          // update.location.y === INSTRUCTIONS_LOCATION.y;
-          state.showInstructions || (update.status === 'playingGame');
-      }
       break;
     case 'playerDisconnect':
       nextState.players = nextState.players.filter(player => player.id !== update.player.id);
@@ -236,6 +229,9 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
         senderPlayer: update.data.senderPlayer,
         recipientPlayer: update.data.recipientPlayer,
       };
+      if (nextState.gameInfo.gameStatus === 'playingGame') {
+        nextState.showInstructions = true;
+      }
       break;
     default:
       throw new Error('Unexpected state request');
@@ -276,9 +272,9 @@ async function GameController(
   socket.on('disconnect', () => {
     dispatchAppUpdate({ action: 'disconnect' });
   });
-  const emitMovement = (location: UserLocation, status: GameStatus) => {
+  const emitMovement = (location: UserLocation) => {
     socket.emit('playerMovement', location);
-    dispatchAppUpdate({ action: 'weMoved', location, status });
+    dispatchAppUpdate({ action: 'weMoved', location });
   };
   const emitGameInvite = (senderPlayer: Player, recipientPlayer: Player) => {
     socket.emit('sendGameInvite', senderPlayer.id, recipientPlayer.id);
