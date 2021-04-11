@@ -230,7 +230,9 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
         recipientPlayer: update.data.recipientPlayer,
       };
       if (nextState.gameInfo.gameStatus === 'playingGame') {
-        nextState.showInstructions = true;
+        if (!closedInstructions) {
+          nextState.showInstructions = true;
+        }
       }
       break;
     default:
