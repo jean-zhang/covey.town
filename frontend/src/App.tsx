@@ -50,7 +50,7 @@ type CoveyAppUpdate =
         myPlayerID: string;
         socket: Socket;
         players: Player[];
-        emitMovement: (location: UserLocation) => void;
+        emitMovement: (location: UserLocation, status: GameStatus) => void;
         emitGameInvite: (senderPlayer: Player, recipientPlayer: Player) => void;
         emitInviteResponse: (
           senderPlayer: Player,
@@ -65,7 +65,7 @@ type CoveyAppUpdate =
   | { action: 'addPlayer'; player: Player }
   | { action: 'playerMoved'; player: Player }
   | { action: 'playerDisconnect'; player: Player }
-  | { action: 'weMoved'; location: UserLocation }
+  | { action: 'weMoved'; location: UserLocation; status: GameStatus }
   | { action: 'disconnect' }
   | { action: 'toggleQuit' }
   | { action: 'exitMaze' }
@@ -198,8 +198,9 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       }
       if (!closedInstructions) {
         nextState.showInstructions =
-          update.location.x === INSTRUCTIONS_LOCATION.x &&
-          update.location.y === INSTRUCTIONS_LOCATION.y;
+          // update.location.x === INSTRUCTIONS_LOCATION.x &&
+          // update.location.y === INSTRUCTIONS_LOCATION.y;
+          state.showInstructions || (update.status === 'playingGame');
       }
       break;
     case 'playerDisconnect':
@@ -275,9 +276,9 @@ async function GameController(
   socket.on('disconnect', () => {
     dispatchAppUpdate({ action: 'disconnect' });
   });
-  const emitMovement = (location: UserLocation) => {
+  const emitMovement = (location: UserLocation, status: GameStatus) => {
     socket.emit('playerMovement', location);
-    dispatchAppUpdate({ action: 'weMoved', location });
+    dispatchAppUpdate({ action: 'weMoved', location, status });
   };
   const emitGameInvite = (senderPlayer: Player, recipientPlayer: Player) => {
     socket.emit('sendGameInvite', senderPlayer.id, recipientPlayer.id);
