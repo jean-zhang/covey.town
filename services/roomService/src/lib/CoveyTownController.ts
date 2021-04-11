@@ -205,12 +205,16 @@ export default class CoveyTownController {
       return false;
     }
 
-    const listeners = this._listeners.filter(
-      listener => listener.listeningPlayerID === recipientPlayerID,
-    );
+    let listeners = this._listeners.filter(
+      listener => listener.listeningPlayerID === recipientPlayerID || 
+      listener.listeningPlayerID === senderPlayerID);
 
-    listeners.forEach(listener => listener.onMazeGameRequested(sender, recipient));
-
+    if (!Maze.getInstance().reachedCapacity()) {
+      listeners.forEach(listener => listener.onMazeGameRequested(sender, recipient));
+    } else {
+      listeners = listeners.filter(listener => listener.listeningPlayerID === senderPlayerID);
+      listeners.forEach(listener => listener.onFullMazeGameRequested(sender));
+    }
     return true;
   }
 }

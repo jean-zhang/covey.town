@@ -45,4 +45,9 @@ export default interface CoveyTownListener {
    * @param senderPlayer the player that has done the inviting
    */
   onMazeGameResponded(senderPlayer: Player, recipientPlayer: Player, gameAcceptance: boolean): void;
+
+  /**
+   * Called when a player has requested to play a game but the Maze is full
+   */
+  onFullMazeGameRequested(senderPlayer: Player): void;
 }
