@@ -39,6 +39,8 @@ class CoveyGameScene extends Phaser.Scene {
 
   private quitGame: () => void;
 
+  private finishGame: (score: number, gaveUp: boolean) => void;
+
   private timeLabel?: Phaser.GameObjects.Text;
 
   private mazeStartTime: number;
@@ -53,11 +55,12 @@ class CoveyGameScene extends Phaser.Scene {
     backgroundColor: '#ffffff',
   };
 
-  constructor(video: Video, emitMovement: (loc: UserLocation) => void, quitGame: () => void) {
+  constructor(video: Video, emitMovement: (loc: UserLocation) => void, quitGame: () => void, finishGame: (score: number, gaveUp: boolean) => void) {
     super('PlayGame');
     this.video = video;
     this.emitMovement = emitMovement;
     this.quitGame = quitGame;
+    this.finishGame = finishGame;
     this.mazeStartTime = -1;
   }
 
@@ -158,12 +161,16 @@ class CoveyGameScene extends Phaser.Scene {
     return undefined;
   }
 
+  private getFormattedMazeScore(time: number) {
+    return Number.parseFloat(((time - this.mazeStartTime) / 1000).toString()).toFixed(2);
+  }
+
   update(time: number) {
     if (this.paused) {
       return;
     }
     if (this.mazeStartTime >= 0) {
-      const timeTaken = Number.parseFloat(((time - this.mazeStartTime) / 1000).toString()).toFixed(2);
+      const timeTaken = this.getFormattedMazeScore(time);
       const timeTakenString = `TIME TAKEN: ${timeTaken}s`
       if (!this.timeLabel) {
         this.timeLabel = this.add
@@ -473,12 +480,16 @@ class CoveyGameScene extends Phaser.Scene {
       body.y = teleportLocation.y;
     }
   }
+
+  private reachGoal() {
+    this.finishGame(this.time.now - this.mazeStartTime, false);
+  }
 }
 
 export default function WorldMap(): JSX.Element {
   const video = Video.instance();
   const {
-    emitMovement, players, quitGame, gameStarted,
+    emitMovement, players, quitGame, gameStarted, finishGame
   } = useCoveyAppState();
   const [gameScene, setGameScene] = useState<CoveyGameScene>();
   useEffect(() => {
@@ -497,7 +508,7 @@ export default function WorldMap(): JSX.Element {
 
     const game = new Phaser.Game(config);
     if (video) {
-      const newGameScene = new CoveyGameScene(video, emitMovement, quitGame);
+      const newGameScene = new CoveyGameScene(video, emitMovement, quitGame, finishGame);
       setGameScene(newGameScene);
       game.scene.add('coveyBoard', newGameScene, true);
       video.pauseGame = () => {
@@ -510,7 +521,7 @@ export default function WorldMap(): JSX.Element {
     return () => {
       game.destroy(true);
     };
-  }, [video, emitMovement, quitGame]);
+  }, [video, emitMovement, quitGame, finishGame]);
 
   const deepPlayers = JSON.stringify(players);
   useEffect(() => {

@@ -46,3 +46,16 @@ export function displayMazeGameResponseToast(recipientPlayer: Player, gameRespon
     isClosable: true,
   });
 }
+
+export function displayPlayerFinishedToast(finishedPlayer: Player, score: number, gaveUp: boolean): void {
+  const toastTitle = gaveUp? `${finishedPlayer.userName} has given up and left the maze` : `${finishedPlayer.userName} has completed the maze!`;
+  const toastDescription = (gaveUp || score <= 0)? undefined : `Score is ${score}`;
+  const toast = createStandaloneToast();
+  toast({
+    title: toastTitle,
+    description: toastDescription,
+    status: 'info',
+    duration: 3000,
+    isClosable:true
+  })
+}

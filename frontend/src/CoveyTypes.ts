@@ -44,6 +44,7 @@ export type CoveyAppState = {
   apiClient: TownsServiceClient;
   toggleQuit: boolean;
   quitGame: () => void;
+  finishGame: (score: number, gaveUp: boolean) => void;
   showInstructions: boolean;
   gameStarted: boolean;
 };

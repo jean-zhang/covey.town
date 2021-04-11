@@ -108,6 +108,7 @@ function wrappedTownSelection() {
           apiClient: new TownsServiceClient(),
           toggleQuit: false,
           quitGame: () => {},
+          finishGame: () => {},
           showInstructions: false,
           gameStarted: false,
         }}>

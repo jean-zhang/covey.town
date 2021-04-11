@@ -29,6 +29,7 @@ import Instructions from './components/world/Instructions';
 import {
   displayMazeGameInviteToast,
   displayMazeGameResponseToast,
+  displayPlayerFinishedToast,
 } from './components/world/MazeGameToastUtils';
 import QuitGame from './components/world/QuitGame';
 import WorldMap from './components/world/WorldMap';
@@ -60,6 +61,7 @@ type CoveyAppUpdate =
         gameInfo: GameInfo;
         toggleQuit: boolean;
         quitGame: () => void;
+        finishGame: (score: number, gaveUp: boolean) => void;
       };
     }
   | { action: 'addPlayer'; player: Player }
@@ -68,7 +70,11 @@ type CoveyAppUpdate =
   | { action: 'weMoved'; location: UserLocation }
   | { action: 'disconnect' }
   | { action: 'toggleQuit' }
-  | { action: 'exitMaze' }
+  | { action: 'exitMaze';
+      data: { score: number;
+              gaveUp: boolean;
+            }
+          }
   | { action: 'closeInstructions' }
   | {
       action: 'updateGameInfo';
@@ -103,6 +109,7 @@ function defaultAppState(): CoveyAppState {
     apiClient: new TownsServiceClient(),
     toggleQuit: false,
     quitGame: () => {},
+    finishGame: () => {},
     showInstructions: false,
     gameStarted: false,
   };
@@ -127,6 +134,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     apiClient: state.apiClient,
     toggleQuit: state.toggleQuit,
     quitGame: state.quitGame,
+    finishGame: state.finishGame,
     showInstructions: state.showInstructions,
     gameStarted: state.gameStarted,
   };
@@ -168,6 +176,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.players = update.data.players;
       nextState.toggleQuit = update.data.toggleQuit;
       nextState.quitGame = update.data.quitGame;
+      nextState.finishGame = update.data.finishGame;
       break;
     case 'addPlayer':
       nextState.players = nextState.players.concat([update.player]);
@@ -219,6 +228,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.gameStarted = true;
       break;
     case 'disconnect':
+      state.socket?.emit('finishGame', state.myPlayerID, -1, true);
       state.socket?.disconnect();
       return defaultAppState();
     case 'toggleQuit':
@@ -226,8 +236,8 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       break;
     case 'exitMaze':
       nextState.toggleQuit = false;
-      // TODO: have this call Player.giveUp() in the backend
-      // state.socket?.emit('giveUp');
+      nextState.gameInfo.gameStatus = 'noGame';
+      state.socket?.emit('finishGame', state.myPlayerID, update.data.score, update.data.gaveUp);
       break;
     case 'updateGameInfo':
       nextState.gameInfo = {
@@ -300,6 +310,9 @@ async function GameController(
   const quitGame = () => {
     dispatchAppUpdate({ action: 'toggleQuit' });
   };
+  const finishGame = (score: number, gaveUp: boolean) => {
+    dispatchAppUpdate({ action: 'exitMaze', data: { score, gaveUp }})
+  }
   socket.on('receivedGameInvite', (senderPlayer: ServerPlayer, recipientPlayer: ServerPlayer) => {
     const sender = Player.fromServerPlayer(senderPlayer);
     const recipient = Player.fromServerPlayer(recipientPlayer);
@@ -331,6 +344,10 @@ async function GameController(
       });
     },
   );
+  socket.on('playerFinished', (finishedPlayer: ServerPlayer , score: number, gaveUp: boolean) => {
+    const player = Player.fromServerPlayer(finishedPlayer);
+    displayPlayerFinishedToast(player, score, gaveUp);
+  });
 
   dispatchAppUpdate({
     action: 'doConnect',
@@ -349,6 +366,7 @@ async function GameController(
       players: initData.currentPlayers.map(sp => Player.fromServerPlayer(sp)),
       toggleQuit: false,
       quitGame,
+      finishGame,
     },
   });
   return true;
@@ -389,7 +407,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
         <QuitGame
           isOpen={appState.toggleQuit}
           onClose={() => dispatchAppUpdate({ action: 'toggleQuit' })}
-          onQuit={() => dispatchAppUpdate({ action: 'exitMaze' })}
+          onQuit={() => dispatchAppUpdate({ action: 'exitMaze', data: { score: -1, gaveUp: true } })}
         />
         <Instructions
           isOpen={appState.showInstructions}
