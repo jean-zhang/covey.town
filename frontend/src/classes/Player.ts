@@ -9,14 +9,14 @@ export default class Player {
 
   public label?: Phaser.GameObjects.Text;
 
-  private _racingEnabled?: boolean;
+  private _enableInvite?: boolean;
 
   constructor(id: string, userName: string, location: UserLocation, racingEnabled?: boolean) {
     this._id = id;
     this._userName = userName;
     this.location = location;
     if(racingEnabled !== null) {
-      this._racingEnabled = racingEnabled;
+      this._enableInvite = racingEnabled;
     }
   }
 
@@ -28,18 +28,15 @@ export default class Player {
     return this._id;
   }
 
-  get racingEnabled(): boolean | undefined {
-    return this._racingEnabled;
+  get enableInvite(): boolean | undefined {
+    return this._enableInvite;
   }
 
   static fromServerPlayer(playerFromServer: ServerPlayer): Player {
-    if (playerFromServer.racingEnabled !== undefined) {
-      return new Player(playerFromServer._id, playerFromServer._userName, playerFromServer.location, playerFromServer.racingEnabled);
-    }
-    return new Player(playerFromServer._id, playerFromServer._userName, playerFromServer.location);
+    return new Player(playerFromServer._id, playerFromServer._userName, playerFromServer.location, playerFromServer._enableInvite);
   }
 }
-export type ServerPlayer = { _id: string; _userName: string; location: UserLocation, racingEnabled?: boolean };
+export type ServerPlayer = { _id: string; _userName: string; _enableInvite: boolean; location: UserLocation };
 
 export type Direction = 'front' | 'back' | 'left' | 'right';
 

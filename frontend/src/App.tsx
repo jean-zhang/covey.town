@@ -317,7 +317,7 @@ async function GameController(
   socket.on('receivedGameInvite', (senderPlayer: ServerPlayer, recipientPlayer: ServerPlayer) => {
     const sender = Player.fromServerPlayer(senderPlayer);
     const recipient = Player.fromServerPlayer(recipientPlayer);
-    if(recipient.racingEnabled) {
+    if(recipient.enableInvite) {
       const onGameResponse = (gameAcceptance: boolean) =>
         emitInviteResponse(sender, recipient, gameAcceptance);
       displayMazeGameInviteToast(sender, onGameResponse);
