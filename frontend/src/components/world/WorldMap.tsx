@@ -299,9 +299,6 @@ class CoveyGameScene extends Phaser.Scene {
     this.mazeFinish = map.findObject('Objects', 
     (obj) => obj.name === 'Maze Finish') as unknown as
     Phaser.GameObjects.Components.Transform;
-    // this.physics.world.enable(mazeFinish);
-    // const mazeFinishSprite = mazeFinish as unknown as Phaser.GameObjects.Sprite;
-    // mazeFinishSprite.y += 2 * mazeFinishSprite.height;
 
     // Find all of the transporters, add them to the physics engine
     const transporters = map.createFromObjects('Objects',
@@ -469,6 +466,13 @@ class CoveyGameScene extends Phaser.Scene {
         this.lastLocation.y = this.mazeStart.y;
         this.emitMovement(this.lastLocation);
       }
+      if (!intoMaze && this.spawnPoint) {
+        this.player.sprite.x = this.spawnPoint.x;
+        this.player.sprite.y = this.spawnPoint.y;
+        this.lastLocation.x = this.spawnPoint.x;
+        this.lastLocation.y = this.spawnPoint.y;
+        this.emitMovement(this.lastLocation);
+      }
     }
   }
 
@@ -535,6 +539,11 @@ export default function WorldMap(): JSX.Element {
             gameScene.pause();
           }
         }
+        // TODO: depends on how we implement finish game
+        // if (gameStarted && gameInfo.gameStatus === 'noGame') {
+        //   gameScene.teleport(false);
+        //   gameStarted = false;
+        // }
       }
     }
   }, [gameScene, gameInfo, showInstructions]);
