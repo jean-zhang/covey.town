@@ -39,7 +39,6 @@ import NearbyPlayersContext from './contexts/NearbyPlayersContext';
 import VideoContext from './contexts/VideoContext';
 import { CoveyAppState, GameInfo, GameStatus, NearbyPlayers } from './CoveyTypes';
 
-const INSTRUCTIONS_LOCATION = { x: 1455, y: 40 };
 type CoveyAppUpdate =
   | {
       action: 'doConnect';
@@ -198,11 +197,6 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       if (samePlayers(nextState.nearbyPlayers, state.nearbyPlayers)) {
         nextState.nearbyPlayers = state.nearbyPlayers;
       }
-      if (!closedInstructions) {
-        nextState.showInstructions =
-          update.location.x === INSTRUCTIONS_LOCATION.x &&
-          update.location.y === INSTRUCTIONS_LOCATION.y;
-      }
       break;
     case 'playerDisconnect':
       nextState.players = nextState.players.filter(player => player.id !== update.player.id);
@@ -237,6 +231,11 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
         senderPlayer: update.data.senderPlayer,
         recipientPlayer: update.data.recipientPlayer,
       };
+      if (nextState.gameInfo.gameStatus === 'playingGame') {
+        if (!closedInstructions) {
+          nextState.showInstructions = true;
+        }
+      }
       break;
     default:
       throw new Error('Unexpected state request');
