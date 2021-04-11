@@ -53,4 +53,9 @@ export default interface CoveyTownListener {
    * @param gaveUp Whether or not the player gave up
    */
   onFinishGame(finishedPlayer: Player, score: number, gaveUp: boolean): void;
+
+  /**
+   * Called when a player has requested to play a game but the Maze is full
+   */
+  onFullMazeGameRequested(senderPlayer: Player): void;
 }

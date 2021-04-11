@@ -30,6 +30,8 @@ import {
   displayMazeGameInviteToast,
   displayMazeGameResponseToast,
   displayPlayerFinishedToast,
+  displayMazeFullGameResponse,
+  displayInviteSent,
 } from './components/world/MazeGameToastUtils';
 import QuitGame from './components/world/QuitGame';
 import WorldMap from './components/world/WorldMap';
@@ -38,7 +40,6 @@ import NearbyPlayersContext from './contexts/NearbyPlayersContext';
 import VideoContext from './contexts/VideoContext';
 import { CoveyAppState, GameInfo, GameStatus, NearbyPlayers } from './CoveyTypes';
 
-const INSTRUCTIONS_LOCATION = { x: 1455, y: 40 };
 type CoveyAppUpdate =
   | {
       action: 'doConnect';
@@ -205,11 +206,6 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       if (samePlayers(nextState.nearbyPlayers, state.nearbyPlayers)) {
         nextState.nearbyPlayers = state.nearbyPlayers;
       }
-      if (!closedInstructions) {
-        nextState.showInstructions =
-          update.location.x === INSTRUCTIONS_LOCATION.x &&
-          update.location.y === INSTRUCTIONS_LOCATION.y;
-      }
       break;
     case 'playerDisconnect':
       nextState.players = nextState.players.filter(player => player.id !== update.player.id);
@@ -245,6 +241,11 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
         senderPlayer: update.data.senderPlayer,
         recipientPlayer: update.data.recipientPlayer,
       };
+      if (nextState.gameInfo.gameStatus === 'playingGame') {
+        if (!closedInstructions) {
+          nextState.showInstructions = true;
+        }
+      }
       break;
     default:
       throw new Error('Unexpected state request');
@@ -318,8 +319,11 @@ async function GameController(
     const recipient = Player.fromServerPlayer(recipientPlayer);
     const onGameResponse = (gameAcceptance: boolean) =>
       emitInviteResponse(sender, recipient, gameAcceptance);
-    displayMazeGameInviteToast(sender, onGameResponse);
-    dispatchAppUpdate({
+    if(gamePlayerID === senderPlayer._id) {
+      displayInviteSent(recipient);
+    } else {
+      displayMazeGameInviteToast(sender, onGameResponse);
+      dispatchAppUpdate({
       action: 'updateGameInfo',
       data: {
         gameStatus: 'invitePending',
@@ -327,7 +331,22 @@ async function GameController(
         recipientPlayer: recipient,
       },
     });
+  }
   });
+  socket.on(
+    'mazeFullGameResponse',
+    (senderPlayer: ServerPlayer) => {
+      const sender = Player.fromServerPlayer(senderPlayer);
+      displayMazeFullGameResponse();
+      dispatchAppUpdate({
+        action: 'updateGameInfo',
+        data: {
+          gameStatus: 'noGame',
+          senderPlayer: sender,
+        },
+      });
+    },
+  );
   socket.on(
     'mazeGameResponse',
     (senderPlayer: ServerPlayer, recipientPlayer: ServerPlayer, gameAcceptance: boolean) => {

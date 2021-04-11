@@ -59,3 +59,25 @@ export function displayPlayerFinishedToast(finishedPlayer: Player, score: number
     isClosable:true
   })
 }
+
+export function displayMazeFullGameResponse(): void {
+  const toastTitle = `Unable to send invite, the maze is full`;
+  const toast = createStandaloneToast();
+  toast({
+    title: toastTitle,
+    status: 'info',
+    duration: 3000,
+    isClosable: true,
+  });
+}
+
+export function displayInviteSent(recipientPlayer: Player): void {
+  const toastTitle = `Invited ${recipientPlayer.userName} to race`;
+  const toast = createStandaloneToast();
+  toast({
+    title: toastTitle,
+    status: 'info',
+    duration: 3000,
+    isClosable: true,
+  });
+}

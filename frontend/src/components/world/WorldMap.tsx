@@ -4,8 +4,6 @@ import Player, { UserLocation } from '../../classes/Player';
 import Video from '../../classes/Video/Video';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 
-const INSTRUCTIONS_LOCATION = {x: 1455, y: 40};
-const START = {x: 352, y: 1216};
 // https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
 class CoveyGameScene extends Phaser.Scene {
   private player?: {
@@ -45,6 +43,13 @@ class CoveyGameScene extends Phaser.Scene {
 
   private mazeStartTime: number;
 
+  private spawnPoint?: Phaser.GameObjects.Components.Transform;
+
+  private mazeStart?: Phaser.GameObjects.Components.Transform;
+
+  private mazeFinish?: Phaser.GameObjects.Components.Transform;
+
+
   private readonly textStyle = {
     font: '18px monospace',
     color: '#000000',
@@ -62,6 +67,14 @@ class CoveyGameScene extends Phaser.Scene {
     this.quitGame = quitGame;
     this.finishGame = finishGame;
     this.mazeStartTime = -1;
+  }
+
+  isPaused() {
+    return this.paused;
+  }
+
+  isReady() {
+    return this.ready;
   }
 
   preload() {
@@ -121,8 +134,8 @@ class CoveyGameScene extends Phaser.Scene {
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore - JB todo
           .sprite(0, 0, 'atlas', 'misa-front')
-          .setSize(30, 40)
-          .setOffset(0, 24);
+          .setSize(30, 30)
+          .setOffset(0, 30);
         const label = this.add.text(0, 0, myPlayer.userName, {
           font: '18px monospace',
           color: '#000000',
@@ -232,7 +245,8 @@ class CoveyGameScene extends Phaser.Scene {
       this.player.label.setY(body.y - 20);
       if (!this.lastLocation
         || this.lastLocation.x !== body.x
-        || this.lastLocation.y !== body.y || this.lastLocation.rotation !== primaryDirection
+        || this.lastLocation.y !== body.y
+        || (isMoving && this.lastLocation.rotation !== primaryDirection)
         || this.lastLocation.moving !== isMoving) {
         if (!this.lastLocation) {
           this.lastLocation = {
@@ -279,10 +293,19 @@ class CoveyGameScene extends Phaser.Scene {
 
     // Object layers in Tiled let you embed extra info into a map - like a spawn point or custom
     // collision shapes. In the tmx file, there's an object layer with a point named "Spawn Point"
-    const spawnPoint = map.findObject('Objects',
+    this.spawnPoint = map.findObject('Objects',
       (obj) => obj.name === 'Spawn Point') as unknown as
       Phaser.GameObjects.Components.Transform;
 
+    // maze start
+    this.mazeStart = map.findObject('Objects', 
+    (obj) => obj.name === 'Maze Start') as unknown as
+    Phaser.GameObjects.Components.Transform;
+
+    // maze finish
+    this.mazeFinish = map.findObject('Objects', 
+    (obj) => obj.name === 'Maze Finish') as unknown as
+    Phaser.GameObjects.Components.Transform;
 
     // Find all of the transporters, add them to the physics engine
     const transporters = map.createFromObjects('Objects',
@@ -337,10 +360,10 @@ class CoveyGameScene extends Phaser.Scene {
     // has a bit of whitespace, so I'm using setSize & setOffset to control the size of the
     // player's body.
     const sprite = this.physics.add
-      .sprite(spawnPoint.x, spawnPoint.y, 'atlas', 'misa-front')
-      .setSize(30, 40)
-      .setOffset(0, 24);
-    const label = this.add.text(spawnPoint.x, spawnPoint.y - 20, '(You)', {
+      .sprite(this.spawnPoint.x, this.spawnPoint.y, 'atlas', 'misa-front')
+      .setSize(30, 30)
+      .setOffset(0, 30);
+    const label = this.add.text(this.spawnPoint.x, this.spawnPoint.y - 20, '(You)', {
       font: '18px monospace',
       color: '#000000',
       // padding: {x: 20, y: 10},
@@ -351,39 +374,13 @@ class CoveyGameScene extends Phaser.Scene {
       label
     };
 
-    /* Configure physics overlap behavior for when the player steps into
-    a transporter area. If you enter a transporter and press 'space', you'll
-    transport to the location on the map that is referenced by the 'target' property
-    of the transporter.
-     */
-    this.physics.add.overlap(sprite, transporters,
-      (overlappingObject, transporter)=>{
-      if(cursorKeys.space.isDown && this.player){
-        // In the tiled editor, set the 'target' to be an *object* pointer
-        // Here, we'll see just the ID, then find the object by ID
-        const transportTargetID = transporter.getData('target') as number;
-        const target = map.findObject('Objects', obj => (obj as unknown as Phaser.Types.Tilemaps.TiledObject).id === transportTargetID);
-        if(target && target.x && target.y && this.lastLocation){
-          // Move the player to the target, update lastLocation and send it to other players
-          this.player.sprite.x = target.x;
-          this.player.sprite.y = target.y;
-          this.lastLocation.x = target.x;
-          this.lastLocation.y = target.y;
-          this.emitMovement(this.lastLocation);
-        }
-        else{
-          throw new Error(`Unable to find target object ${target}`);
-        }
-      }
-    })
-
     this.emitMovement({
       rotation: 'front',
       moving: false,
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore - JB todo
-      x: spawnPoint.x,
-      y: spawnPoint.y,
+      x: this.spawnPoint.x,
+      y: this.spawnPoint.y,
     });
 
     // Watch the player and worldLayer for collisions, for the duration of the scene:
@@ -468,16 +465,21 @@ class CoveyGameScene extends Phaser.Scene {
   }
 
   teleport(intoMaze: boolean) {
-    if(this.player) {
-      const body = this.player.sprite.body as Phaser.Physics.Arcade.Body;
-      let teleportLocation;
-      if(intoMaze) {
-        teleportLocation = INSTRUCTIONS_LOCATION;
-      } else {
-        teleportLocation = START;
+    if(this.player && this.lastLocation) {
+      if(intoMaze && this.mazeStart) {
+        this.player.sprite.x = this.mazeStart.x + 20;
+        this.player.sprite.y = this.mazeStart.y;
+        this.lastLocation.x = this.mazeStart.x  + 20;
+        this.lastLocation.y = this.mazeStart.y;
+        this.emitMovement(this.lastLocation);
       }
-      body.x = teleportLocation.x;
-      body.y = teleportLocation.y;
+      if (!intoMaze && this.spawnPoint) {
+        this.player.sprite.x = this.spawnPoint.x;
+        this.player.sprite.y = this.spawnPoint.y;
+        this.lastLocation.x = this.spawnPoint.x;
+        this.lastLocation.y = this.spawnPoint.y;
+        this.emitMovement(this.lastLocation);
+      }
     }
   }
 
@@ -489,7 +491,7 @@ class CoveyGameScene extends Phaser.Scene {
 export default function WorldMap(): JSX.Element {
   const video = Video.instance();
   const {
-    emitMovement, players, quitGame, gameStarted, finishGame
+    emitMovement, players, quitGame, gameStarted, showInstructions, gameInfo, finishGame,
   } = useCoveyAppState();
   const [gameScene, setGameScene] = useState<CoveyGameScene>();
   useEffect(() => {
@@ -532,6 +534,29 @@ export default function WorldMap(): JSX.Element {
     gameScene?.startMazeTimer();
     }
   }, [gameStarted, gameScene]);
+
+  // pauses the game and prevents movement while instructions are shown
+  // use effect to catch when game info updates to playingGame -> teleport to maze start
+  useEffect(() => {
+    if (gameScene) {
+      if (gameScene.isReady()) {
+        if (gameScene.isPaused() && !showInstructions) {
+          gameScene.resume();
+        }
+        if (showInstructions) {
+          if (gameInfo.gameStatus === 'playingGame') {
+            gameScene.teleport(true);
+            gameScene.pause();
+          }
+        }
+        // TODO: depends on how we implement finish game
+        // if (gameStarted && gameInfo.gameStatus === 'noGame') {
+        //   gameScene.teleport(false);
+        //   gameStarted = false;
+        // }
+      }
+    }
+  }, [gameScene, gameInfo, showInstructions]);
 
   return <div id="map-container"/>;
 }
