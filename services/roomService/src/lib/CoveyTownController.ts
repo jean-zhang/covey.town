@@ -197,6 +197,33 @@ export default class CoveyTownController {
   /**
    * returns true if succeeded
    */
+  playerFinish(playerID: string, score: number, gaveUp: boolean): boolean {
+    const finishedPlayer = this._players.find(player => player.id === playerID);
+    if (!finishedPlayer) {
+      return false;
+    }
+    try {
+      finishedPlayer.finish(score, gaveUp).then((opposingPlayerId?) => {
+        if (!opposingPlayerId) {
+          return false;
+        }
+        const listeners = this._listeners.filter(listener => listener.listeningPlayerID === opposingPlayerId || listener.listeningPlayerID === playerID);
+        if (listeners.length !== 2) {
+          return false;
+        }
+        listeners.forEach(listener => listener.onFinishGame(finishedPlayer, score, gaveUp));
+        return true;
+      });
+    } catch (e) {
+      return false;
+    }
+    
+    return true;
+  }
+
+  /**
+   * returns true if succeeded
+   */
   onGameRequested(senderPlayerID: string, recipientPlayerID: string): boolean {
     const sender = this._players.find(player => player.id === senderPlayerID);
     const recipient = this._players.find(player => player.id === recipientPlayerID);

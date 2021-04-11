@@ -53,4 +53,11 @@ export default class Maze {
   removeGame(gameId: string): void {
     this._gameIds.delete(gameId);
   }
+
+  /**
+   * Returns true if the maze contains the specified game
+   */
+  hasGame(gameId: string): boolean {
+    return this._gameIds.has(gameId);
+  }
 }

@@ -45,4 +45,12 @@ export default interface CoveyTownListener {
    * @param senderPlayer the player that has done the inviting
    */
   onMazeGameResponded(senderPlayer: Player, recipientPlayer: Player, gameAcceptance: boolean): void;
+
+  /**
+   * Called when a player has finished a game to notify both game players
+   * @param finishedPlayer The player who finished
+   * @param score The score of the player, if applicable (will be -1 if not)
+   * @param gaveUp Whether or not the player gave up
+   */
+  onFinishGame(finishedPlayer: Player, score: number, gaveUp: boolean): void;
 }

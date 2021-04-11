@@ -239,6 +239,9 @@ function townSocketAdapter(socket: Socket, listeningPlayerID?: string): CoveyTow
     onMazeGameResponded(senderPlayer: Player, recipientPlayer: Player, gameAcceptance: boolean) {
       socket.emit('mazeGameResponse', senderPlayer, recipientPlayer, gameAcceptance);
     },
+    onFinishGame(finishedPlayer: Player, score: number, gaveUp: boolean) {
+      socket.emit('playerFinished', finishedPlayer, score, gaveUp);
+    },
   };
 }
 
@@ -291,6 +294,11 @@ export function townSubscriptionHandler(socket: Socket): void {
       townController.respondToGameInvite(senderPlayerID, recipientPlayerID, gameAcceptance);
     },
   );
+
+  socket.on(
+    'exitMaze', (playerID: string, score: number, gaveUp: boolean) => {
+      townController.playerFinish(playerID, score, gaveUp);
+    });
 }
 
 export async function mazeTimeHandler(): Promise<ResponseEnvelope<MazeCompletionTimeListResponse>> {

@@ -1,6 +1,5 @@
 import { nanoid } from 'nanoid';
 import { UserLocation } from '../CoveyTypes';
-import Maze from '../lib/Maze';
 import Game from './Game';
 
 /**
@@ -55,42 +54,28 @@ export default class Player {
   }
 
   /**
-   * Sends an invite to a player within the town
-   * @param player Player to invite
-   */
-  // sendInvite(recipient: Player): void {}
-
-  /**
-   * Removes player from Game
-   */
-  async giveUp(): Promise<void> {
-    if (this._game) {
-      await this._game.updateScore({ userID: this.id, userName: this.userName }, -1);
-      this.resetPlayer();
-    } else {
-      throw new Error('game not defined');
-    }
-  }
-
-  /**
    * Called when player has completed the maze
+   * Returns the player id of the opposing player
    */
-  async finish(timeScore: number): Promise<void> {
-    if (timeScore > 0 && this._game) {
-      await this._game.updateScore({ userID: this.id, userName: this.userName }, timeScore);
-      this.resetPlayer();
+  async finish(timeScore: number, gaveUp: boolean): Promise<string> {
+    if (!this._game) {
+      throw new Error('game undefined');
     }
-    throw new Error('start time and game not defined');
+    await this._game.playerFinish({ userID: this.id, userName: this.userName }, timeScore, gaveUp);
+    const opposingPlayerId = this._game.getOpposingPlayerID(this._id);
+    this.resetPlayer();
+    return opposingPlayerId;
   }
 
   /**
    * Accepts an invite to a Game
+   * @returns the game id
    */
-  acceptInvite(sender: Player): void {
+  acceptInvite(sender: Player): string {
     const newGame = new Game(this.id, sender.id);
     this._game = newGame;
     sender.onInviteAccepted(newGame);
-    Maze.getInstance().addGame(newGame.getGameId());
+    return newGame.getGameId();
   }
 
   onInviteAccepted(game: Game): void {
