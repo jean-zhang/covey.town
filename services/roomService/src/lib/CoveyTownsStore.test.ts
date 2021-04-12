@@ -29,6 +29,9 @@ function mockCoveyListener(): CoveyTownListener {
     onPlayerRaceSettings(senderPlayer: Player, raceSettings: boolean): void {
       mockCoveyListenerOtherFns(senderPlayer, raceSettings);
     },
+    onFullMazeGameRequested(senderPlayer: Player) {
+      mockCoveyListenerOtherFns(senderPlayer);
+    },
   };
 }
 

@@ -242,6 +242,9 @@ function townSocketAdapter(socket: Socket, listeningPlayerID?: string): CoveyTow
     onPlayerRaceSettings(senderPlayer: Player, enabled: boolean) {
       socket.emit('playerRaceSettings', senderPlayer, enabled);
     },
+    onFullMazeGameRequested(senderPlayer: Player) {
+      socket.emit('mazeFullGameResponse', senderPlayer);
+    },
   };
 }
 
