@@ -45,4 +45,11 @@ export default interface CoveyTownListener {
    * @param senderPlayer the player that has done the inviting
    */
   onMazeGameResponded(senderPlayer: Player, recipientPlayer: Player, gameAcceptance: boolean): void;
+
+  /**
+   * Called when a player updates their racing settings
+   * @param recipientPlayer the player that has been invited
+   * @param senderPlayer the player that has done the inviting
+   */
+  onPlayerRaceSettings(senderPlayer: Player, raceSettings: boolean): void; 
 }

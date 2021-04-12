@@ -198,6 +198,7 @@ export default class CoveyTownController {
     const player = this._players.find(player => player.id === playerId);
     if (player) {
       player.enableInvite = enabled;
+      this._listeners.forEach(listener => listener.onPlayerRaceSettings(player, enabled))
     }
   }
 

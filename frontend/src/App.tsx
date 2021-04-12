@@ -73,6 +73,7 @@ type CoveyAppUpdate =
   | { action: 'exitMaze' }
   | { action: 'closeInstructions' }
   | { action: 'raceSettings' }
+  | { action: 'playerRaceSettings'; player: Player}
   | {
       action: 'updateGameInfo';
       data: {
@@ -194,6 +195,12 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
         nextState.nearbyPlayers = state.nearbyPlayers;
       }
       break;
+    case 'playerRaceSettings': 
+      updatePlayer = nextState.players.find(p => p.id === update.player.id)
+      if (updatePlayer) {
+        updatePlayer.enableInvite = update.player.enableInvite;
+      }
+      break;
     case 'weMoved':
       nextState.currentLocation = update.location;
       nextState.nearbyPlayers = calculateNearbyPlayers(
@@ -278,6 +285,11 @@ async function GameController(
   socket.on('playerMoved', (player: ServerPlayer) => {
     if (player._id !== gamePlayerID) {
       dispatchAppUpdate({ action: 'playerMoved', player: Player.fromServerPlayer(player) });
+    }
+  });
+  socket.on('playerRaceSettings', (player: ServerPlayer) => {
+    if (player._id !== gamePlayerID) {
+      dispatchAppUpdate({ action: 'playerRaceSettings', player: Player.fromServerPlayer(player) });
     }
   });
   socket.on('playerDisconnect', (player: ServerPlayer) => {

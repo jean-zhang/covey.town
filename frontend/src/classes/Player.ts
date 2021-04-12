@@ -32,6 +32,10 @@ export default class Player {
     return this._enableInvite;
   }
 
+  set enableInvite(enabled: boolean | undefined) {
+    this._enableInvite = enabled;
+  }
+
   static fromServerPlayer(playerFromServer: ServerPlayer): Player {
     return new Player(playerFromServer._id, playerFromServer._userName, playerFromServer.location, playerFromServer._enableInvite);
   }
