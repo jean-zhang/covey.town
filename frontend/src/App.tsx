@@ -75,8 +75,7 @@ type CoveyAppUpdate =
   | { action: 'toggleQuit' }
   | { action: 'exitMaze' }
   | { action: 'closeInstructions' }
-  | { action: 'openLeaderboard' }
-  | { action: 'closeLeaderboard' }
+  | { action: 'toggleLeaderboard' }
   | {
       action: 'updateGameInfo';
       data: {
@@ -222,11 +221,8 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       closedInstructions = true;
       nextState.gameStarted = true;
       break;
-    case 'openLeaderboard':
-      nextState.showLeaderboard = true;
-      break;
-    case 'closeLeaderboard':
-      nextState.showLeaderboard = false;
+    case 'toggleLeaderboard':
+      nextState.showLeaderboard = !state.showLeaderboard;
       break;
     case 'disconnect':
       state.socket?.disconnect();
@@ -432,7 +428,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
     return (
       <div>
         <WorldMap />
-        <Button onClick={() => dispatchAppUpdate({ action: 'openLeaderboard' })}>
+        <Button onClick={() => dispatchAppUpdate({ action: 'toggleLeaderboard' })}>
           Show Leaderboard
         </Button>
         <VideoOverlay preferredMode='fullwidth' />
@@ -447,7 +443,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
         />
         <LeaderboardModal
           isOpen={appState.showLeaderboard}
-          onClose={() => dispatchAppUpdate({ action: 'closeLeaderboard' })}
+          onClose={() => dispatchAppUpdate({ action: 'toggleLeaderboard' })}
           leaderboardData={currentMazeCompletionList}
         />
       </div>
