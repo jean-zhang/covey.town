@@ -339,7 +339,9 @@ async function GameController(
     (senderPlayer: ServerPlayer, recipientPlayer: ServerPlayer, gameAcceptance: boolean) => {
       const sender = Player.fromServerPlayer(senderPlayer);
       const recipient = Player.fromServerPlayer(recipientPlayer);
-      displayMazeGameResponseToast(recipient, gameAcceptance);
+      if (sender.id === gamePlayerID) {
+        displayMazeGameResponseToast(recipient, gameAcceptance);
+      }
       dispatchAppUpdate({
         action: 'updateGameInfo',
         data: {
