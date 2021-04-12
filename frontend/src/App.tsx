@@ -57,11 +57,6 @@ type CoveyAppUpdate =
         players: Player[];
         emitMovement: (location: UserLocation) => void;
         emitGameInvite: (senderPlayer: Player, recipientPlayer: Player) => void;
-        emitInviteResponse: (
-          senderPlayer: Player,
-          recipientPlayer: Player,
-          gameAcceptance: boolean,
-        ) => void;
         gameInfo: GameInfo;
         toggleQuit: boolean;
         quitGame: () => void;
@@ -104,7 +99,6 @@ function defaultAppState(): CoveyAppState {
     },
     emitMovement: () => {},
     emitGameInvite: () => {},
-    emitInviteResponse: () => {},
     gameInfo: { gameStatus: 'noGame' },
     apiClient: new TownsServiceClient(),
     toggleQuit: false,
@@ -129,7 +123,6 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     socket: state.socket,
     emitMovement: state.emitMovement,
     emitGameInvite: state.emitGameInvite,
-    emitInviteResponse: state.emitInviteResponse,
     gameInfo: state.gameInfo,
     apiClient: state.apiClient,
     toggleQuit: state.toggleQuit,
@@ -170,7 +163,6 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.userName = update.data.userName;
       nextState.emitMovement = update.data.emitMovement;
       nextState.emitGameInvite = update.data.emitGameInvite;
-      nextState.emitInviteResponse = update.data.emitInviteResponse;
       nextState.gameInfo = update.data.gameInfo;
       nextState.socket = update.data.socket;
       nextState.players = update.data.players;
@@ -371,7 +363,6 @@ async function GameController(
       townIsPubliclyListed: video.isPubliclyListed,
       emitMovement,
       emitGameInvite,
-      emitInviteResponse,
       gameInfo: { gameStatus: 'noGame' },
       socket,
       players: initData.currentPlayers.map(sp => Player.fromServerPlayer(sp)),
