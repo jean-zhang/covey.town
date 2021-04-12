@@ -109,8 +109,10 @@ function wrappedTownSelection() {
           apiClient: new TownsServiceClient(),
           toggleQuit: false,
           quitGame: () => {},
+          finishGame: () => {},
           showInstructions: false,
           gameStarted: false,
+          toggleGameStarted: () => {},
         }}>
         <TownSelection doLogin={doLoginMock} />
       </CoveyAppContext.Provider>

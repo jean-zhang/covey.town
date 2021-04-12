@@ -299,8 +299,9 @@ export function townSubscriptionHandler(socket: Socket): void {
   );
 
   socket.on(
-    'exitMaze', (playerID: string, score: number, gaveUp: boolean) => {
+    'finishGame', (playerID: string, score: number, gaveUp: boolean) => {
       townController.playerFinish(playerID, score, gaveUp);
+      console.log('finish game backend');
     });
 }
 

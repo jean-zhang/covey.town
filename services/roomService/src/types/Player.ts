@@ -58,7 +58,7 @@ export default class Player {
    * Returns the player id of the opposing player
    */
   async finish(timeScore: number, gaveUp: boolean): Promise<string> {
-    if (!this._game) {
+    if (this._game === undefined) {
       throw new Error('game undefined');
     }
     await this._game.playerFinish({ userID: this.id, userName: this.userName }, timeScore, gaveUp);
