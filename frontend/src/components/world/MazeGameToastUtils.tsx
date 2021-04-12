@@ -39,6 +39,7 @@ export function displayMazeGameResponseToast(recipientPlayer: Player, gameRespon
   const acceptRejectString = gameResponse ? 'accepted' : 'rejected';
   const toastTitle = `${recipientPlayer.userName} ${acceptRejectString} your game invite`;
   const toast = createStandaloneToast();
+  toast.close(recipientPlayer.id);
   toast({
     title: toastTitle,
     status: 'info',
@@ -47,7 +48,7 @@ export function displayMazeGameResponseToast(recipientPlayer: Player, gameRespon
   });
 }
 
-export function displayMazeFullGameResponse(): void {
+export function displayMazeFullGameResponseToast(): void {
   const toastTitle = `Unable to send invite, the maze is full`;
   const toast = createStandaloneToast();
   toast({
@@ -58,13 +59,18 @@ export function displayMazeFullGameResponse(): void {
   });
 }
 
-export function displayInviteSent(recipientPlayer: Player): void {
+export function displayInviteSentToast(recipientPlayer: Player): void {
+  const TOAST_ID = recipientPlayer.id;
   const toastTitle = `Invited ${recipientPlayer.userName} to race`;
   const toast = createStandaloneToast();
-  toast({
-    title: toastTitle,
-    status: 'info',
-    duration: 3000,
-    isClosable: true,
-  });
+
+  if (!toast.isActive(TOAST_ID)) {
+    toast({
+      id: TOAST_ID,
+      title: toastTitle,
+      status: 'info',
+      duration: null,
+      isClosable: true,
+    });
+  }
 }

@@ -29,8 +29,8 @@ import Instructions from './components/world/Instructions';
 import {
   displayMazeGameInviteToast,
   displayMazeGameResponseToast,
-  displayMazeFullGameResponse,
-  displayInviteSent,
+  displayMazeFullGameResponseToast,
+  displayInviteSentToast,
 } from './components/world/MazeGameToastUtils';
 import QuitGame from './components/world/QuitGame';
 import WorldMap from './components/world/WorldMap';
@@ -307,7 +307,7 @@ async function GameController(
     const onGameResponse = (gameAcceptance: boolean) =>
       emitInviteResponse(sender, recipient, gameAcceptance);
     if(gamePlayerID === senderPlayer._id) {
-      displayInviteSent(recipient);
+      displayInviteSentToast(recipient);
     } else {
       displayMazeGameInviteToast(sender, onGameResponse);
       dispatchAppUpdate({
@@ -324,7 +324,7 @@ async function GameController(
     'mazeFullGameResponse',
     (senderPlayer: ServerPlayer) => {
       const sender = Player.fromServerPlayer(senderPlayer);
-      displayMazeFullGameResponse();
+      displayMazeFullGameResponseToast();
       dispatchAppUpdate({
         action: 'updateGameInfo',
         data: {
