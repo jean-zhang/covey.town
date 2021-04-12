@@ -76,6 +76,19 @@ export interface TownUpdateRequest {
   isPubliclyListed?: boolean;
 }
 
+export interface MazeCompletionInfo {
+  playerID: string;
+  username: string;
+  time: number;
+}
+
+/**
+ * Response from the server for a Maze Completion Times request
+ */
+export interface MazeCompletionTimesResponse {
+  mazeCompletionTimes: MazeCompletionInfo[];
+}
+
 /**
  * Envelope that wraps any response from the server
  */
@@ -150,6 +163,13 @@ export default class TownsServiceClient {
 
   async joinTown(requestData: TownJoinRequest): Promise<TownJoinResponse> {
     const responseWrapper = await this._axios.post('/sessions', requestData);
+    return TownsServiceClient.unwrapOrThrowError(responseWrapper);
+  }
+
+  async getMazeCompletionTimes(): Promise<MazeCompletionTimesResponse> {
+    const responseWrapper = await this._axios.get<ResponseEnvelope<MazeCompletionTimesResponse>>(
+      '/maze-completion-times',
+    );
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 }
