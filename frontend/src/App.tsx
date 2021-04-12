@@ -57,6 +57,7 @@ type CoveyAppUpdate =
           recipientPlayer: Player,
           gameAcceptance: boolean,
         ) => void;
+        emitRaceSettings: (myPlayerID: string, toggleRaceSettings: boolean) => void;
         gameInfo: GameInfo;
         toggleQuit: boolean;
         quitGame: () => void;
@@ -103,6 +104,7 @@ function defaultAppState(): CoveyAppState {
     emitMovement: () => {},
     emitGameInvite: () => {},
     emitInviteResponse: () => {},
+    emitRaceSettings: () => {},
     gameInfo: { gameStatus: 'noGame' },
     apiClient: new TownsServiceClient(),
     toggleQuit: false,
@@ -129,6 +131,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     emitMovement: state.emitMovement,
     emitGameInvite: state.emitGameInvite,
     emitInviteResponse: state.emitInviteResponse,
+    emitRaceSettings: state.emitRaceSettings,
     gameInfo: state.gameInfo,
     apiClient: state.apiClient,
     toggleQuit: state.toggleQuit,
@@ -171,6 +174,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.emitMovement = update.data.emitMovement;
       nextState.emitGameInvite = update.data.emitGameInvite;
       nextState.emitInviteResponse = update.data.emitInviteResponse;
+      nextState.emitRaceSettings = update.data.emitRaceSettings;
       nextState.gameInfo = update.data.gameInfo;
       nextState.socket = update.data.socket;
       nextState.players = update.data.players;
@@ -240,7 +244,6 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       break;
     case 'raceSettings': 
       nextState.toggleRaceSettings = !state.toggleRaceSettings;
-      state.socket?.emit('raceSettings', state.myPlayerID, nextState.toggleRaceSettings);
       break;
     case 'exitMaze':
       nextState.toggleQuit = false;
@@ -320,6 +323,15 @@ async function GameController(
   ) => {
     socket.emit('sendGameInviteResponse', senderPlayer.id, recipientPlayer.id, gameAcceptance);
   };
+  const emitRaceSettings = (
+    myPlayerID: string,
+    toggleRaceSettings: boolean,
+  ) => {
+    console.log('raceSettings', myPlayerID, toggleRaceSettings);
+    dispatchAppUpdate({ action: 'raceSettings' });
+
+    socket.emit('raceSettings', myPlayerID, !toggleRaceSettings);
+  };
   const quitGame = () => {
     dispatchAppUpdate({ action: 'toggleQuit' });
   };
@@ -329,21 +341,17 @@ async function GameController(
   socket.on('receivedGameInvite', (senderPlayer: ServerPlayer, recipientPlayer: ServerPlayer) => {
     const sender = Player.fromServerPlayer(senderPlayer);
     const recipient = Player.fromServerPlayer(recipientPlayer);
-    if(recipient.enableInvite) {
-      const onGameResponse = (gameAcceptance: boolean) =>
-        emitInviteResponse(sender, recipient, gameAcceptance);
-      displayMazeGameInviteToast(sender, onGameResponse);
-      dispatchAppUpdate({
-        action: 'updateGameInfo',
-        data: {
-          gameStatus: 'invitePending',
-          senderPlayer: sender,
-          recipientPlayer: recipient,
-        },
-      });
-    } else {
-      emitInviteResponse(sender, recipient, false);
-    }
+    const onGameResponse = (gameAcceptance: boolean) =>
+      emitInviteResponse(sender, recipient, gameAcceptance);
+    displayMazeGameInviteToast(sender, onGameResponse);
+    dispatchAppUpdate({
+      action: 'updateGameInfo',
+      data: {
+        gameStatus: 'invitePending',
+        senderPlayer: sender,
+        recipientPlayer: recipient,
+      },
+    });
   });
   socket.on(
     'mazeGameResponse',
@@ -374,6 +382,7 @@ async function GameController(
       emitMovement,
       emitGameInvite,
       emitInviteResponse,
+      emitRaceSettings,
       gameInfo: { gameStatus: 'noGame' },
       socket,
       players: initData.currentPlayers.map(sp => Player.fromServerPlayer(sp)),
@@ -417,12 +426,6 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
     return (
       <div>
         <WorldMap />
-        <FormControl display="flex" alignItems="center">
-        <FormLabel htmlFor="isRacingEnabled-alerts" mb="0">Enable Race Invites</FormLabel>
-        <Switch id="racing-config" 
-            isChecked={appState.toggleRaceSettings}
-            onChange={() => dispatchAppUpdate({ action: 'raceSettings' })}/>
-        </FormControl>
         <VideoOverlay preferredMode='fullwidth' />
         <QuitGame
           isOpen={appState.toggleQuit}
@@ -442,6 +445,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
     appState.showInstructions,
     appState.toggleQuit,
     appState.toggleRaceSettings,
+    appState.emitRaceSettings,
   ]);
   return (
     <CoveyAppContext.Provider value={appState}>

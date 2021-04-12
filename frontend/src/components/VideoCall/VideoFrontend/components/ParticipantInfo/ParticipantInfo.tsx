@@ -1,4 +1,4 @@
-import { Button, useToast, Switch } from '@chakra-ui/react';
+import { Button, useToast, Switch, FormControl, FormLabel } from '@chakra-ui/react';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import clsx from 'clsx';
@@ -260,8 +260,7 @@ export default function ParticipantInfo({
             <AudioLevelIndicator audioTrack={audioTrack} />
             <Typography variant='body1' className={classes.typeography} component='span'>
               {profile ? profile.displayName : ''}
-              {isLocalParticipant && ' (You)'}
-              {isLocalParticipant && <Switch id="racing-config" width="100px"></Switch>}
+              {isLocalParticipant && ' (You)' }
             </Typography>
           </a>
         </div>
