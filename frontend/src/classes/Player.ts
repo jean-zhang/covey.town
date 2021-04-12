@@ -11,12 +11,12 @@ export default class Player {
 
   private _enableInvite?: boolean;
 
-  constructor(id: string, userName: string, location: UserLocation, racingEnabled?: boolean) {
+  constructor(id: string, userName: string, location: UserLocation, enableInvite?: boolean) {
     this._id = id;
     this._userName = userName;
     this.location = location;
-    if(racingEnabled !== null) {
-      this._enableInvite = racingEnabled;
+    if(enableInvite !== null) {
+      this._enableInvite = enableInvite;
     }
   }
 

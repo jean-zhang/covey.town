@@ -1,16 +1,12 @@
 import React from 'react';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import { FormControl, FormLabel } from '@chakra-ui/react';
 
 import Button from '@material-ui/core/Button';
-import { Typography, Grid, Hidden } from '@material-ui/core';
+import { Typography, Grid, Hidden, FormControlLabel, Switch } from '@material-ui/core';
 import EndCallButton from '../Buttons/EndCallButton/EndCallButton';
 import FlipCameraButton from './FlipCameraButton/FlipCameraButton';
 import Menu from './Menu/Menu';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Switch from '@material-ui/core/Switch';
 
-import { UserProfile } from '../../../../../CoveyTypes';
 import useCoveyAppState from '../../../../../hooks/useCoveyAppState';
 import useRoomState from '../../hooks/useRoomState/useRoomState';
 import useVideoContext from '../../hooks/useVideoContext/useVideoContext';
@@ -91,11 +87,11 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
               <FormControlLabel
                 control={
                 <Switch
-                  checked={appState.toggleRaceSettings}
+                  checked={appState.enableInvite}
                   onChange={
                     event => {
                     event.stopPropagation();
-                    appState.emitRaceSettings(appState.myPlayerID, appState.toggleRaceSettings);
+                    appState.emitRaceSettings(appState.myPlayerID, appState.enableInvite);
                   }}
                   name="racing-config"
                   color="primary"

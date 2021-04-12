@@ -195,10 +195,10 @@ export default class CoveyTownController {
   }
 
   updatePlayerRaceSettings(playerId: string, enabled: boolean): void {
-    const player = this._players.find(player => player.id === playerId);
-    if (player) {
-      player.enableInvite = enabled;
-      this._listeners.forEach(listener => listener.onPlayerRaceSettings(player, enabled))
+    const updatePlayer = this._players.find(player => player.id === playerId);
+    if (updatePlayer) {
+      updatePlayer.enableInvite = enabled;
+      this._listeners.forEach(listener => listener.onPlayerRaceSettings(updatePlayer, enabled));
     }
   }
 

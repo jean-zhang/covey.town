@@ -240,7 +240,7 @@ function townSocketAdapter(socket: Socket, listeningPlayerID?: string): CoveyTow
       socket.emit('mazeGameResponse', senderPlayer, recipientPlayer, gameAcceptance);
     },
     onPlayerRaceSettings(senderPlayer: Player, enabled: boolean) {
-      socket.emit('playerRaceSettings',senderPlayer, enabled);
+      socket.emit('playerRaceSettings', senderPlayer, enabled);
     },
   };
 }
@@ -297,7 +297,7 @@ export function townSubscriptionHandler(socket: Socket): void {
 
   socket.on('raceSettings', (playerId: string, enabled: boolean) => { 
     townController.updatePlayerRaceSettings(playerId, enabled);
- });
+  });
 }
 
 export async function mazeTimeHandler(): Promise<ResponseEnvelope<MazeCompletionTimeListResponse>> {

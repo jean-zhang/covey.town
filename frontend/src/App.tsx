@@ -1,4 +1,4 @@
-import { ChakraProvider, Switch, FormControl, FormLabel } from '@chakra-ui/react';
+import { ChakraProvider } from '@chakra-ui/react';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import assert from 'assert';
 import React, {
@@ -57,12 +57,11 @@ type CoveyAppUpdate =
           recipientPlayer: Player,
           gameAcceptance: boolean,
         ) => void;
-        emitRaceSettings: (myPlayerID: string, toggleRaceSettings: boolean) => void;
+        emitRaceSettings: (myPlayerID: string, enableInvite: boolean) => void;
         gameInfo: GameInfo;
         toggleQuit: boolean;
         quitGame: () => void;
-        enableRace: (playerID: string) => void,
-        toggleRaceSettings: boolean,
+        enableInvite: boolean,
       };
     }
   | { action: 'addPlayer'; player: Player }
@@ -109,10 +108,9 @@ function defaultAppState(): CoveyAppState {
     apiClient: new TownsServiceClient(),
     toggleQuit: false,
     quitGame: () => {},
-    enableRace: () => {},
     showInstructions: false,
     gameStarted: false,
-    toggleRaceSettings: true,
+    enableInvite: true,
   };
 }
 let closedInstructions = false;
@@ -138,8 +136,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     quitGame: state.quitGame,
     showInstructions: state.showInstructions,
     gameStarted: state.gameStarted,
-    toggleRaceSettings: state.toggleRaceSettings,
-    enableRace: state.enableRace,
+    enableInvite: state.enableInvite,
   };
 
   function calculateNearbyPlayers(players: Player[], currentLocation: UserLocation) {
@@ -243,7 +240,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.toggleQuit = !state.toggleQuit;
       break;
     case 'raceSettings': 
-      nextState.toggleRaceSettings = !state.toggleRaceSettings;
+      nextState.enableInvite = !state.enableInvite;
       break;
     case 'exitMaze':
       nextState.toggleQuit = false;
@@ -325,18 +322,13 @@ async function GameController(
   };
   const emitRaceSettings = (
     myPlayerID: string,
-    toggleRaceSettings: boolean,
+    enableInvite: boolean,
   ) => {
-    console.log('raceSettings', myPlayerID, toggleRaceSettings);
     dispatchAppUpdate({ action: 'raceSettings' });
-
-    socket.emit('raceSettings', myPlayerID, !toggleRaceSettings);
+    socket.emit('raceSettings', myPlayerID, !enableInvite);
   };
   const quitGame = () => {
     dispatchAppUpdate({ action: 'toggleQuit' });
-  };
-  const enableRace = () => {
-    dispatchAppUpdate({ action: 'raceSettings' });
   };
   socket.on('receivedGameInvite', (senderPlayer: ServerPlayer, recipientPlayer: ServerPlayer) => {
     const sender = Player.fromServerPlayer(senderPlayer);
@@ -388,8 +380,7 @@ async function GameController(
       players: initData.currentPlayers.map(sp => Player.fromServerPlayer(sp)),
       toggleQuit: false,
       quitGame,
-      toggleRaceSettings: true, 
-      enableRace,
+      enableInvite: true, 
     },
   });
   return true;
@@ -444,8 +435,6 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
     videoInstance,
     appState.showInstructions,
     appState.toggleQuit,
-    appState.toggleRaceSettings,
-    appState.emitRaceSettings,
   ]);
   return (
     <CoveyAppContext.Provider value={appState}>
