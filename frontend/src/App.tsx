@@ -182,6 +182,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.toggleQuit = update.data.toggleQuit;
       nextState.quitGame = update.data.quitGame;
       nextState.finishGame = update.data.finishGame;
+      nextState.toggleGameStarted = update.data.toggleGameStarted;
       break;
     case 'addPlayer':
       nextState.players = nextState.players.concat([update.player]);
@@ -239,11 +240,9 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.toggleQuit = false;
       nextState.gameInfo.gameStatus = 'noGame';
       closedInstructions = false;
-      console.log('finish game');
       state.socket?.emit('finishGame', state.myPlayerID, update.data.score, update.data.gaveUp);
       break;
     case 'toggleGameStarted':
-      console.log('toggling game started');
       nextState.gameStarted = update.gameStarted;
       break;
     case 'updateGameInfo':
@@ -326,7 +325,6 @@ async function GameController(
     dispatchAppUpdate({ action: 'exitMaze', data: { score, gaveUp }});
   }
   const toggleGameStarted = (gameStarted: boolean) => {
-    console.log('jdkaslfjsakljfdsljfalskjfl toggless');
     dispatchAppUpdate({ action: 'toggleGameStarted', gameStarted });
   }
   socket.on('receivedGameInvite', (senderPlayer: ServerPlayer, recipientPlayer: ServerPlayer) => {

@@ -189,7 +189,6 @@ class CoveyGameScene extends Phaser.Scene {
       .setDepth(31);
     }
     if (this.mazeStartTime >= 0) {
-      console.log('inGame');
       this.timeLabel.setVisible(true);
       const timeTaken = this.getFormattedMazeScore(time);
       const timeTakenString = `TIME TAKEN: ${timeTaken}s`
@@ -550,7 +549,6 @@ export default function WorldMap(): JSX.Element {
     gameScene?.updatePlayersLocations(players);
   }, [players, deepPlayers, gameScene]);
   useEffect(() => {
-    console.log(`game started changed to: ${gameStarted}`);
     if (gameStarted) {
       gameScene?.startMazeTimer();
     }
@@ -573,7 +571,6 @@ export default function WorldMap(): JSX.Element {
         if (gameStarted && gameInfo.gameStatus === 'noGame') {
           gameScene.teleport(false);
           gameScene.resetStartTime();
-          console.log('trying to toggle game start');
           toggleGameStarted(false);
         }
       }
