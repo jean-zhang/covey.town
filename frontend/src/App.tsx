@@ -77,7 +77,6 @@ type CoveyAppUpdate =
   | { action: 'closeInstructions' }
   | { action: 'openLeaderboard' }
   | { action: 'closeLeaderboard' }
-  | { action: 'updateLeaderboard'; newEntries: MazeCompletionInfo[] }
   | {
       action: 'updateGameInfo';
       data: {
