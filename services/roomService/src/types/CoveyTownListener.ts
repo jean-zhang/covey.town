@@ -55,6 +55,13 @@ export default interface CoveyTownListener {
   onFinishGame(finishedPlayer: Player, score: number, gaveUp: boolean): void;
 
   /**
+   * Called when a player updates their racing settings
+   * @param senderPlayer the player that has updated their race settings
+   * @param raceSettings whether receiving invites is enabled
+   */
+  onUpdatePlayerRaceSettings(senderPlayer: Player, raceSettings: boolean): void;
+
+  /** 
    * Called when a player has requested to play a game but the Maze is full
    */
   onFullMazeGameRequested(senderPlayer: Player): void;

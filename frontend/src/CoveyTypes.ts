@@ -40,6 +40,7 @@ export type CoveyAppState = {
     gameAcceptance: boolean,
   ) => void;
   emitFinishGame: (score: number, gaveUp: boolean) => void;
+  emitRaceSettings: (myPlayerId: string, enableInvite: boolean) => void;
   gameInfo: GameInfo;
   socket: Socket | null;
   apiClient: TownsServiceClient;
@@ -49,4 +50,5 @@ export type CoveyAppState = {
   showInstructions: boolean;
   showLeaderboard: boolean;
   updateGameInfoStatus: (gameStatus: GameStatus) => void;
+  enableInvite: boolean;
 };

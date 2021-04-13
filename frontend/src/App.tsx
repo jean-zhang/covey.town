@@ -69,6 +69,8 @@ type CoveyAppUpdate =
         quitGame: () => void;
         finishGame: (score: number, gaveUp: boolean) => void;
         updateGameInfoStatus: (gameStatus: GameStatus) => void;
+        emitRaceSettings: (myPlayerID: string, enableInvite: boolean) => void;
+        enableInvite: boolean,
       };
     }
   | { action: 'addPlayer'; player: Player }
@@ -80,6 +82,8 @@ type CoveyAppUpdate =
   | { action: 'updateGameInfoStatus'; gameStatus: GameStatus }
   | { action: 'exitMaze' }
   | { action: 'closeInstructions' }
+  | { action: 'toggleRaceSettings' }
+  | { action: 'updatePlayerRaceSettings'; player: Player }
   | { action: 'toggleLeaderboard' }
   | {
       action: 'updateGameInfo';
@@ -111,6 +115,7 @@ function defaultAppState(): CoveyAppState {
     emitGameInvite: () => {},
     emitInviteResponse: () => {},
     emitFinishGame: () => {},
+    emitRaceSettings: () => {},
     gameInfo: { gameStatus: 'noGame' },
     apiClient: new TownsServiceClient(),
     toggleQuit: false,
@@ -119,6 +124,7 @@ function defaultAppState(): CoveyAppState {
     showInstructions: false,
     showLeaderboard: false,
     updateGameInfoStatus: () => {},
+    enableInvite: true,
   };
 }
 let closedInstructions = false;
@@ -138,6 +144,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     emitGameInvite: state.emitGameInvite,
     emitInviteResponse: state.emitInviteResponse,
     emitFinishGame: state.emitFinishGame,
+    emitRaceSettings: state.emitRaceSettings,
     gameInfo: state.gameInfo,
     apiClient: state.apiClient,
     toggleQuit: state.toggleQuit,
@@ -146,6 +153,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     showInstructions: state.showInstructions,
     showLeaderboard: state.showLeaderboard,
     updateGameInfoStatus: state.updateGameInfoStatus,
+    enableInvite: state.enableInvite,
   };
 
   function calculateNearbyPlayers(players: Player[], currentLocation: UserLocation) {
@@ -181,6 +189,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.emitGameInvite = update.data.emitGameInvite;
       nextState.emitInviteResponse = update.data.emitInviteResponse;
       nextState.emitFinishGame = update.data.emitFinishGame;
+      nextState.emitRaceSettings = update.data.emitRaceSettings;
       nextState.gameInfo = update.data.gameInfo;
       nextState.socket = update.data.socket;
       nextState.players = update.data.players;
@@ -205,6 +214,12 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       );
       if (samePlayers(nextState.nearbyPlayers, state.nearbyPlayers)) {
         nextState.nearbyPlayers = state.nearbyPlayers;
+      }
+      break;
+    case 'updatePlayerRaceSettings':
+      updatePlayer = nextState.players.find(p => p.id === update.player.id)
+      if (updatePlayer) {
+        updatePlayer.enableInvite = update.player.enableInvite;
       }
       break;
     case 'weMoved':
@@ -245,6 +260,9 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       if (state.gameInfo.gameStatus === 'gameStarted') {
         nextState.toggleQuit = !state.toggleQuit;
       }
+      break;
+    case 'toggleRaceSettings':
+      nextState.enableInvite = !state.enableInvite;
       break;
     case 'exitMaze':
       nextState.toggleQuit = false;
@@ -299,6 +317,11 @@ async function GameController(
       dispatchAppUpdate({ action: 'playerMoved', player: Player.fromServerPlayer(player) });
     }
   });
+  socket.on('updatePlayerRaceSettings', (player: ServerPlayer) => {
+    if (player._id !== gamePlayerID) {
+      dispatchAppUpdate({ action: 'updatePlayerRaceSettings', player: Player.fromServerPlayer(player) });
+    }
+  });
   socket.on('playerDisconnect', (player: ServerPlayer) => {
     dispatchAppUpdate({ action: 'playerDisconnect', player: Player.fromServerPlayer(player) });
   });
@@ -329,6 +352,13 @@ async function GameController(
   };
   const emitFinishGame = (score: number, gaveUp: boolean) => {
     socket.emit('finishGame', gamePlayerID, score, gaveUp);
+  };
+  const emitRaceSettings = (
+    myPlayerID: string,
+    enableInvite: boolean,
+  ) => {
+    dispatchAppUpdate({ action: 'toggleRaceSettings' });
+    socket.emit('toggleRaceSettings', myPlayerID, !enableInvite);
   };
   const quitGame = () => {
     dispatchAppUpdate({ action: 'toggleQuit' });
@@ -406,6 +436,7 @@ async function GameController(
       emitGameInvite,
       emitInviteResponse,
       emitFinishGame,
+      emitRaceSettings,
       gameInfo: { gameStatus: 'noGame' },
       socket,
       players: initData.currentPlayers.map(sp => Player.fromServerPlayer(sp)),
@@ -413,6 +444,7 @@ async function GameController(
       quitGame,
       finishGame,
       updateGameInfoStatus,
+      enableInvite: true,
     },
   });
   return true;

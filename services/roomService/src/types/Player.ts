@@ -49,6 +49,14 @@ export default class Player {
     return this._id;
   }
 
+  get enableInvite(): boolean {
+    return this._enableInvite;
+  }
+
+  set enableInvite(enabled: boolean) { 
+    this._enableInvite = enabled;
+  }
+
   updateLocation(location: UserLocation): void {
     this.location = location;
   }

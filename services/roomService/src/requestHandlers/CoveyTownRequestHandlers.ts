@@ -242,6 +242,9 @@ function townSocketAdapter(socket: Socket, listeningPlayerID?: string): CoveyTow
     onFinishGame(finishedPlayer: Player, score: number, gaveUp: boolean) {
       socket.emit('playerFinished', finishedPlayer, score, gaveUp);
     },
+    onUpdatePlayerRaceSettings(senderPlayer: Player, enabled: boolean) {
+      socket.emit('updatePlayerRaceSettings', senderPlayer, enabled);
+    },
     onFullMazeGameRequested(senderPlayer: Player) {
       socket.emit('mazeFullGameResponse', senderPlayer);
     },
@@ -300,6 +303,10 @@ export function townSubscriptionHandler(socket: Socket): void {
 
   socket.on('finishGame', (playerID: string, score: number, gaveUp: boolean) => {
     townController.playerFinish(playerID, score, gaveUp);
+  });
+
+  socket.on('toggleRaceSettings', (playerId: string, enabled: boolean) => {
+    townController.updatePlayerRaceSettings(playerId, enabled);
   });
 }
 

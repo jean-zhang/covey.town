@@ -106,6 +106,7 @@ function wrappedTownSelection() {
           emitGameInvite: () => {},
           emitInviteResponse: () => {},
           emitFinishGame: () => {},
+          emitRaceSettings: () => {},
           gameInfo: { gameStatus: 'noGame' },
           apiClient: new TownsServiceClient(),
           toggleQuit: false,
@@ -114,6 +115,7 @@ function wrappedTownSelection() {
           showLeaderboard: false,
           finishGame: () => {},
           updateGameInfoStatus: () => {},
+          enableInvite: true,
         }}>
         <TownSelection doLogin={doLoginMock} />
       </CoveyAppContext.Provider>
