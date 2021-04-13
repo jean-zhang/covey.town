@@ -45,29 +45,24 @@ import { CoveyAppState, GameInfo, GameStatus, NearbyPlayers } from './CoveyTypes
 
 type CoveyAppUpdate =
   | {
-    action: 'doConnect';
-    data: {
-      userName: string;
-      townFriendlyName: string;
-      townID: string;
-      townIsPubliclyListed: boolean;
-      sessionToken: string;
-      myPlayerID: string;
-      socket: Socket;
-      players: Player[];
-      emitMovement: (location: UserLocation) => void;
-      emitGameInvite: (senderPlayer: Player, recipientPlayer: Player) => void;
-      emitInviteResponse: (
-        senderPlayer: Player,
-        recipientPlayer: Player,
-        gameAcceptance: boolean,
-      ) => void;
-      emitRaceSettings: (myPlayerID: string, enableInvite: boolean) => void;
-      gameInfo: GameInfo;
-      toggleQuit: boolean;
-      quitGame: () => void;
-      enableInvite: boolean,
-    };
+      action: 'doConnect';
+      data: {
+        userName: string;
+        townFriendlyName: string;
+        townID: string;
+        townIsPubliclyListed: boolean;
+        sessionToken: string;
+        myPlayerID: string;
+        socket: Socket;
+        players: Player[];
+        emitMovement: (location: UserLocation) => void;
+        emitGameInvite: (senderPlayer: Player, recipientPlayer: Player) => void;
+        emitRaceSettings: (myPlayerID: string, enableInvite: boolean) => void;
+        gameInfo: GameInfo;
+        toggleQuit: boolean;
+        quitGame: () => void;
+        enableInvite: boolean,
+      };
   }
   | { action: 'addPlayer'; player: Player }
   | { action: 'playerMoved'; player: Player }
@@ -81,12 +76,12 @@ type CoveyAppUpdate =
   | { action: 'updatePlayerRaceSettings'; player: Player }
   | { action: 'toggleLeaderboard' }
   | {
-    action: 'updateGameInfo';
-    data: {
-      gameStatus: GameStatus;
-      senderPlayer?: Player;
-      recipientPlayer?: Player;
-    };
+      action: 'updateGameInfo';
+      data: {
+        gameStatus: GameStatus;
+        senderPlayer?: Player;
+        recipientPlayer?: Player;
+      };
   };
 
 function defaultAppState(): CoveyAppState {
@@ -106,14 +101,13 @@ function defaultAppState(): CoveyAppState {
       rotation: 'front',
       moving: false,
     },
-    emitMovement: () => { },
-    emitGameInvite: () => { },
-    emitInviteResponse: () => { },
-    emitRaceSettings: () => { },
+    emitMovement: () => {},
+    emitGameInvite: () => {},
+    emitRaceSettings: () => {},
     gameInfo: { gameStatus: 'noGame' },
     apiClient: new TownsServiceClient(),
     toggleQuit: false,
-    quitGame: () => { },
+    quitGame: () => {},
     showInstructions: false,
     showLeaderboard: false,
     gameStarted: false,
@@ -135,7 +129,6 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     socket: state.socket,
     emitMovement: state.emitMovement,
     emitGameInvite: state.emitGameInvite,
-    emitInviteResponse: state.emitInviteResponse,
     emitRaceSettings: state.emitRaceSettings,
     gameInfo: state.gameInfo,
     apiClient: state.apiClient,
@@ -178,7 +171,6 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.userName = update.data.userName;
       nextState.emitMovement = update.data.emitMovement;
       nextState.emitGameInvite = update.data.emitGameInvite;
-      nextState.emitInviteResponse = update.data.emitInviteResponse;
       nextState.emitRaceSettings = update.data.emitRaceSettings;
       nextState.gameInfo = update.data.gameInfo;
       nextState.socket = update.data.socket;
@@ -401,7 +393,6 @@ async function GameController(
       townIsPubliclyListed: video.isPubliclyListed,
       emitMovement,
       emitGameInvite,
-      emitInviteResponse,
       emitRaceSettings,
       gameInfo: { gameStatus: 'noGame' },
       socket,
