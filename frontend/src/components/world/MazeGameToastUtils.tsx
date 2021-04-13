@@ -2,6 +2,9 @@ import { Button, createStandaloneToast, Heading, SimpleGrid, Text } from '@chakr
 import React from 'react';
 import Player from '../../classes/Player';
 
+export const AUTO_REJECT_GAME_SECONDS = 20;
+export const TEMPORARY_TOAST_DURATION_SECONDS = 3;
+
 export function displayMazeGameInviteToast(
   senderPlayer: Player,
   onGameResponse: (gameAcceptance: boolean) => void,
@@ -37,7 +40,7 @@ export function displayMazeGameInviteToast(
       id: TOAST_ID,
       title: toastTitle,
       description: acceptRejectButtons,
-      duration: 20000,
+      duration: AUTO_REJECT_GAME_SECONDS * 1000,
     });
   }
 }
@@ -50,7 +53,7 @@ export function displayMazeGameResponseToast(recipientPlayer: Player, gameRespon
   toast({
     title: toastTitle,
     status: 'info',
-    duration: 3000,
+    duration: TEMPORARY_TOAST_DURATION_SECONDS * 1000,
     isClosable: true,
   });
 }
@@ -61,7 +64,7 @@ export function displayMazeFullGameResponseToast(): void {
   toast({
     title: toastTitle,
     status: 'info',
-    duration: 3000,
+    duration: TEMPORARY_TOAST_DURATION_SECONDS * 1000,
     isClosable: true,
   });
 }

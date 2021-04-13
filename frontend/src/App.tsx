@@ -31,6 +31,7 @@ import {
   displayMazeGameResponseToast,
   displayMazeFullGameResponseToast,
   displayInviteSentToast,
+  AUTO_REJECT_GAME_SECONDS,
 } from './components/world/MazeGameToastUtils';
 import QuitGame from './components/world/QuitGame';
 import WorldMap from './components/world/WorldMap';
@@ -313,7 +314,7 @@ async function GameController(
       // If player does not respond in 20 seconds, auto reject
       setTimeout(() => {
         onGameResponse(false);
-      }, 20000)
+      }, AUTO_REJECT_GAME_SECONDS * 1000)
       dispatchAppUpdate({
       action: 'updateGameInfo',
       data: {
