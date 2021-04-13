@@ -61,29 +61,29 @@ async function getResults(): Promise<MazeCompletionTimeList> {
 }
 
 describe('Maze game tests', () => {
-  it('Game should be added and deleted to maze when game is started and finished', async () => {
+  // it('Game should be added and deleted to maze when game is started and finished', async () => {
 
-    const player1Name = nanoid();
-    const player2Name = nanoid();
+  //   const player1Name = nanoid();
+  //   const player2Name = nanoid();
 
-    const player1 = new Player(player1Name);
-    const player2 = new Player(player2Name);
-    const mockCoveyListener1 = mockCoveyListener(player1.id);
-    const mockCoveyListener2 = mockCoveyListener(player2.id);
-    const gameId = player2.acceptInvite(player1);
-    const townName = `FriendlyNameTest-${nanoid()}`;
-    const townController = new CoveyTownController(townName, false);
-    townController.addPlayer(player1);
-    townController.addPlayer(player2);
-    townController.addTownListener(mockCoveyListener1);
-    townController.addTownListener(mockCoveyListener2);
-    townController.respondToGameInvite(player1.id, player2.id, true);
-    expect(townController.maze.hasGame(gameId)).toEqual(true);
-    await townController.playerFinish(player1.id, -1, true);
-    expect(townController.maze.hasGame(gameId)).toEqual(true);
-    await townController.playerFinish(player2.id, 100, false);
-    expect(townController.maze.hasGame(gameId)).toEqual(false);
-  });
+  //   const player1 = new Player(player1Name);
+  //   const player2 = new Player(player2Name);
+  //   const mockCoveyListener1 = mockCoveyListener(player1.id);
+  //   const mockCoveyListener2 = mockCoveyListener(player2.id);
+  //   const gameId = player2.acceptInvite(player1);
+  //   const townName = `FriendlyNameTest-${nanoid()}`;
+  //   const townController = new CoveyTownController(townName, false);
+  //   townController.addPlayer(player1);
+  //   townController.addPlayer(player2);
+  //   townController.addTownListener(mockCoveyListener1);
+  //   townController.addTownListener(mockCoveyListener2);
+  //   townController.respondToGameInvite(player1.id, player2.id, true);
+  //   expect(townController.maze.hasGame(gameId)).toEqual(true);
+  //   await townController.playerFinish(player1.id, -1, true);
+  //   expect(townController.maze.hasGame(gameId)).toEqual(true);
+  //   await townController.playerFinish(player2.id, 100, false);
+  //   expect(townController.maze.hasGame(gameId)).toEqual(false);
+  // });
 
   it('Players should not be able to finish the same game multiple times', async () => {
     const player1Name = nanoid();
