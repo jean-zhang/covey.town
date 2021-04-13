@@ -47,18 +47,24 @@ export function displayMazeGameResponseToast(recipientPlayer: Player, gameRespon
   });
 }
 
-export function displayPlayerFinishedToast(finishedPlayer: Player, score: number, gaveUp: boolean): void {
-  const toastTitle = gaveUp? `${finishedPlayer.userName} has given up and left the maze` : `${finishedPlayer.userName} has completed the maze!`;
-  const toastDescription = (gaveUp || score <= 0)? undefined : `Score is ${score / 1000}s`;
-  const duration = gaveUp? 3000 : 6000;
+export function displayPlayerFinishedToast(
+  finishedPlayer: Player,
+  score: number,
+  gaveUp: boolean,
+): void {
+  const toastTitle = gaveUp
+    ? `${finishedPlayer.userName} has given up and left the maze`
+    : `${finishedPlayer.userName} has completed the maze!`;
+  const toastDescription = gaveUp || score <= 0 ? undefined : `Score is ${score / 1000}s`;
+  const duration = gaveUp ? 3000 : 6000;
   const toast = createStandaloneToast();
   toast({
     title: toastTitle,
     description: toastDescription,
     status: 'info',
     duration,
-    isClosable:true
-  })
+    isClosable: true,
+  });
 }
 
 export function displayMazeFullGameResponse(): void {
