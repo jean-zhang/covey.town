@@ -112,6 +112,7 @@ function wrappedTownSelection() {
           quitGame: () => {},
           finishGame: () => {},
           showInstructions: false,
+          showLeaderboard: false,
           gameStarted: false,
           toggleGameStarted: () => {},
         }}>
