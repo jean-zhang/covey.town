@@ -105,6 +105,7 @@ function wrappedTownSelection() {
           emitMovement: () => {},
           emitGameInvite: () => {},
           emitInviteResponse: () => {},
+          emitFinishGame: () => {},
           gameInfo: { gameStatus: 'noGame' },
           apiClient: new TownsServiceClient(),
           toggleQuit: false,
