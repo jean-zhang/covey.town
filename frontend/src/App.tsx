@@ -63,7 +63,7 @@ type CoveyAppUpdate =
         quitGame: () => void;
         enableInvite: boolean,
       };
-  }
+    }
   | { action: 'addPlayer'; player: Player }
   | { action: 'playerMoved'; player: Player }
   | { action: 'playerDisconnect'; player: Player }
@@ -82,7 +82,7 @@ type CoveyAppUpdate =
         senderPlayer?: Player;
         recipientPlayer?: Player;
       };
-  };
+    };
 
 function defaultAppState(): CoveyAppState {
   return {
