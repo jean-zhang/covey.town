@@ -111,6 +111,7 @@ function wrappedTownSelection() {
           quitGame: () => {},
           showInstructions: false,
           showLeaderboard: false,
+          toggleShowLeaderboard: () => {},
           gameStarted: false,
         }}>
         <TownSelection doLogin={doLoginMock} />

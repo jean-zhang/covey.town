@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
 import Phaser from 'phaser';
+import React, { useEffect, useState } from 'react';
 import Player, { UserLocation } from '../../classes/Player';
 import Video from '../../classes/Video/Video';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
@@ -7,7 +7,8 @@ import useCoveyAppState from '../../hooks/useCoveyAppState';
 // https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
 class CoveyGameScene extends Phaser.Scene {
   private player?: {
-    sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, label: Phaser.GameObjects.Text
+    sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+    label: Phaser.GameObjects.Text;
   };
 
   private id?: string;
@@ -54,12 +55,17 @@ class CoveyGameScene extends Phaser.Scene {
     color: '#000000',
     padding: {
       x: 20,
-      y: 10
+      y: 10,
     },
     backgroundColor: '#ffffff',
   };
 
-  constructor(video: Video, emitMovement: (loc: UserLocation) => void, quitGame: () => void, toggleShowLeaderboard: () => void) {
+  constructor(
+    video: Video,
+    emitMovement: (loc: UserLocation) => void,
+    quitGame: () => void,
+    toggleShowLeaderboard: () => void,
+  ) {
     super('PlayGame');
     this.video = video;
     this.emitMovement = emitMovement;
@@ -88,14 +94,14 @@ class CoveyGameScene extends Phaser.Scene {
       this.players = players;
       return;
     }
-    players.forEach((p) => {
+    players.forEach(p => {
       this.updatePlayerLocation(p);
     });
     // Remove disconnected players from board
     const disconnectedPlayers = this.players.filter(
-      (player) => !players.find((p) => p.id === player.id),
+      player => !players.find(p => p.id === player.id),
     );
-    disconnectedPlayers.forEach((disconnectedPlayer) => {
+    disconnectedPlayers.forEach(disconnectedPlayer => {
       if (disconnectedPlayer.sprite) {
         disconnectedPlayer.sprite.destroy();
         disconnectedPlayer.label?.destroy();
@@ -104,15 +110,13 @@ class CoveyGameScene extends Phaser.Scene {
     // Remove disconnected players from list
     if (disconnectedPlayers.length) {
       this.players = this.players.filter(
-        (player) => !disconnectedPlayers.find(
-          (p) => p.id === player.id,
-        ),
+        player => !disconnectedPlayers.find(p => p.id === player.id),
       );
     }
   }
 
   updatePlayerLocation(player: Player) {
-    let myPlayer = this.players.find((p) => p.id === player.id);
+    let myPlayer = this.players.find(p => p.id === player.id);
     if (!myPlayer) {
       let { location } = player;
       if (!location) {
@@ -178,15 +182,16 @@ class CoveyGameScene extends Phaser.Scene {
       return;
     }
     if (this.mazeStartTime >= 0) {
-      const timeTaken = Number.parseFloat(((time - this.mazeStartTime) / 1000).toString()).toFixed(2);
-      const timeTakenString = `TIME TAKEN: ${timeTaken}s`
+      const timeTaken = Number.parseFloat(((time - this.mazeStartTime) / 1000).toString()).toFixed(
+        2,
+      );
+      const timeTakenString = `TIME TAKEN: ${timeTaken}s`;
       if (!this.timeLabel) {
         this.timeLabel = this.add
-        .text(16, 100, timeTakenString, this.textStyle)
-        .setScrollFactor(0)
-        .setDepth(31);
-      }
-      else {
+          .text(16, 100, timeTakenString, this.textStyle)
+          .setScrollFactor(0)
+          .setDepth(31);
+      } else {
         this.timeLabel.setText(timeTakenString);
       }
     }
@@ -232,17 +237,18 @@ class CoveyGameScene extends Phaser.Scene {
       }
 
       // Normalize and scale the velocity so that player can't move faster along a diagonal
-      this.player.sprite.body.velocity.normalize()
-        .scale(speed);
+      this.player.sprite.body.velocity.normalize().scale(speed);
 
       const isMoving = primaryDirection !== undefined;
       this.player.label.setX(body.x);
       this.player.label.setY(body.y - 20);
-      if (!this.lastLocation
-        || this.lastLocation.x !== body.x
-        || this.lastLocation.y !== body.y
-        || (isMoving && this.lastLocation.rotation !== primaryDirection)
-        || this.lastLocation.moving !== isMoving) {
+      if (
+        !this.lastLocation ||
+        this.lastLocation.x !== body.x ||
+        this.lastLocation.y !== body.y ||
+        (isMoving && this.lastLocation.rotation !== primaryDirection) ||
+        this.lastLocation.moving !== isMoving
+      ) {
         if (!this.lastLocation) {
           this.lastLocation = {
             x: body.x,
@@ -288,19 +294,22 @@ class CoveyGameScene extends Phaser.Scene {
 
     // Object layers in Tiled let you embed extra info into a map - like a spawn point or custom
     // collision shapes. In the tmx file, there's an object layer with a point named "Spawn Point"
-    this.spawnPoint = map.findObject('Objects',
-      (obj) => obj.name === 'Spawn Point') as unknown as
-      Phaser.GameObjects.Components.Transform;
+    this.spawnPoint = (map.findObject(
+      'Objects',
+      obj => obj.name === 'Spawn Point',
+    ) as unknown) as Phaser.GameObjects.Components.Transform;
 
     // maze start
-    this.mazeStart = map.findObject('Objects', 
-    (obj) => obj.name === 'Maze Start') as unknown as
-    Phaser.GameObjects.Components.Transform;
+    this.mazeStart = (map.findObject(
+      'Objects',
+      obj => obj.name === 'Maze Start',
+    ) as unknown) as Phaser.GameObjects.Components.Transform;
 
     // maze finish
-    this.mazeFinish = map.findObject('Objects', 
-    (obj) => obj.name === 'Maze Finish') as unknown as
-    Phaser.GameObjects.Components.Transform;
+    this.mazeFinish = (map.findObject(
+      'Objects',
+      obj => obj.name === 'Maze Finish',
+    ) as unknown) as Phaser.GameObjects.Components.Transform;
 
     const leaderboard = map.createFromObjects('Objects', { name: 'Leaderboard' });
     this.physics.world.enable(leaderboard, 0);
@@ -309,45 +318,52 @@ class CoveyGameScene extends Phaser.Scene {
       // make hitbox larger
       sprite.setScale(1.3, 1.3);
       sprite.setVisible(false);
-      }
-    );
+    });
 
     // Find all of the transporters, add them to the physics engine
-    const transporters = map.createFromObjects('Objects',
-      { name: 'transporter' })
+    const transporters = map.createFromObjects('Objects', { name: 'transporter' });
     this.physics.world.enable(transporters);
 
     // For each of the transporters (rectangle objects), we need to tweak their location on the scene
     // for reasons that are not obvious to me, but this seems to work. We also set them to be invisible
     // but for debugging, you can comment out that line.
     transporters.forEach(transporter => {
-        const sprite = transporter as Phaser.GameObjects.Sprite;
-        sprite.y += 2 * sprite.height; // Phaser and Tiled seem to disagree on which corner is y
-        sprite.setVisible(false); // Comment this out to see the transporter rectangles drawn on
-                                  // the map
-      }
-    );
+      const sprite = transporter as Phaser.GameObjects.Sprite;
+      sprite.y += 2 * sprite.height; // Phaser and Tiled seem to disagree on which corner is y
+      sprite.setVisible(false); // Comment this out to see the transporter rectangles drawn on
+      // the map
+    });
 
     const cursorKeys = this.input.keyboard.createCursorKeys();
     this.cursors.push(cursorKeys);
-    this.cursors.push(this.input.keyboard.addKeys({
-      'up': Phaser.Input.Keyboard.KeyCodes.W,
-      'down': Phaser.Input.Keyboard.KeyCodes.S,
-      'left': Phaser.Input.Keyboard.KeyCodes.A,
-      'right': Phaser.Input.Keyboard.KeyCodes.D
-    }, false) as Phaser.Types.Input.Keyboard.CursorKeys);
-    this.cursors.push(this.input.keyboard.addKeys({
-      'up': Phaser.Input.Keyboard.KeyCodes.H,
-      'down': Phaser.Input.Keyboard.KeyCodes.J,
-      'left': Phaser.Input.Keyboard.KeyCodes.K,
-      'right': Phaser.Input.Keyboard.KeyCodes.L
-    }, false) as Phaser.Types.Input.Keyboard.CursorKeys);
+    this.cursors.push(
+      this.input.keyboard.addKeys(
+        {
+          up: Phaser.Input.Keyboard.KeyCodes.W,
+          down: Phaser.Input.Keyboard.KeyCodes.S,
+          left: Phaser.Input.Keyboard.KeyCodes.A,
+          right: Phaser.Input.Keyboard.KeyCodes.D,
+        },
+        false,
+      ) as Phaser.Types.Input.Keyboard.CursorKeys,
+    );
+    this.cursors.push(
+      this.input.keyboard.addKeys(
+        {
+          up: Phaser.Input.Keyboard.KeyCodes.H,
+          down: Phaser.Input.Keyboard.KeyCodes.J,
+          left: Phaser.Input.Keyboard.KeyCodes.K,
+          right: Phaser.Input.Keyboard.KeyCodes.L,
+        },
+        false,
+      ) as Phaser.Types.Input.Keyboard.CursorKeys,
+    );
 
     // non-cursor keybinds
     this.quitKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
     this.quitKey.on('down', () => {
       this.quitGame();
-    })
+    });
 
     // Create a sprite with physics enabled via the physics system. The image used for the sprite
     // has a bit of whitespace, so I'm using setSize & setOffset to control the size of the
@@ -364,7 +380,7 @@ class CoveyGameScene extends Phaser.Scene {
     });
     this.player = {
       sprite,
-      label
+      label,
     };
 
     this.emitMovement({
@@ -379,17 +395,16 @@ class CoveyGameScene extends Phaser.Scene {
     // Watch the player and worldLayer for collisions, for the duration of the scene:
     this.physics.add.collider(sprite, worldLayer);
 
-        /* Configure physics overlap behavior for when the player steps into
+    /* Configure physics overlap behavior for when the player steps into
     leaderboard hit area. If you're inside the hit area and press 'space', you'll
     open the leaderboard modal.
      */
-    
-    this.physics.add.overlap(sprite, leaderboard,
-      () => {
+
+    this.physics.add.overlap(sprite, leaderboard, () => {
       if (cursorKeys.space.isDown && this.player) {
         this.toggleShowLeaderboard();
       }
-    })
+    });
 
     // Create the player's walking animations from the texture atlas. These are stored in the global
     // animation manager so any sprite can access them.
@@ -445,7 +460,12 @@ class CoveyGameScene extends Phaser.Scene {
 
     // Help text that has a "fixed" position on the screen
     this.add
-      .text(16, 16, `Arrow keys to move, space to transport\nCurrent town: ${this.video.townFriendlyName} (${this.video.coveyTownID})`, this.textStyle)
+      .text(
+        16,
+        16,
+        `Arrow keys to move, space to transport\nCurrent town: ${this.video.townFriendlyName} (${this.video.coveyTownID})`,
+        this.textStyle,
+      )
       .setScrollFactor(0)
       .setDepth(30);
 
@@ -453,7 +473,7 @@ class CoveyGameScene extends Phaser.Scene {
     if (this.players.length) {
       // Some players got added to the queue before we were ready, make sure that they have
       // sprites....
-      this.players.forEach((p) => this.updatePlayerLocation(p));
+      this.players.forEach(p => this.updatePlayerLocation(p));
     }
   }
 
@@ -474,7 +494,7 @@ class CoveyGameScene extends Phaser.Scene {
       if (intoMaze && this.mazeStart) {
         this.player.sprite.x = this.mazeStart.x + 20;
         this.player.sprite.y = this.mazeStart.y;
-        this.lastLocation.x = this.mazeStart.x  + 20;
+        this.lastLocation.x = this.mazeStart.x + 20;
         this.lastLocation.y = this.mazeStart.y;
         this.emitMovement(this.lastLocation);
       }
@@ -487,13 +507,18 @@ class CoveyGameScene extends Phaser.Scene {
       }
     }
   }
-
 }
 
 export default function WorldMap(): JSX.Element {
   const video = Video.instance();
   const {
-    emitMovement, players, quitGame, gameStarted, showInstructions, gameInfo, toggleShowLeaderboard
+    emitMovement,
+    players,
+    quitGame,
+    gameStarted,
+    showInstructions,
+    gameInfo,
+    toggleShowLeaderboard,
   } = useCoveyAppState();
   const [gameScene, setGameScene] = useState<CoveyGameScene>();
   useEffect(() => {
@@ -517,10 +542,10 @@ export default function WorldMap(): JSX.Element {
       game.scene.add('coveyBoard', newGameScene, true);
       video.pauseGame = () => {
         newGameScene.pause();
-      }
+      };
       video.unPauseGame = () => {
         newGameScene.resume();
-      }
+      };
     }
     return () => {
       game.destroy(true);
@@ -533,7 +558,7 @@ export default function WorldMap(): JSX.Element {
   }, [players, deepPlayers, gameScene]);
   useEffect(() => {
     if (gameStarted) {
-    gameScene?.startMazeTimer();
+      gameScene?.startMazeTimer();
     }
   }, [gameStarted, gameScene]);
 
@@ -560,5 +585,5 @@ export default function WorldMap(): JSX.Element {
     }
   }, [gameScene, gameInfo, showInstructions]);
 
-  return <div id="map-container"/>;
+  return <div id='map-container' />;
 }

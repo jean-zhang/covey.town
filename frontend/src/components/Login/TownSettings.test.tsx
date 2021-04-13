@@ -62,6 +62,7 @@ function wrappedTownSettings() {
           quitGame: () => {},
           showInstructions: false,
           showLeaderboard: false,
+          toggleShowLeaderboard: () => {},
           gameStarted: false,
         }}>
         <TownSettings />
