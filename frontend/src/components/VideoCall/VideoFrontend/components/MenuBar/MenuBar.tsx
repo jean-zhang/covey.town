@@ -88,7 +88,7 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
                 control={
                   <Switch
                     checked={appState.enableInvite}
-                    onChange={() => { appState.emitRaceSettings(appState.myPlayerID, appState.enableInvite); }}
+                    onChange={() => appState.emitRaceSettings(appState.myPlayerID, appState.enableInvite)}
                     name="racing-config"
                     color="primary"
                   />
