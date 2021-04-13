@@ -196,11 +196,9 @@ class CoveyGameScene extends Phaser.Scene {
     } else {
       this.timeLabel.setVisible(false);
     }
-    // 2496, 1248
-    // TODO: replace with this.mazeFinish.y
     if (this.lastLocation && this.mazeFinish &&
         Math.abs(this.lastLocation.x - this.mazeFinish.x) < 10 &&
-        Math.abs(this.lastLocation.y - 1186) < 10) {
+        Math.abs(this.lastLocation.y - this.mazeFinish.y) < 10) {
       this.finishMaze(false);
       return;
     }
