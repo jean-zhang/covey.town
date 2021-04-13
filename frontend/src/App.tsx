@@ -35,7 +35,7 @@ import {
   displayMazeFullGameResponse,
   displayMazeGameInviteToast,
   displayMazeGameResponseToast,
-  displayPlayerFinishedToast
+  displayPlayerFinishedToast,
 } from './components/world/MazeGameToastUtils';
 import QuitGame from './components/world/QuitGame';
 import WorldMap from './components/world/WorldMap';
@@ -63,7 +63,7 @@ type CoveyAppUpdate =
           recipientPlayer: Player,
           gameAcceptance: boolean,
         ) => void;
-        emitFinishGame: (score: number, gaveUp: boolean) => void,
+        emitFinishGame: (score: number, gaveUp: boolean) => void;
         gameInfo: GameInfo;
         toggleQuit: boolean;
         quitGame: () => void;
@@ -77,7 +77,7 @@ type CoveyAppUpdate =
   | { action: 'weMoved'; location: UserLocation }
   | { action: 'disconnect' }
   | { action: 'toggleQuit' }
-  | {action: 'updateGameInfoStatus'; gameStatus: GameStatus }
+  | { action: 'updateGameInfoStatus'; gameStatus: GameStatus }
   | { action: 'exitMaze' }
   | { action: 'closeInstructions' }
   | { action: 'toggleLeaderboard' }
@@ -329,17 +329,17 @@ async function GameController(
   };
   const emitFinishGame = (score: number, gaveUp: boolean) => {
     socket.emit('finishGame', gamePlayerID, score, gaveUp);
-  }
+  };
   const quitGame = () => {
     dispatchAppUpdate({ action: 'toggleQuit' });
   };
   const finishGame = (score: number, gaveUp: boolean) => {
-    dispatchAppUpdate({ action: 'exitMaze'});
+    dispatchAppUpdate({ action: 'exitMaze' });
     emitFinishGame(score, gaveUp);
-  }
+  };
   const updateGameInfoStatus = (gameStatus: GameStatus) => {
     dispatchAppUpdate({ action: 'updateGameInfoStatus', gameStatus });
-  }
+  };
   socket.on('receivedGameInvite', (senderPlayer: ServerPlayer, recipientPlayer: ServerPlayer) => {
     const sender = Player.fromServerPlayer(senderPlayer);
     const recipient = Player.fromServerPlayer(recipientPlayer);
@@ -388,7 +388,7 @@ async function GameController(
       });
     },
   );
-  socket.on('playerFinished', (finishedPlayer: ServerPlayer , score: number, gaveUp: boolean) => {
+  socket.on('playerFinished', (finishedPlayer: ServerPlayer, score: number, gaveUp: boolean) => {
     const player = Player.fromServerPlayer(finishedPlayer);
     displayPlayerFinishedToast(player, score, gaveUp);
   });
@@ -423,7 +423,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
   const [currentMazeCompletionList, setCurrentMazeCompletionList] = useState<MazeCompletionInfo[]>(
     [],
   );
-  const {emitFinishGame} = appState;
+  const { emitFinishGame } = appState;
 
   const setupGameController = useCallback(
     async (initData: TownJoinResponse) => {
