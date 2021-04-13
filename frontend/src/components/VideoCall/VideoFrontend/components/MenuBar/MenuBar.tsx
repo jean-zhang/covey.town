@@ -2,11 +2,12 @@ import React from 'react';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 
 import Button from '@material-ui/core/Button';
-import { Typography, Grid, Hidden } from '@material-ui/core';
+import { Typography, Grid, Hidden, FormControlLabel, Switch } from '@material-ui/core';
 import EndCallButton from '../Buttons/EndCallButton/EndCallButton';
 import FlipCameraButton from './FlipCameraButton/FlipCameraButton';
 import Menu from './Menu/Menu';
 
+import useCoveyAppState from '../../../../../hooks/useCoveyAppState';
 import useRoomState from '../../hooks/useRoomState/useRoomState';
 import useVideoContext from '../../hooks/useVideoContext/useVideoContext';
 import ToggleAudioButton from '../Buttons/ToggleAudioButton/ToggleAudioButton';
@@ -66,6 +67,7 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   const classes = useStyles();
   const { isSharingScreen, toggleScreenShare } = useVideoContext();
   const roomState = useRoomState();
+  const appState = useCoveyAppState();
   const isReconnecting = roomState === 'reconnecting';
 
   return (
@@ -82,6 +84,17 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
             <Grid container justify="center">
               <ToggleAudioButton disabled={isReconnecting} setMediaError={props.setMediaError} />
               <ToggleVideoButton disabled={isReconnecting} setMediaError={props.setMediaError} />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={appState.enableInvite}
+                    onChange={() => appState.emitRaceSettings(appState.myPlayerID, appState.enableInvite)}
+                    name="racing-config"
+                    color="primary"
+                  />
+                }
+                label="Enable Race Invites" />
+
               <Hidden smDown>
                 {!isSharingScreen && <ToggleScreenShareButton disabled={isReconnecting} />}
               </Hidden>

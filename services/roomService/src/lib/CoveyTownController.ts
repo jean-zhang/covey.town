@@ -194,6 +194,14 @@ export default class CoveyTownController {
     return true;
   }
 
+  updatePlayerRaceSettings(playerId: string, enabled: boolean): void {
+    const updatePlayer = this._players.find(player => player.id === playerId);
+    if (updatePlayer) {
+      updatePlayer.enableInvite = enabled;
+      this._listeners.forEach(listener => listener.onUpdatePlayerRaceSettings(updatePlayer, enabled));
+    }
+  }
+
   /**
    * returns true if succeeded
    */
@@ -206,8 +214,8 @@ export default class CoveyTownController {
     }
 
     let listeners = this._listeners.filter(
-      listener => listener.listeningPlayerID === recipientPlayerID || 
-      listener.listeningPlayerID === senderPlayerID);
+      listener => listener.listeningPlayerID === recipientPlayerID ||
+        listener.listeningPlayerID === senderPlayerID);
 
     if (!Maze.getInstance().reachedCapacity()) {
       listeners.forEach(listener => listener.onMazeGameRequested(sender, recipient));

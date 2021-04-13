@@ -57,9 +57,11 @@ type CoveyAppUpdate =
         players: Player[];
         emitMovement: (location: UserLocation) => void;
         emitGameInvite: (senderPlayer: Player, recipientPlayer: Player) => void;
+        emitRaceSettings: (myPlayerID: string, enableInvite: boolean) => void;
         gameInfo: GameInfo;
         toggleQuit: boolean;
         quitGame: () => void;
+        enableInvite: boolean,
       };
     }
   | { action: 'addPlayer'; player: Player }
@@ -70,6 +72,8 @@ type CoveyAppUpdate =
   | { action: 'toggleQuit' }
   | { action: 'exitMaze' }
   | { action: 'closeInstructions' }
+  | { action: 'toggleRaceSettings' }
+  | { action: 'updatePlayerRaceSettings'; player: Player }
   | { action: 'toggleLeaderboard' }
   | {
       action: 'updateGameInfo';
@@ -99,6 +103,7 @@ function defaultAppState(): CoveyAppState {
     },
     emitMovement: () => {},
     emitGameInvite: () => {},
+    emitRaceSettings: () => {},
     gameInfo: { gameStatus: 'noGame' },
     apiClient: new TownsServiceClient(),
     toggleQuit: false,
@@ -106,6 +111,7 @@ function defaultAppState(): CoveyAppState {
     showInstructions: false,
     showLeaderboard: false,
     gameStarted: false,
+    enableInvite: true,
   };
 }
 let closedInstructions = false;
@@ -123,6 +129,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     socket: state.socket,
     emitMovement: state.emitMovement,
     emitGameInvite: state.emitGameInvite,
+    emitRaceSettings: state.emitRaceSettings,
     gameInfo: state.gameInfo,
     apiClient: state.apiClient,
     toggleQuit: state.toggleQuit,
@@ -130,6 +137,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     showInstructions: state.showInstructions,
     showLeaderboard: state.showLeaderboard,
     gameStarted: state.gameStarted,
+    enableInvite: state.enableInvite,
   };
 
   function calculateNearbyPlayers(players: Player[], currentLocation: UserLocation) {
@@ -163,6 +171,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.userName = update.data.userName;
       nextState.emitMovement = update.data.emitMovement;
       nextState.emitGameInvite = update.data.emitGameInvite;
+      nextState.emitRaceSettings = update.data.emitRaceSettings;
       nextState.gameInfo = update.data.gameInfo;
       nextState.socket = update.data.socket;
       nextState.players = update.data.players;
@@ -185,6 +194,12 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       );
       if (samePlayers(nextState.nearbyPlayers, state.nearbyPlayers)) {
         nextState.nearbyPlayers = state.nearbyPlayers;
+      }
+      break;
+    case 'updatePlayerRaceSettings':
+      updatePlayer = nextState.players.find(p => p.id === update.player.id)
+      if (updatePlayer) {
+        updatePlayer.enableInvite = update.player.enableInvite;
       }
       break;
     case 'weMoved':
@@ -221,6 +236,9 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       return defaultAppState();
     case 'toggleQuit':
       nextState.toggleQuit = !state.toggleQuit;
+      break;
+    case 'toggleRaceSettings':
+      nextState.enableInvite = !state.enableInvite;
       break;
     case 'exitMaze':
       nextState.toggleQuit = false;
@@ -272,6 +290,11 @@ async function GameController(
       dispatchAppUpdate({ action: 'playerMoved', player: Player.fromServerPlayer(player) });
     }
   });
+  socket.on('updatePlayerRaceSettings', (player: ServerPlayer) => {
+    if (player._id !== gamePlayerID) {
+      dispatchAppUpdate({ action: 'updatePlayerRaceSettings', player: Player.fromServerPlayer(player) });
+    }
+  });
   socket.on('playerDisconnect', (player: ServerPlayer) => {
     dispatchAppUpdate({ action: 'playerDisconnect', player: Player.fromServerPlayer(player) });
   });
@@ -299,6 +322,13 @@ async function GameController(
     gameAcceptance: boolean,
   ) => {
     socket.emit('sendGameInviteResponse', senderPlayer.id, recipientPlayer.id, gameAcceptance);
+  };
+  const emitRaceSettings = (
+    myPlayerID: string,
+    enableInvite: boolean,
+  ) => {
+    dispatchAppUpdate({ action: 'toggleRaceSettings' });
+    socket.emit('toggleRaceSettings', myPlayerID, !enableInvite);
   };
   const quitGame = () => {
     dispatchAppUpdate({ action: 'toggleQuit' });
@@ -363,11 +393,13 @@ async function GameController(
       townIsPubliclyListed: video.isPubliclyListed,
       emitMovement,
       emitGameInvite,
+      emitRaceSettings,
       gameInfo: { gameStatus: 'noGame' },
       socket,
       players: initData.currentPlayers.map(sp => Player.fromServerPlayer(sp)),
       toggleQuit: false,
       quitGame,
+      enableInvite: true,
     },
   });
   return true;

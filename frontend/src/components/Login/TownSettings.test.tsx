@@ -55,6 +55,7 @@ function wrappedTownSettings() {
           },
           emitMovement: () => {},
           emitGameInvite: () => {},
+          emitRaceSettings: () => {},
           gameInfo: { gameStatus: 'noGame' },
           apiClient: new TownsServiceClient(),
           toggleQuit: false,
@@ -62,6 +63,7 @@ function wrappedTownSettings() {
           showInstructions: false,
           showLeaderboard: false,
           gameStarted: false,
+          enableInvite: true,
         }}>
         <TownSettings />
       </CoveyAppContext.Provider>

@@ -34,6 +34,7 @@ export type CoveyAppState = {
   nearbyPlayers: NearbyPlayers;
   emitMovement: (location: UserLocation) => void;
   emitGameInvite: (senderPlayer: Player, recipientPlayer: Player) => void;
+  emitRaceSettings: (myPlayerId: string, enableInvite: boolean) => void;
   gameInfo: GameInfo;
   socket: Socket | null;
   apiClient: TownsServiceClient;
@@ -42,4 +43,5 @@ export type CoveyAppState = {
   showInstructions: boolean;
   showLeaderboard: boolean;
   gameStarted: boolean;
+  enableInvite: boolean;
 };
