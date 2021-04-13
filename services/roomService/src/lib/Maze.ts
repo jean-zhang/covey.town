@@ -6,7 +6,7 @@ export default class Maze {
   public static readonly CAPACITY: number = 10;
 
   /** The Games in this Maze * */
-  public _gameIds = new Set<string>();
+  private _gameIds = new Set<string>();
 
   /** The leaderboard that keeps track of the Player username and Score * */
   private _leaderboard: Map<string, number>;
