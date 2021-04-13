@@ -411,6 +411,7 @@ async function GameController(
 
 function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefined>> }) {
   const [appState, dispatchAppUpdate] = useReducer(appStateReducer, defaultAppState());
+  const {emitFinishGame} = appState;
 
   const setupGameController = useCallback(
     async (initData: TownJoinResponse) => {
@@ -446,7 +447,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
           onClose={() => dispatchAppUpdate({ action: 'toggleQuit' })}
           onQuit={() => {
             dispatchAppUpdate({ action: 'exitMaze' });
-            appState.emitFinishGame(-1, true);
+            emitFinishGame(-1, true);
           }}
         />
         <Instructions
@@ -461,6 +462,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
     videoInstance,
     appState.showInstructions,
     appState.toggleQuit,
+    emitFinishGame,
   ]);
   return (
     <CoveyAppContext.Provider value={appState}>
