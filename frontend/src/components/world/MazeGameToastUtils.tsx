@@ -1,4 +1,4 @@
-import { Button, createStandaloneToast, SimpleGrid } from '@chakra-ui/react';
+import { Button, createStandaloneToast, Heading, SimpleGrid, Text } from '@chakra-ui/react';
 import React from 'react';
 import Player from '../../classes/Player';
 
@@ -14,6 +14,13 @@ export function displayMazeGameInviteToast(
     toast.close(TOAST_ID);
   }
 
+  const toastTitle = (
+    <>
+      <Heading size='sm'>{`${senderPlayer.userName} has invited you to race`}</Heading>
+      <Text fontSize='sm'>Auto-rejection after 20 seconds</Text>
+    </>
+  );
+
   const acceptRejectButtons = (
     <SimpleGrid columns={2} spacing={10}>
       <Button colorScheme='blackAlpha' onClick={() => onToastResponse(true)}>
@@ -28,7 +35,7 @@ export function displayMazeGameInviteToast(
   if (!toast.isActive(TOAST_ID)) {
     toast({
       id: TOAST_ID,
-      title: `${senderPlayer.userName} has invited you to race (game will be auto-rejected after 20 seconds)`,
+      title: toastTitle,
       description: acceptRejectButtons,
       duration: 20000,
     });
