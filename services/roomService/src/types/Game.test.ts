@@ -4,14 +4,50 @@ import { deleteMazeCompletionTime, getMazeCompletionTime } from "../utils/querie
 import Player from "./Player";
 import { MazeCompletionTimeRow } from "../requestHandlers/CoveyTownRequestHandlers"
 import { MazeCompletionTimeList } from "../CoveyTypes";
+import CoveyTownController from '../lib/CoveyTownController';
+import CoveyTownListener from '../types/CoveyTownListener';
+import CoveyTownsStore from '../lib/CoveyTownsStore';
+
 import Maze from "../lib/Maze";
 
+const mockCoveyListenerTownDestroyed = jest.fn();
+const mockCoveyListenerOtherFns = jest.fn();
+function mockCoveyListener(id: string): CoveyTownListener {
+  return {
+    listeningPlayerID: id,
+    onPlayerDisconnected(removedPlayer: Player): void {
+      mockCoveyListenerOtherFns(removedPlayer);
+    },
+    onPlayerMoved(movedPlayer: Player): void {
+      mockCoveyListenerOtherFns(movedPlayer);
+    },
+    onTownDestroyed() {
+      mockCoveyListenerTownDestroyed();
+    },
+    onPlayerJoined(newPlayer: Player) {
+      mockCoveyListenerOtherFns(newPlayer);
+    },
+    onMazeGameRequested(senderPlayer: Player, recipientPlayer: Player) {
+      mockCoveyListenerOtherFns(senderPlayer, recipientPlayer);
+    },
+    onMazeGameResponded(senderPlayer: Player, recipientPlayer: Player, gameAcceptance: boolean) {
+      mockCoveyListenerOtherFns(senderPlayer, recipientPlayer, gameAcceptance);
+    },
+    onFinishGame(finishedPlayer: Player, score: number, gaveUp: boolean) {
+      mockCoveyListenerOtherFns(finishedPlayer, score, gaveUp);
+    },
+    onFullMazeGameRequested(senderPlayer: Player) {
+      mockCoveyListenerOtherFns(senderPlayer);
+    },
+  };
+}
+
 async function deleteFromDatabase(player1Name: string, player2Name: string) {
-    await pool.query(deleteMazeCompletionTime, [ player1Name ]);
-    await pool.query(deleteMazeCompletionTime, [ player2Name ]);
-    const resultsMapped = await getResults();
-    expect(resultsMapped.find(result => { result.username === player1Name })).toBeUndefined();
-    expect(resultsMapped.find(result => { result.username === player2Name })).toBeUndefined();
+  await pool.query(deleteMazeCompletionTime, [player1Name]);
+  await pool.query(deleteMazeCompletionTime, [player2Name]);
+  const resultsMapped = await getResults();
+  expect(resultsMapped.find(result => { result.username === player1Name })).toBeUndefined();
+  expect(resultsMapped.find(result => { result.username === player2Name })).toBeUndefined();
 }
 
 async function getResults(): Promise<MazeCompletionTimeList> {
@@ -25,41 +61,57 @@ async function getResults(): Promise<MazeCompletionTimeList> {
 }
 
 describe('Maze game tests', () => {
-  it('Game should be added and deleted to maze when game is started and finished', async() => {
+  it('Game should be added and deleted to maze when game is started and finished', async () => {
+
+    const player1Name = nanoid();
+    const player2Name = nanoid();
+
+    const player1 = new Player(player1Name);
+    const player2 = new Player(player2Name);
+    const mockCoveyListener1 = mockCoveyListener(player1.id);
+    const mockCoveyListener2 = mockCoveyListener(player2.id);
+    const gameId = player2.acceptInvite(player1);
+    const townName = `FriendlyNameTest-${nanoid()}`;
+    const townController = new CoveyTownController(townName, false);
+    townController.addPlayer(player1);
+    townController.addPlayer(player2);
+    townController.addTownListener(mockCoveyListener1);
+    townController.addTownListener(mockCoveyListener2);
+    townController.respondToGameInvite(player1.id, player2.id, true);
+    expect(townController.maze.hasGame(gameId)).toEqual(true);
+    await townController.playerFinish(player1.id, -1, true);
+    expect(townController.maze.hasGame(gameId)).toEqual(true);
+    await townController.playerFinish(player2.id, 100, false);
+    expect(townController.maze.hasGame(gameId)).toEqual(false);
+  });
+
+  it('Players should not be able to finish the same game multiple times', async () => {
     const player1Name = nanoid();
     const player2Name = nanoid();
     const player1 = new Player(player1Name);
     const player2 = new Player(player2Name);
     const gameId = player2.acceptInvite(player1);
-    expect(Maze.getInstance().hasGame(gameId)).toEqual(true);
-    await player1.finish(-1, true);
-    expect(Maze.getInstance().hasGame(gameId)).toEqual(true);
-    await player2.finish(100, false);
-    expect(Maze.getInstance().hasGame(gameId)).toEqual(false);
+    let playerStatus = await player1.finish(100, false);
+    if (playerStatus) {
+      expect(playerStatus.opposingPlayerId).toEqual(player2.id);
+      expect(playerStatus.bothPlayersFinished).toEqual(false);
+      expect(playerStatus.gameId).toEqual(gameId);
+    } else {
+      fail();
+    }
+    let player2Status = await player2.finish(-1, false);
+    if (player2Status) {
+      expect(player2Status.opposingPlayerId).toEqual(player1.id);
+      expect(player2Status.bothPlayersFinished).toEqual(true);
+      expect(player2Status.gameId).toEqual(gameId);
+    } else {
+      fail();
+    }
+    playerStatus = await player1.finish(1000, false);
+    player2Status = await player2.finish(1000, false);
+    expect(playerStatus).toBeUndefined();
+    expect(player2Status).toBeUndefined();
   });
-
-  it('Players should not be able to finish the same game multiple times', async() => {
-    const player1Name = nanoid();
-    const player2Name = nanoid();
-    const player1 = new Player(player1Name);
-    const player2 = new Player(player2Name);
-    player2.acceptInvite(player1);
-    await player1.finish(100, false);
-    await player2.finish(-1, false);
-
-    try {
-      await player1.finish(1000, false);
-      fail();
-    } catch(e) {
-      expect(e.message).toEqual('game undefined');
-    }
-    try {
-      await player2.finish(10000, false);
-      fail();
-    } catch(e) {
-      expect(e.message).toEqual('game undefined');
-    }
-  }); 
 
   it('Race where both give up should not push anything to database', async () => {
     const player1Name = nanoid();

@@ -6,19 +6,10 @@ export default class Maze {
   public static readonly CAPACITY: number = 10;
 
   /** The Games in this Maze * */
-  private _gameIds = new Set<string>();
+  public _gameIds = new Set<string>();
 
   /** The leaderboard that keeps track of the Player username and Score * */
   private _leaderboard: Map<string, number>;
-
-  private static _instance: Maze;
-
-  static getInstance(): Maze {
-    if (Maze._instance === undefined) {
-      Maze._instance = new Maze();
-    }
-    return Maze._instance;
-  }
 
   constructor() {
     this._leaderboard = new Map();

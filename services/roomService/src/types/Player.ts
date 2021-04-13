@@ -57,13 +57,15 @@ export default class Player {
    * Called when player has completed the maze
    * Returns the player id of the opposing player if the game exists
    */
-  async finish(timeScore: number, gaveUp: boolean): Promise<string|undefined> {
+  async finish(timeScore: number, gaveUp: boolean): Promise<{ opposingPlayerId: string, bothPlayersFinished: boolean, gameId: string } | undefined> {
     const game = this._game;
     this.resetPlayer(); // make sure that game is removed so that race conditions can't occur trying to remove multiple times
     if (game !== undefined) {
       await game.playerFinish({ userID: this.id, userName: this.userName }, timeScore, gaveUp);
       const opposingPlayerId = game.getOpposingPlayerID(this._id);
-      return opposingPlayerId;
+      const bothPlayersFinished = game.bothPlayersFinished();
+      const gameId = game.getGameId();
+      return { opposingPlayerId, bothPlayersFinished, gameId };
     }
     return undefined;
   }

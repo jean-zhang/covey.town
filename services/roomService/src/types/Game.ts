@@ -1,6 +1,5 @@
 import { PlayerInfo } from '../CoveyTypes';
 import pool from '../dbconnector/pool';
-import Maze from '../lib/Maze';
 import { insertMazeCompletionTime } from '../utils/queries';
 
 /**
@@ -17,11 +16,10 @@ export default class Game {
   constructor(player1ID: string, player2ID: string) {
     this._player1ID = player1ID;
     this._player2ID = player2ID;
-    Maze.getInstance().addGame(this.getGameId());
   }
 
   getOpposingPlayerID(playerID: string): string {
-    return (playerID === this._player1ID)? this._player2ID : this._player1ID;
+    return (playerID === this._player1ID) ? this._player2ID : this._player1ID;
   }
 
   getGameId(): string {
@@ -37,12 +35,9 @@ export default class Game {
         score,
       ]);
     }
-    if (this.bothPlayersFinished()) {
-      Maze.getInstance().removeGame(this.getGameId());
-    }
   }
 
-  private bothPlayersFinished(): boolean {
+  bothPlayersFinished(): boolean {
     return this.finishedPlayers.length >= 2;
   }
 }

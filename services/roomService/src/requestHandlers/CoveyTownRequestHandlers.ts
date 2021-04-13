@@ -301,7 +301,6 @@ export function townSubscriptionHandler(socket: Socket): void {
   socket.on(
     'finishGame', (playerID: string, score: number, gaveUp: boolean) => {
       townController.playerFinish(playerID, score, gaveUp);
-      console.log('finish game backend');
     });
 }
 
