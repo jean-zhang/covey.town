@@ -298,10 +298,9 @@ export function townSubscriptionHandler(socket: Socket): void {
     },
   );
 
-  socket.on(
-    'finishGame', (playerID: string, score: number, gaveUp: boolean) => {
-      townController.playerFinish(playerID, score, gaveUp);
-    });
+  socket.on('finishGame', (playerID: string, score: number, gaveUp: boolean) => {
+    townController.playerFinish(playerID, score, gaveUp);
+  });
 }
 
 export async function mazeTimeHandler(): Promise<ResponseEnvelope<MazeCompletionTimeListResponse>> {

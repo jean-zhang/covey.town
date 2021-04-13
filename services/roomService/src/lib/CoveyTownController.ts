@@ -215,7 +215,11 @@ export default class CoveyTownController {
       }
       const { opposingPlayerId, bothPlayersFinished, gameId } = playStatus;
 
-      const listeners = this._listeners.filter(listener => listener.listeningPlayerID === opposingPlayerId || listener.listeningPlayerID === playerID);
+      const listeners = this._listeners.filter(
+        listener =>
+          listener.listeningPlayerID === opposingPlayerId ||
+          listener.listeningPlayerID === playerID,
+      );
       if (listeners.length !== 2) {
         return false;
       }
@@ -241,8 +245,10 @@ export default class CoveyTownController {
     }
 
     let listeners = this._listeners.filter(
-      listener => listener.listeningPlayerID === recipientPlayerID ||
-        listener.listeningPlayerID === senderPlayerID);
+      listener =>
+        listener.listeningPlayerID === recipientPlayerID ||
+        listener.listeningPlayerID === senderPlayerID,
+    );
 
     if (!this._maze.reachedCapacity()) {
       listeners.forEach(listener => listener.onMazeGameRequested(sender, recipient));

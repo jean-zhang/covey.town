@@ -19,7 +19,7 @@ export default class Game {
   }
 
   getOpposingPlayerID(playerID: string): string {
-    return (playerID === this._player1ID) ? this._player2ID : this._player1ID;
+    return playerID === this._player1ID ? this._player2ID : this._player1ID;
   }
 
   getGameId(): string {
@@ -29,11 +29,7 @@ export default class Game {
   async playerFinish(playerInfo: PlayerInfo, score: number, gaveUp: boolean): Promise<void> {
     this.finishedPlayers.push(playerInfo.userID);
     if (!gaveUp && score > 0) {
-      await pool.query(insertMazeCompletionTime, [
-        playerInfo.userID,
-        playerInfo.userName,
-        score,
-      ]);
+      await pool.query(insertMazeCompletionTime, [playerInfo.userID, playerInfo.userName, score]);
     }
   }
 

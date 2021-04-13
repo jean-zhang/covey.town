@@ -57,7 +57,12 @@ export default class Player {
    * Called when player has completed the maze
    * Returns the player id of the opposing player if the game exists
    */
-  async finish(timeScore: number, gaveUp: boolean): Promise<{ opposingPlayerId: string, bothPlayersFinished: boolean, gameId: string } | undefined> {
+  async finish(
+    timeScore: number,
+    gaveUp: boolean,
+  ): Promise<
+    { opposingPlayerId: string; bothPlayersFinished: boolean; gameId: string } | undefined
+    > {
     const game = this._game;
     this.resetPlayer(); // make sure that game is removed so that race conditions can't occur trying to remove multiple times
     if (game !== undefined) {
