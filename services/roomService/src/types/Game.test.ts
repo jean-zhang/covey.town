@@ -7,34 +7,33 @@ import CoveyTownListener from '../types/CoveyTownListener';
 import { deleteMazeCompletionTime, getMazeCompletionTime } from '../utils/queries';
 import Player from './Player';
 
-const mockCoveyListenerTownDestroyed = jest.fn();
-const mockCoveyListenerOtherFns = jest.fn();
+const mockCoveyListenerFns = jest.fn();
 function mockCoveyListener(id: string): CoveyTownListener {
   return {
     listeningPlayerID: id,
     onPlayerDisconnected(removedPlayer: Player): void {
-      mockCoveyListenerOtherFns(removedPlayer);
+      mockCoveyListenerFns(removedPlayer);
     },
     onPlayerMoved(movedPlayer: Player): void {
-      mockCoveyListenerOtherFns(movedPlayer);
+      mockCoveyListenerFns(movedPlayer);
     },
     onTownDestroyed() {
-      mockCoveyListenerTownDestroyed();
+      mockCoveyListenerFns();
     },
     onPlayerJoined(newPlayer: Player) {
-      mockCoveyListenerOtherFns(newPlayer);
+      mockCoveyListenerFns(newPlayer);
     },
     onMazeGameRequested(senderPlayer: Player, recipientPlayer: Player) {
-      mockCoveyListenerOtherFns(senderPlayer, recipientPlayer);
+      mockCoveyListenerFns(senderPlayer, recipientPlayer);
     },
     onMazeGameResponded(senderPlayer: Player, recipientPlayer: Player, gameAcceptance: boolean) {
-      mockCoveyListenerOtherFns(senderPlayer, recipientPlayer, gameAcceptance);
+      mockCoveyListenerFns(senderPlayer, recipientPlayer, gameAcceptance);
     },
     onFinishGame(finishedPlayer: Player, score: number, gaveUp: boolean) {
-      mockCoveyListenerOtherFns(finishedPlayer, score, gaveUp);
+      mockCoveyListenerFns(finishedPlayer, score, gaveUp);
     },
     onFullMazeGameRequested(senderPlayer: Player) {
-      mockCoveyListenerOtherFns(senderPlayer);
+      mockCoveyListenerFns(senderPlayer);
     },
   };
 }
