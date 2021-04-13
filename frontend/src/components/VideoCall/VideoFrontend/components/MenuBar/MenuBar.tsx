@@ -86,19 +86,15 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
               <ToggleVideoButton disabled={isReconnecting} setMediaError={props.setMediaError} />
               <FormControlLabel
                 control={
-                <Switch
-                  checked={appState.enableInvite}
-                  onChange={
-                    event => {
-                    event.stopPropagation();
-                    appState.emitRaceSettings(appState.myPlayerID, appState.enableInvite);
-                  }}
-                  name="racing-config"
-                  color="primary"
-                />
+                  <Switch
+                    checked={appState.enableInvite}
+                    onChange={() => { appState.emitRaceSettings(appState.myPlayerID, appState.enableInvite); }}
+                    name="racing-config"
+                    color="primary"
+                  />
                 }
-              label="Enable Race Invites"/>
-              
+                label="Enable Race Invites" />
+
               <Hidden smDown>
                 {!isSharingScreen && <ToggleScreenShareButton disabled={isReconnecting} />}
               </Hidden>

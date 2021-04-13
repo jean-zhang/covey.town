@@ -15,7 +15,7 @@ export default class Player {
     this._id = id;
     this._userName = userName;
     this.location = location;
-    if(enableInvite !== null) {
+    if (enableInvite !== null) {
       this._enableInvite = enableInvite;
     }
   }
