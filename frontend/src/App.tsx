@@ -244,7 +244,9 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       closedInstructions = false;
       return defaultAppState();
     case 'toggleQuit':
-      nextState.toggleQuit = !state.toggleQuit;
+      if (state.gameInfo.gameStatus === 'playingGame') {
+        nextState.toggleQuit = !state.toggleQuit;
+      }
       break;
     case 'exitMaze':
       nextState.toggleQuit = false;
