@@ -3,7 +3,7 @@ import Player, { UserLocation } from './classes/Player';
 import TownsServiceClient from './classes/TownsServiceClient';
 
 export type CoveyEvent = 'playerMoved' | 'playerAdded' | 'playerRemoved';
-export type GameStatus = 'invitePending' | 'noGame' | 'playingGame';
+export type GameStatus = 'invitePending' | 'noGame' | 'playingGame' | 'gameStarted' | 'gameEnded';
 
 export type VideoRoom = {
   twilioID: string;
@@ -48,6 +48,5 @@ export type CoveyAppState = {
   finishGame: (score: number, gaveUp: boolean) => void;
   showInstructions: boolean;
   showLeaderboard: boolean;
-  gameStarted: boolean;
-  toggleGameStarted: (gameStarted: boolean) => void;
+  updateGameInfoStatus: (gameStatus: GameStatus) => void;
 };

@@ -112,9 +112,8 @@ function wrappedTownSelection() {
           quitGame: () => {},
           showInstructions: false,
           showLeaderboard: false,
-          gameStarted: false,
-          toggleGameStarted: () => {},
           finishGame: () => {},
+          updateGameInfoStatus: () => {},
         }}>
         <TownSelection doLogin={doLoginMock} />
       </CoveyAppContext.Provider>

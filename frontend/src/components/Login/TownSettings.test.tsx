@@ -63,9 +63,8 @@ function wrappedTownSettings() {
           quitGame: () => {},
           showInstructions: false,
           showLeaderboard: false,
-          gameStarted: false,
-          toggleGameStarted: () => {},
           finishGame: () => {},
+          updateGameInfoStatus: () => {},
         }}>
         <TownSettings />
       </CoveyAppContext.Provider>

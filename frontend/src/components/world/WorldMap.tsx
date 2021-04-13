@@ -508,7 +508,7 @@ class CoveyGameScene extends Phaser.Scene {
 export default function WorldMap(): JSX.Element {
   const video = Video.instance();
   const {
-    emitMovement, players, quitGame, gameStarted, showInstructions, gameInfo, finishGame, toggleGameStarted,
+    emitMovement, players, quitGame, showInstructions, gameInfo, finishGame, updateGameInfoStatus,
   } = useCoveyAppState();
   const [gameScene, setGameScene] = useState<CoveyGameScene>();
   useEffect(() => {
@@ -547,10 +547,10 @@ export default function WorldMap(): JSX.Element {
     gameScene?.updatePlayersLocations(players);
   }, [players, deepPlayers, gameScene]);
   useEffect(() => {
-    if (gameStarted) {
+    if (gameInfo.gameStatus === 'gameStarted') {
       gameScene?.startMazeTimer();
     }
-  }, [gameStarted, gameScene]);
+  }, [gameInfo.gameStatus, gameScene]);
 
   // pauses the game and prevents movement while instructions are shown
   // use effect to catch when game info updates to playingGame -> teleport to maze start
@@ -566,14 +566,14 @@ export default function WorldMap(): JSX.Element {
             gameScene.pause();
           }
         }
-        if (gameStarted && gameInfo.gameStatus === 'noGame') {
+        if (gameInfo.gameStatus === 'gameEnded') {
           gameScene.teleport(false);
           gameScene.resetStartTime();
-          toggleGameStarted(false);
+          updateGameInfoStatus('noGame');
         }
       }
     }
-  }, [gameScene, gameInfo.gameStatus, showInstructions, gameStarted, toggleGameStarted]);
+  }, [gameScene, gameInfo.gameStatus, showInstructions, updateGameInfoStatus]);
 
   return <div id="map-container"/>;
 }

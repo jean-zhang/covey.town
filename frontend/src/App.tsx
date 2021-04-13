@@ -68,7 +68,7 @@ type CoveyAppUpdate =
         toggleQuit: boolean;
         quitGame: () => void;
         finishGame: (score: number, gaveUp: boolean) => void;
-        toggleGameStarted: (gameStarted: boolean) => void;
+        updateGameInfoStatus: (gameStatus: GameStatus) => void;
       };
     }
   | { action: 'addPlayer'; player: Player }
@@ -77,7 +77,7 @@ type CoveyAppUpdate =
   | { action: 'weMoved'; location: UserLocation }
   | { action: 'disconnect' }
   | { action: 'toggleQuit' }
-  | {action: 'toggleGameStarted'; gameStarted: boolean }
+  | {action: 'updateGameInfoStatus'; gameStatus: GameStatus }
   | { action: 'exitMaze' }
   | { action: 'closeInstructions' }
   | { action: 'toggleLeaderboard' }
@@ -118,8 +118,7 @@ function defaultAppState(): CoveyAppState {
     finishGame: () => {},
     showInstructions: false,
     showLeaderboard: false,
-    gameStarted: false,
-    toggleGameStarted: () => {},
+    updateGameInfoStatus: () => {},
   };
 }
 let closedInstructions = false;
@@ -146,8 +145,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     finishGame: state.finishGame,
     showInstructions: state.showInstructions,
     showLeaderboard: state.showLeaderboard,
-    gameStarted: state.gameStarted,
-    toggleGameStarted: state.toggleGameStarted,
+    updateGameInfoStatus: state.updateGameInfoStatus,
   };
 
   function calculateNearbyPlayers(players: Player[], currentLocation: UserLocation) {
@@ -189,7 +187,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.toggleQuit = update.data.toggleQuit;
       nextState.quitGame = update.data.quitGame;
       nextState.finishGame = update.data.finishGame;
-      nextState.toggleGameStarted = update.data.toggleGameStarted;
+      nextState.updateGameInfoStatus = update.data.updateGameInfoStatus;
       break;
     case 'addPlayer':
       nextState.players = nextState.players.concat([update.player]);
@@ -233,7 +231,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     case 'closeInstructions':
       nextState.showInstructions = false;
       closedInstructions = true;
-      nextState.gameStarted = true;
+      nextState.gameInfo.gameStatus = 'gameStarted';
       break;
     case 'toggleLeaderboard':
       nextState.showLeaderboard = !state.showLeaderboard;
@@ -244,17 +242,17 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       closedInstructions = false;
       return defaultAppState();
     case 'toggleQuit':
-      if (state.gameInfo.gameStatus === 'playingGame') {
+      if (state.gameInfo.gameStatus === 'gameStarted') {
         nextState.toggleQuit = !state.toggleQuit;
       }
       break;
     case 'exitMaze':
       nextState.toggleQuit = false;
-      nextState.gameInfo.gameStatus = 'noGame';
+      nextState.gameInfo.gameStatus = 'gameEnded';
       closedInstructions = false;
       break;
-    case 'toggleGameStarted':
-      nextState.gameStarted = update.gameStarted;
+    case 'updateGameInfoStatus':
+      nextState.gameInfo.gameStatus = update.gameStatus;
       break;
     case 'updateGameInfo':
       nextState.gameInfo = {
@@ -339,8 +337,8 @@ async function GameController(
     dispatchAppUpdate({ action: 'exitMaze'});
     emitFinishGame(score, gaveUp);
   }
-  const toggleGameStarted = (gameStarted: boolean) => {
-    dispatchAppUpdate({ action: 'toggleGameStarted', gameStarted });
+  const updateGameInfoStatus = (gameStatus: GameStatus) => {
+    dispatchAppUpdate({ action: 'updateGameInfoStatus', gameStatus });
   }
   socket.on('receivedGameInvite', (senderPlayer: ServerPlayer, recipientPlayer: ServerPlayer) => {
     const sender = Player.fromServerPlayer(senderPlayer);
@@ -414,7 +412,7 @@ async function GameController(
       toggleQuit: false,
       quitGame,
       finishGame,
-      toggleGameStarted,
+      updateGameInfoStatus,
     },
   });
   return true;
