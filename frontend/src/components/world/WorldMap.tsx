@@ -37,6 +37,8 @@ class CoveyGameScene extends Phaser.Scene {
 
   private quitGame: () => void;
 
+  private toggleShowLeaderboard: () => void;
+
   private timeLabel?: Phaser.GameObjects.Text;
 
   private mazeStartTime: number;
@@ -46,7 +48,6 @@ class CoveyGameScene extends Phaser.Scene {
   private mazeStart?: Phaser.GameObjects.Components.Transform;
 
   private mazeFinish?: Phaser.GameObjects.Components.Transform;
-
 
   private readonly textStyle = {
     font: '18px monospace',
@@ -58,12 +59,13 @@ class CoveyGameScene extends Phaser.Scene {
     backgroundColor: '#ffffff',
   };
 
-  constructor(video: Video, emitMovement: (loc: UserLocation) => void, quitGame: () => void) {
+  constructor(video: Video, emitMovement: (loc: UserLocation) => void, quitGame: () => void, toggleShowLeaderboard: () => void) {
     super('PlayGame');
     this.video = video;
     this.emitMovement = emitMovement;
     this.quitGame = quitGame;
     this.mazeStartTime = -1;
+    this.toggleShowLeaderboard = toggleShowLeaderboard;
   }
 
   isPaused() {
@@ -300,6 +302,20 @@ class CoveyGameScene extends Phaser.Scene {
     (obj) => obj.name === 'Maze Finish') as unknown as
     Phaser.GameObjects.Components.Transform;
 
+    // leaderboard
+    // this.leaderboard = map.findObject('Objects', 
+    // (obj) => obj.name === 'Leaderboard') as unknown as
+    // Phaser.GameObjects.Components.Transform;
+    const leaderboard = map.createFromObjects('Objects', { name: 'Leaderboard' });
+    this.physics.world.enable(leaderboard, 0);
+    leaderboard.forEach(board => {
+      const sprite = board as Phaser.GameObjects.Sprite;
+      sprite.y += 2 * sprite.height; // Phaser and Tiled seem to disagree on which corner is y
+      sprite.setVisible(true); // Comment this out to see the transporter rectangles drawn on
+                                // the map
+      }
+    );
+
     // Find all of the transporters, add them to the physics engine
     const transporters = map.createFromObjects('Objects',
       { name: 'transporter' })
@@ -315,18 +331,6 @@ class CoveyGameScene extends Phaser.Scene {
                                   // the map
       }
     );
-
-    const labels = map.filterObjects('Objects',(obj)=>obj.name==='label');
-    labels.forEach(label => {
-      if(label.x && label.y){
-        this.add.text(label.x, label.y, label.text.text, {
-          color: '#FFFFFF',
-          backgroundColor: '#000000',
-        })
-      }
-    });
-
-
 
     const cursorKeys = this.input.keyboard.createCursorKeys();
     this.cursors.push(cursorKeys);
@@ -378,6 +382,19 @@ class CoveyGameScene extends Phaser.Scene {
 
     // Watch the player and worldLayer for collisions, for the duration of the scene:
     this.physics.add.collider(sprite, worldLayer);
+
+        /* Configure physics overlap behavior for when the player steps into
+    a transporter area. If you enter a transporter and press 'space', you'll
+    transport to the location on the map that is referenced by the 'target' property
+    of the transporter.
+     */
+    
+    this.physics.add.overlap(sprite, leaderboard,
+      () => {
+      if (cursorKeys.space.isDown && this.player) {
+        this.toggleShowLeaderboard();
+      }
+    })
 
     // Create the player's walking animations from the texture atlas. These are stored in the global
     // animation manager so any sprite can access them.
@@ -458,8 +475,8 @@ class CoveyGameScene extends Phaser.Scene {
   }
 
   teleport(intoMaze: boolean) {
-    if(this.player && this.lastLocation) {
-      if(intoMaze && this.mazeStart) {
+    if (this.player && this.lastLocation) {
+      if (intoMaze && this.mazeStart) {
         this.player.sprite.x = this.mazeStart.x + 20;
         this.player.sprite.y = this.mazeStart.y;
         this.lastLocation.x = this.mazeStart.x  + 20;
@@ -481,7 +498,7 @@ class CoveyGameScene extends Phaser.Scene {
 export default function WorldMap(): JSX.Element {
   const video = Video.instance();
   const {
-    emitMovement, players, quitGame, gameStarted, showInstructions, gameInfo
+    emitMovement, players, quitGame, gameStarted, showInstructions, gameInfo, toggleShowLeaderboard
   } = useCoveyAppState();
   const [gameScene, setGameScene] = useState<CoveyGameScene>();
   useEffect(() => {
@@ -500,7 +517,7 @@ export default function WorldMap(): JSX.Element {
 
     const game = new Phaser.Game(config);
     if (video) {
-      const newGameScene = new CoveyGameScene(video, emitMovement, quitGame);
+      const newGameScene = new CoveyGameScene(video, emitMovement, quitGame, toggleShowLeaderboard);
       setGameScene(newGameScene);
       game.scene.add('coveyBoard', newGameScene, true);
       video.pauseGame = () => {
@@ -513,7 +530,7 @@ export default function WorldMap(): JSX.Element {
     return () => {
       game.destroy(true);
     };
-  }, [video, emitMovement, quitGame]);
+  }, [video, emitMovement, quitGame, toggleShowLeaderboard]);
 
   const deepPlayers = JSON.stringify(players);
   useEffect(() => {

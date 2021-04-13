@@ -65,6 +65,8 @@ type CoveyAppUpdate =
         gameInfo: GameInfo;
         toggleQuit: boolean;
         quitGame: () => void;
+        showLeaderboard: boolean;
+        toggleShowLeaderboard: () => void;
       };
     }
   | { action: 'addPlayer'; player: Player }
@@ -111,6 +113,7 @@ function defaultAppState(): CoveyAppState {
     quitGame: () => {},
     showInstructions: false,
     showLeaderboard: false,
+    toggleShowLeaderboard: () => {},
     gameStarted: false,
   };
 }
@@ -136,6 +139,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     quitGame: state.quitGame,
     showInstructions: state.showInstructions,
     showLeaderboard: state.showLeaderboard,
+    toggleShowLeaderboard: state.toggleShowLeaderboard,
     gameStarted: state.gameStarted,
   };
 
@@ -176,6 +180,8 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.players = update.data.players;
       nextState.toggleQuit = update.data.toggleQuit;
       nextState.quitGame = update.data.quitGame;
+      nextState.showLeaderboard = update.data.showLeaderboard;
+      nextState.toggleShowLeaderboard = update.data.toggleShowLeaderboard;
       break;
     case 'addPlayer':
       nextState.players = nextState.players.concat([update.player]);
@@ -311,6 +317,9 @@ async function GameController(
   const quitGame = () => {
     dispatchAppUpdate({ action: 'toggleQuit' });
   };
+  const toggleShowLeaderboard = () => {
+    dispatchAppUpdate({ action: 'toggleLeaderboard' });
+  };
   socket.on('receivedGameInvite', (senderPlayer: ServerPlayer, recipientPlayer: ServerPlayer) => {
     const sender = Player.fromServerPlayer(senderPlayer);
     const recipient = Player.fromServerPlayer(recipientPlayer);
@@ -377,6 +386,8 @@ async function GameController(
       players: initData.currentPlayers.map(sp => Player.fromServerPlayer(sp)),
       toggleQuit: false,
       quitGame,
+      showLeaderboard: false,
+      toggleShowLeaderboard,
     },
   });
   return true;
