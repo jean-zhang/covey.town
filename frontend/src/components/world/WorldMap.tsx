@@ -198,7 +198,7 @@ class CoveyGameScene extends Phaser.Scene {
     }
     if (this.lastLocation && this.mazeFinish &&
         Math.abs(this.lastLocation.x - this.mazeFinish.x) < 10 &&
-        Math.abs(this.lastLocation.y - this.mazeFinish.y) < 10) {
+        Math.abs(this.lastLocation.y - 1181) < 10) { // TODO: change 1181 to this.mazeFinish.y after Linda merges her changes
       this.finishMaze(false);
       return;
     }
