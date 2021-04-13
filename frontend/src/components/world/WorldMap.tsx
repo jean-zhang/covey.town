@@ -302,17 +302,13 @@ class CoveyGameScene extends Phaser.Scene {
     (obj) => obj.name === 'Maze Finish') as unknown as
     Phaser.GameObjects.Components.Transform;
 
-    // leaderboard
-    // this.leaderboard = map.findObject('Objects', 
-    // (obj) => obj.name === 'Leaderboard') as unknown as
-    // Phaser.GameObjects.Components.Transform;
     const leaderboard = map.createFromObjects('Objects', { name: 'Leaderboard' });
     this.physics.world.enable(leaderboard, 0);
     leaderboard.forEach(board => {
       const sprite = board as Phaser.GameObjects.Sprite;
-      sprite.y += 2 * sprite.height; // Phaser and Tiled seem to disagree on which corner is y
-      sprite.setVisible(true); // Comment this out to see the transporter rectangles drawn on
-                                // the map
+      // make hitbox larger
+      sprite.setScale(1.3, 1.3);
+      sprite.setVisible(false);
       }
     );
 
@@ -384,9 +380,8 @@ class CoveyGameScene extends Phaser.Scene {
     this.physics.add.collider(sprite, worldLayer);
 
         /* Configure physics overlap behavior for when the player steps into
-    a transporter area. If you enter a transporter and press 'space', you'll
-    transport to the location on the map that is referenced by the 'target' property
-    of the transporter.
+    leaderboard hit area. If you're inside the hit area and press 'space', you'll
+    open the leaderboard modal.
      */
     
     this.physics.add.overlap(sprite, leaderboard,
