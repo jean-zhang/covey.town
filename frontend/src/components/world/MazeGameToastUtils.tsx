@@ -28,9 +28,9 @@ export function displayMazeGameInviteToast(
   if (!toast.isActive(TOAST_ID)) {
     toast({
       id: TOAST_ID,
-      title: `${senderPlayer.userName} has invited you to race, accept?`,
+      title: `${senderPlayer.userName} has invited you to race (game will be auto-rejected after 20 seconds)`,
       description: acceptRejectButtons,
-      duration: null,
+      duration: 20000,
     });
   }
 }

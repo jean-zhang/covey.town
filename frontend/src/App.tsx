@@ -306,10 +306,14 @@ async function GameController(
     const recipient = Player.fromServerPlayer(recipientPlayer);
     const onGameResponse = (gameAcceptance: boolean) =>
       emitInviteResponse(sender, recipient, gameAcceptance);
-    if(gamePlayerID === senderPlayer._id) {
+    if (gamePlayerID === sender.id) {
       displayInviteSentToast(recipient);
     } else {
       displayMazeGameInviteToast(sender, onGameResponse);
+      // If player does not respond in 20 seconds, auto reject
+      setTimeout(() => {
+        onGameResponse(false);
+      }, 20000)
       dispatchAppUpdate({
       action: 'updateGameInfo',
       data: {
