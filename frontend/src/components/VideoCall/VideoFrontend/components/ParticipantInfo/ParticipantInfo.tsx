@@ -281,6 +281,7 @@ export default function ParticipantInfo({
                   }
                 }
               }}
+              isDisabled={appState.gameInfo.gameStatus !== 'noGame'}
               size='sm'
               width='100px'>
               Invite to race
