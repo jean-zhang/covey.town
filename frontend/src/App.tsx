@@ -27,11 +27,10 @@ import useConnectionOptions from './components/VideoCall/VideoFrontend/utils/use
 import VideoOverlay from './components/VideoCall/VideoOverlay/VideoOverlay';
 import Instructions from './components/world/Instructions';
 import {
+  displayInviteSentToast,
+  displayMazeFullGameResponseToast,
   displayMazeGameInviteToast,
   displayMazeGameResponseToast,
-  displayMazeFullGameResponseToast,
-  displayInviteSentToast,
-  AUTO_REJECT_GAME_SECONDS,
 } from './components/world/MazeGameToastUtils';
 import QuitGame from './components/world/QuitGame';
 import WorldMap from './components/world/WorldMap';
@@ -311,34 +310,27 @@ async function GameController(
       displayInviteSentToast(recipient);
     } else {
       displayMazeGameInviteToast(sender, onGameResponse);
-      // If player does not respond in 20 seconds, auto reject
-      setTimeout(() => {
-        onGameResponse(false);
-      }, AUTO_REJECT_GAME_SECONDS * 1000)
-      dispatchAppUpdate({
-      action: 'updateGameInfo',
-      data: {
-        gameStatus: 'invitePending',
-        senderPlayer: sender,
-        recipientPlayer: recipient,
-      },
-    });
-  }
-  });
-  socket.on(
-    'mazeFullGameResponse',
-    (senderPlayer: ServerPlayer) => {
-      const sender = Player.fromServerPlayer(senderPlayer);
-      displayMazeFullGameResponseToast();
       dispatchAppUpdate({
         action: 'updateGameInfo',
         data: {
-          gameStatus: 'noGame',
+          gameStatus: 'invitePending',
           senderPlayer: sender,
+          recipientPlayer: recipient,
         },
       });
-    },
-  );
+    }
+  });
+  socket.on('mazeFullGameResponse', (senderPlayer: ServerPlayer) => {
+    const sender = Player.fromServerPlayer(senderPlayer);
+    displayMazeFullGameResponseToast();
+    dispatchAppUpdate({
+      action: 'updateGameInfo',
+      data: {
+        gameStatus: 'noGame',
+        senderPlayer: sender,
+      },
+    });
+  });
   socket.on(
     'mazeGameResponse',
     (senderPlayer: ServerPlayer, recipientPlayer: ServerPlayer, gameAcceptance: boolean) => {

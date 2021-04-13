@@ -12,6 +12,11 @@ export function displayMazeGameInviteToast(
   const TOAST_ID = senderPlayer.id;
   const toast = createStandaloneToast();
 
+  // If player does not respond in 20 seconds, auto reject
+  setTimeout(() => {
+    onGameResponse(false);
+  }, AUTO_REJECT_GAME_SECONDS * 1000);
+
   function onToastResponse(gameAcceptance: boolean) {
     onGameResponse(gameAcceptance);
     toast.close(TOAST_ID);
