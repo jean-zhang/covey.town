@@ -39,6 +39,7 @@ export type CoveyAppState = {
     recipientPlayer: Player,
     gameAcceptance: boolean,
   ) => void;
+  emitFinishGame: (score: number, gaveUp: boolean) => void;
   gameInfo: GameInfo;
   socket: Socket | null;
   apiClient: TownsServiceClient;
