@@ -93,7 +93,6 @@ class CoveyGameScene extends Phaser.Scene {
     }
     players.forEach((p) => {
       this.updatePlayerLocation(p);
-      // Tried here
     });
     // Remove disconnected players from board
     const disconnectedPlayers = this.players.filter(
@@ -113,18 +112,6 @@ class CoveyGameScene extends Phaser.Scene {
         ),
       );
     }
-  }
-
-  updatePlayersLabels(players: Player[]) {
-    if (!this.ready) {
-      this.players = players;
-      return;
-    }
-    this.players.forEach((p) => {
-      if (p.label) {
-        p.label.setText(generateDisplayUserName(p.hasCompletedMaze, p.userName));
-      }
-    })
   }
 
   updatePlayerLocation(player: Player) {
@@ -151,8 +138,7 @@ class CoveyGameScene extends Phaser.Scene {
           .sprite(0, 0, 'atlas', 'misa-front')
           .setSize(30, 30)
           .setOffset(0, 30);
-        // Tried here
-        const label = this.add.text(0, 0, generateDisplayUserName(player.hasCompletedMaze, player.userName), {
+        const label = this.add.text(0, 0, myPlayer.userName, {
           font: '18px monospace',
           color: '#000000',
           backgroundColor: '#ffffff',
@@ -165,7 +151,7 @@ class CoveyGameScene extends Phaser.Scene {
       sprite.setY(player.location.y);
       myPlayer.label?.setX(player.location.x);
       myPlayer.label?.setY(player.location.y - 20);
-      // Tried here
+      myPlayer.label?.setText(generateDisplayUserName(player.hasCompletedMaze, player.userName));
       if (player.location.moving) {
         sprite.anims.play(`misa-${player.location.rotation}-walk`, true);
       } else {
@@ -222,8 +208,6 @@ class CoveyGameScene extends Phaser.Scene {
       return;
     }
 
-    // Tried here
-
     if (this.player && this.cursors) {
       const speed = 175;
       const prevVelocity = this.player.sprite.body.velocity.clone();
@@ -271,7 +255,7 @@ class CoveyGameScene extends Phaser.Scene {
       const isMoving = primaryDirection !== undefined;
       this.player.label.setX(body.x);
       this.player.label.setY(body.y - 20);
-      // Tried here
+
       if (!this.lastLocation
         || this.lastLocation.x !== body.x
         || this.lastLocation.y !== body.y
@@ -477,7 +461,7 @@ class CoveyGameScene extends Phaser.Scene {
     if (this.players.length) {
       // Some players got added to the queue before we were ready, make sure that they have
       // sprites....
-      this.players.forEach((p) => {this.updatePlayerLocation(p)});
+      this.players.forEach((p) => this.updatePlayerLocation(p));
     }
   }
 
@@ -564,13 +548,11 @@ export default function WorldMap(): JSX.Element {
     };
   }, [video, emitMovement, quitGame, finishGame]);
 
-  // if this is outside a useEffect, does it ever actually update?
   const deepPlayers = JSON.stringify(players);
   useEffect(() => {
     gameScene?.updatePlayersLocations(players);
-    // players doesn't appear to sync up with appState.players, but this does get called often
-    gameScene?.updatePlayersLabels(players);
   }, [players, deepPlayers, gameScene]);
+
   useEffect(() => {
     if (gameInfo.gameStatus === 'gameStarted') {
       gameScene?.startMazeTimer();

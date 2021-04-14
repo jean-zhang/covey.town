@@ -80,6 +80,7 @@ type CoveyAppUpdate =
   | { action: 'toggleRaceSettings' }
   | { action: 'updatePlayerRaceSettings'; player: Player }
   | { action: 'toggleLeaderboard' }
+  | { action: 'updatePlayerHasCompletedMaze'; player: Player }
   | {
       action: 'updateGameInfo';
       data: {
@@ -197,8 +198,6 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       updatePlayer = nextState.players.find(p => p.id === update.player.id);
       if (updatePlayer) {
         updatePlayer.location = update.player.location;
-        // hacky fix -- while we have the server player, lets update their completed maze status here
-        updatePlayer.hasCompletedMaze = update.player.hasCompletedMaze;
       } else {
         nextState.players = nextState.players.concat([update.player]);
       }
@@ -211,7 +210,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       }
       break;
     case 'updatePlayerRaceSettings':
-      updatePlayer = nextState.players.find(p => p.id === update.player.id)
+      updatePlayer = nextState.players.find(p => p.id === update.player.id);
       if (updatePlayer) {
         updatePlayer.enableInvite = update.player.enableInvite;
       }
@@ -276,6 +275,12 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
         if (!closedInstructions) {
           nextState.showInstructions = true;
         }
+      }
+      break;
+    case 'updatePlayerHasCompletedMaze':
+      updatePlayer = nextState.players.find(p => p.id === update.player.id);
+      if (updatePlayer) {
+        updatePlayer.hasCompletedMaze = update.player.hasCompletedMaze;
       }
       break;
     default:
@@ -415,6 +420,10 @@ async function GameController(
   socket.on('playerFinished', (finishedPlayer: ServerPlayer, score: number, gaveUp: boolean) => {
     const player = Player.fromServerPlayer(finishedPlayer);
     displayPlayerFinishedToast(player, score, gaveUp);
+    dispatchAppUpdate({
+      action: 'updatePlayerHasCompletedMaze',
+      player,
+    });
   });
 
   dispatchAppUpdate({
