@@ -49,10 +49,11 @@ export default interface CoveyTownListener {
   /**
    * Called when a player has finished a game to notify both game players
    * @param finishedPlayer The player who finished
+   * @param partnerPlayer The partner who needs to be notified
    * @param score The score of the player, if applicable (will be -1 if not)
    * @param gaveUp Whether or not the player gave up
    */
-  onFinishGame(finishedPlayer: Player, score: number, gaveUp: boolean): void;
+  onFinishGame(finishedPlayer: Player, partnerPlayer: Player, score: number, gaveUp: boolean): void;
 
   /**
    * Called when a player updates their racing settings
@@ -61,7 +62,7 @@ export default interface CoveyTownListener {
    */
   onUpdatePlayerRaceSettings(senderPlayer: Player, raceSettings: boolean): void;
 
-  /** 
+  /**
    * Called when a player has requested to play a game but the Maze is full
    */
   onFullMazeGameRequested(senderPlayer: Player): void;
