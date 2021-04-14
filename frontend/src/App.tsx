@@ -31,6 +31,9 @@ import VideoOverlay from './components/VideoCall/VideoOverlay/VideoOverlay';
 import Instructions from './components/world/Instructions';
 import LeaderboardModal from './components/world/LeaderboardModal';
 import {
+  dismissAllToasts,
+  dismissToastById,
+  displayInviteExpiredResponse,
   displayInviteSent,
   displayMazeFullGameResponse,
   displayMazeGameInviteToast,
@@ -224,9 +227,15 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
         nextState.nearbyPlayers = state.nearbyPlayers;
       }
       break;
-    case 'playerDisconnect':
-      nextState.players = nextState.players.filter(player => player.id !== update.player.id);
-
+    case 'playerDisconnect':  
+    nextState.players = nextState.players.filter(player => player.id !== update.player.id);
+    if (state.gameInfo.senderPlayer && state.gameInfo.senderPlayer.id === update.player.id) {
+      dismissToastById(update.player.id);
+      displayInviteExpiredResponse(update.player);
+    }
+    if (state.gameInfo.recipientPlayer && state.gameInfo.recipientPlayer.id === update.player.id) {
+      displayInviteExpiredResponse(update.player);
+    }  
       nextState.nearbyPlayers = calculateNearbyPlayers(
         nextState.players,
         nextState.currentLocation,
@@ -244,6 +253,10 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.showLeaderboard = !state.showLeaderboard;
       break;
     case 'disconnect':
+      dismissAllToasts();
+      if (state.gameInfo.gameStatus === 'invitePending') {
+        state.socket?.emit('sendGameInviteResponse', state.gameInfo?.senderPlayer?.id, state.gameInfo?.recipientPlayer?.id, false);
+      }
       state.socket?.emit('finishGame', state.myPlayerID, -1, true);
       state.socket?.disconnect();
       closedInstructions = false;
