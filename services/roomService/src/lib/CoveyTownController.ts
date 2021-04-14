@@ -204,7 +204,9 @@ export default class CoveyTownController {
     const updatePlayer = this._players.find(player => player.id === playerId);
     if (updatePlayer) {
       updatePlayer.enableInvite = enabled;
-      this._listeners.forEach(listener => listener.onUpdatePlayerRaceSettings(updatePlayer, enabled));
+      this._listeners.forEach(listener =>
+        listener.onUpdatePlayerRaceSettings(updatePlayer, enabled),
+      );
     }
   }
 
@@ -219,30 +221,27 @@ export default class CoveyTownController {
     if (!gaveUp) {
       finishedPlayer.hasCompletedMaze = true;
     }
-    
-    try {
-      const playStatus = await finishedPlayer.finish(score, gaveUp);
-      if (!playStatus) {
-        return false;
-      }
-      const { opposingPlayerID, bothPlayersFinished, gameID } = playStatus;
 
-      const listeners = this._listeners.filter(
-        listener =>
-          listener.listeningPlayerID === opposingPlayerID ||
-          listener.listeningPlayerID === playerID,
-      );
-      if (listeners.length !== 2) {
-        return false;
-      }
-      if (bothPlayersFinished) {
-        this._maze.removeGame(gameID);
-      }
-      listeners.forEach(listener => listener.onFinishGame(finishedPlayer, score, gaveUp));
-      return true;
-    } catch (e) {
+    const playStatus = await finishedPlayer.finish(score, gaveUp);
+    if (!playStatus) {
       return false;
     }
+
+    const { opposingPlayerID, bothPlayersFinished, gameID } = playStatus;
+    const opposingPlayer = this._players.find(player => player.id === opposingPlayerID);
+
+    if (!finishedPlayer || !opposingPlayer) {
+      return false;
+    }
+
+    if (bothPlayersFinished) {
+      this._maze.removeGame(gameID);
+    }
+
+    this._listeners.forEach(listener =>
+      listener.onFinishGame(finishedPlayer, opposingPlayer, score, gaveUp),
+    );
+    return true;
   }
 
   /**
