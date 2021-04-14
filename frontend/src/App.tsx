@@ -446,7 +446,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
   const [currentMazeCompletionList, setCurrentMazeCompletionList] = useState<MazeCompletionInfo[]>(
     [],
   );
-  const { emitFinishGame } = appState;
+  const { emitFinishGame, sessionToken, toggleQuit, showInstructions, showLeaderboard, apiClient, nearbyPlayers } = appState;
 
   const setupGameController = useCallback(
     async (initData: TownJoinResponse) => {
@@ -467,10 +467,10 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
   }, [dispatchAppUpdate, setOnDisconnect]);
 
   const updateMazeCompletionTimes = useCallback(() => {
-    appState.apiClient.getMazeCompletionTimes().then(times => {
+    apiClient.getMazeCompletionTimes().then(times => {
       setCurrentMazeCompletionList(times.mazeCompletionTimes);
     });
-  }, [setCurrentMazeCompletionList, appState.apiClient]);
+  }, [setCurrentMazeCompletionList, apiClient]);
 
   useEffect(() => {
     updateMazeCompletionTimes();
@@ -481,7 +481,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
   }, [updateMazeCompletionTimes]);
 
   const page = useMemo(() => {
-    if (!appState.sessionToken) {
+    if (!sessionToken) {
       return <Login doLogin={setupGameController} />;
     }
     if (!videoInstance) {
@@ -495,7 +495,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
         </Button>
         <VideoOverlay preferredMode='fullwidth' />
         <QuitGame
-          isOpen={appState.toggleQuit}
+          isOpen={toggleQuit}
           onClose={() => dispatchAppUpdate({ action: 'toggleQuit' })}
           onQuit={() => {
             dispatchAppUpdate({ action: 'exitMaze' });
@@ -503,11 +503,11 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
           }}
         />
         <Instructions
-          isOpen={appState.showInstructions}
+          isOpen={showInstructions}
           onClose={() => dispatchAppUpdate({ action: 'closeInstructions' })}
         />
         <LeaderboardModal
-          isOpen={appState.showLeaderboard}
+          isOpen={showLeaderboard}
           onClose={() => dispatchAppUpdate({ action: 'toggleLeaderboard' })}
           leaderboardData={currentMazeCompletionList}
         />
@@ -515,18 +515,18 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
     );
   }, [
     setupGameController,
-    appState.sessionToken,
+    sessionToken,
     videoInstance,
-    appState.showInstructions,
-    appState.showLeaderboard,
-    appState.toggleQuit,
+    showInstructions,
+    showLeaderboard,
+    toggleQuit,
     emitFinishGame,
     currentMazeCompletionList,
   ]);
   return (
     <CoveyAppContext.Provider value={appState}>
       <VideoContext.Provider value={Video.instance()}>
-        <NearbyPlayersContext.Provider value={appState.nearbyPlayers}>
+        <NearbyPlayersContext.Provider value={nearbyPlayers}>
           {page}
         </NearbyPlayersContext.Provider>
       </VideoContext.Provider>
