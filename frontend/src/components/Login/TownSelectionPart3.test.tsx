@@ -104,7 +104,6 @@ function wrappedTownSelection() {
           },
           emitMovement: () => {},
           emitGameInvite: () => {},
-          emitInviteResponse: () => {},
           emitFinishGame: () => {},
           emitRaceSettings: () => {},
           gameInfo: { gameStatus: 'noGame' },

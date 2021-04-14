@@ -55,7 +55,6 @@ function wrappedTownSettings() {
           },
           emitMovement: () => {},
           emitGameInvite: () => {},
-          emitInviteResponse: () => {},
           emitFinishGame: () => {},
           emitRaceSettings: () => {},
           gameInfo: { gameStatus: 'noGame' },

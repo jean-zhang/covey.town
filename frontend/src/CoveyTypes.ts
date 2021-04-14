@@ -34,11 +34,6 @@ export type CoveyAppState = {
   nearbyPlayers: NearbyPlayers;
   emitMovement: (location: UserLocation) => void;
   emitGameInvite: (senderPlayer: Player, recipientPlayer: Player) => void;
-  emitInviteResponse: (
-    senderPlayer: Player,
-    recipientPlayer: Player,
-    gameAcceptance: boolean,
-  ) => void;
   emitFinishGame: (score: number, gaveUp: boolean) => void;
   emitRaceSettings: (myPlayerId: string, enableInvite: boolean) => void;
   gameInfo: GameInfo;
