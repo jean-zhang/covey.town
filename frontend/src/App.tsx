@@ -65,7 +65,6 @@ type CoveyAppUpdate =
         gameInfo: GameInfo;
         toggleQuit: boolean;
         quitGame: () => void;
-        showLeaderboard: boolean;
         toggleShowLeaderboard: () => void;
       };
     }
@@ -180,7 +179,6 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.players = update.data.players;
       nextState.toggleQuit = update.data.toggleQuit;
       nextState.quitGame = update.data.quitGame;
-      nextState.showLeaderboard = update.data.showLeaderboard;
       nextState.toggleShowLeaderboard = update.data.toggleShowLeaderboard;
       break;
     case 'addPlayer':
@@ -386,7 +384,6 @@ async function GameController(
       players: initData.currentPlayers.map(sp => Player.fromServerPlayer(sp)),
       toggleQuit: false,
       quitGame,
-      showLeaderboard: false,
       toggleShowLeaderboard,
     },
   });

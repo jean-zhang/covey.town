@@ -463,7 +463,7 @@ class CoveyGameScene extends Phaser.Scene {
       .text(
         16,
         16,
-        `Arrow keys to move, space to transport\nCurrent town: ${this.video.townFriendlyName} (${this.video.coveyTownID})`,
+        `Arrow keys to move\nWhen in front of blue sign, press space to show leaderboard\nCurrent town: ${this.video.townFriendlyName} (${this.video.coveyTownID})`,
         this.textStyle,
       )
       .setScrollFactor(0)
