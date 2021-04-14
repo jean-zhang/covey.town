@@ -506,9 +506,6 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
     return (
       <div>
         <WorldMap />
-        <Button onClick={() => dispatchAppUpdate({ action: 'toggleLeaderboard' })}>
-          Show Leaderboard
-        </Button>
         <VideoOverlay preferredMode='fullwidth' />
         <QuitGame
           isOpen={toggleQuit}
