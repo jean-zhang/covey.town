@@ -205,7 +205,7 @@ class CoveyGameScene extends Phaser.Scene {
     }
     if (this.lastLocation && this.mazeFinish &&
         Math.abs(this.lastLocation.x - this.mazeFinish.x) < 10 &&
-        Math.abs(this.lastLocation.y - this.mazeFinish.y) < 10) {
+        Math.abs(this.lastLocation.y - this.mazeFinish.y) < 50) {
       this.finishMaze(false);
       return;
     }
@@ -477,7 +477,7 @@ class CoveyGameScene extends Phaser.Scene {
       .text(
         16,
         16,
-        `Arrow keys to move\nWhen in front of blue sign, press space to show leaderboard\nCurrent town: ${this.video.townFriendlyName} (${this.video.coveyTownID})`,
+        `Arrow keys to move\nCurrent town: ${this.video.townFriendlyName} (${this.video.coveyTownID})`,
         this.textStyle,
       )
       .setScrollFactor(0)
