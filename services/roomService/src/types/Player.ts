@@ -69,16 +69,16 @@ export default class Player {
     timeScore: number,
     gaveUp: boolean,
   ): Promise<
-    { opposingPlayerId: string; bothPlayersFinished: boolean; gameId: string } | undefined
+    { opposingPlayerID: string; bothPlayersFinished: boolean; gameID: string } | undefined
     > {
     const game = this._game;
     this.resetPlayer(); // make sure that game is removed so that race conditions can't occur trying to remove multiple times
     if (game !== undefined) {
       await game.playerFinish({ userID: this.id, userName: this.userName }, timeScore, gaveUp);
-      const opposingPlayerId = game.getOpposingPlayerID(this._id);
+      const opposingPlayerID = game.getOpposingPlayerID(this._id);
       const bothPlayersFinished = game.bothPlayersFinished();
-      const gameId = game.getGameId();
-      return { opposingPlayerId, bothPlayersFinished, gameId };
+      const gameID = game.getGameId();
+      return { opposingPlayerID, bothPlayersFinished, gameID };
     }
     return undefined;
   }

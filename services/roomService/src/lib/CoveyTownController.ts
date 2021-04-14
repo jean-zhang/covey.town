@@ -194,8 +194,8 @@ export default class CoveyTownController {
       .forEach(listener => listener.onMazeGameResponded(sender, recipient, gameAcceptance));
 
     if (gameAcceptance) {
-      const gameId = recipient.acceptInvite(sender);
-      this._maze.addGame(gameId);
+      const gameID = recipient.acceptInvite(sender);
+      this._maze.addGame(gameID);
     }
     return true;
   }
@@ -221,18 +221,18 @@ export default class CoveyTownController {
       if (!playStatus) {
         return false;
       }
-      const { opposingPlayerId, bothPlayersFinished, gameId } = playStatus;
+      const { opposingPlayerID, bothPlayersFinished, gameID } = playStatus;
 
       const listeners = this._listeners.filter(
         listener =>
-          listener.listeningPlayerID === opposingPlayerId ||
+          listener.listeningPlayerID === opposingPlayerID ||
           listener.listeningPlayerID === playerID,
       );
       if (listeners.length !== 2) {
         return false;
       }
       if (bothPlayersFinished) {
-        this._maze.removeGame(gameId);
+        this._maze.removeGame(gameID);
       }
       listeners.forEach(listener => listener.onFinishGame(finishedPlayer, score, gaveUp));
       return true;

@@ -35,6 +35,9 @@ function mockCoveyListener(id: string): CoveyTownListener {
     onFullMazeGameRequested(senderPlayer: Player) {
       mockCoveyListenerFns(senderPlayer);
     },
+    onUpdatePlayerRaceSettings(senderPlayer: Player) {
+      mockCoveyListenerFns(senderPlayer);
+    },
   };
 }
 
@@ -76,7 +79,7 @@ describe('Maze game tests', () => {
     const player2 = new Player(player2Name);
     const mockCoveyListener1 = mockCoveyListener(player1.id);
     const mockCoveyListener2 = mockCoveyListener(player2.id);
-    const gameId = player2.acceptInvite(player1);
+    const gameID = player2.acceptInvite(player1);
     const townName = `FriendlyNameTest-${nanoid()}`;
     const townController = new CoveyTownController(townName, false);
     townController.addPlayer(player1);
@@ -84,11 +87,11 @@ describe('Maze game tests', () => {
     townController.addTownListener(mockCoveyListener1);
     townController.addTownListener(mockCoveyListener2);
     townController.respondToGameInvite(player1.id, player2.id, true);
-    expect(townController.maze.hasGame(gameId)).toEqual(true);
+    expect(townController.maze.hasGame(gameID)).toEqual(true);
     await townController.playerFinish(player1.id, -1, true);
-    expect(townController.maze.hasGame(gameId)).toEqual(true);
+    expect(townController.maze.hasGame(gameID)).toEqual(true);
     await townController.playerFinish(player2.id, 100, false);
-    expect(townController.maze.hasGame(gameId)).toEqual(false);
+    expect(townController.maze.hasGame(gameID)).toEqual(false);
   });
 
   it('Players should not be able to finish the same game multiple times', async () => {
@@ -96,20 +99,20 @@ describe('Maze game tests', () => {
     const player2Name = nanoid();
     const player1 = new Player(player1Name);
     const player2 = new Player(player2Name);
-    const gameId = player2.acceptInvite(player1);
+    const gameID = player2.acceptInvite(player1);
     let playerStatus = await player1.finish(100, false);
     if (playerStatus) {
-      expect(playerStatus.opposingPlayerId).toEqual(player2.id);
+      expect(playerStatus.opposingPlayerID).toEqual(player2.id);
       expect(playerStatus.bothPlayersFinished).toEqual(false);
-      expect(playerStatus.gameId).toEqual(gameId);
+      expect(playerStatus.gameID).toEqual(gameID);
     } else {
       fail();
     }
     let player2Status = await player2.finish(-1, false);
     if (player2Status) {
-      expect(player2Status.opposingPlayerId).toEqual(player1.id);
+      expect(player2Status.opposingPlayerID).toEqual(player1.id);
       expect(player2Status.bothPlayersFinished).toEqual(true);
-      expect(player2Status.gameId).toEqual(gameId);
+      expect(player2Status.gameID).toEqual(gameID);
     } else {
       fail();
     }
