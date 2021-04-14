@@ -66,7 +66,7 @@ type CoveyAppUpdate =
         finishGame: (score: number, gaveUp: boolean) => void;
         updateGameInfoStatus: (gameStatus: GameStatus) => void;
         emitRaceSettings: (myPlayerID: string, enableInvite: boolean) => void;
-        enableInvite: boolean,
+        enableInvite: boolean;
       };
     }
   | { action: 'addPlayer'; player: Player }
@@ -215,7 +215,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       }
       break;
     case 'updatePlayerRaceSettings':
-      updatePlayer = nextState.players.find(p => p.id === update.player.id)
+      updatePlayer = nextState.players.find(p => p.id === update.player.id);
       if (updatePlayer) {
         updatePlayer.enableInvite = update.player.enableInvite;
       }
@@ -317,7 +317,10 @@ async function GameController(
   });
   socket.on('updatePlayerRaceSettings', (player: ServerPlayer) => {
     if (player._id !== gamePlayerID) {
-      dispatchAppUpdate({ action: 'updatePlayerRaceSettings', player: Player.fromServerPlayer(player) });
+      dispatchAppUpdate({
+        action: 'updatePlayerRaceSettings',
+        player: Player.fromServerPlayer(player),
+      });
     }
   });
   socket.on('playerDisconnect', (player: ServerPlayer) => {
@@ -351,10 +354,7 @@ async function GameController(
   const emitFinishGame = (score: number, gaveUp: boolean) => {
     socket.emit('finishGame', gamePlayerID, score, gaveUp);
   };
-  const emitRaceSettings = (
-    myPlayerID: string,
-    enableInvite: boolean,
-  ) => {
+  const emitRaceSettings = (myPlayerID: string, enableInvite: boolean) => {
     dispatchAppUpdate({ action: 'toggleRaceSettings' });
     socket.emit('toggleRaceSettings', myPlayerID, !enableInvite);
   };
@@ -363,6 +363,7 @@ async function GameController(
   };
   const toggleShowLeaderboard = () => {
     dispatchAppUpdate({ action: 'toggleLeaderboard' });
+  };
   const finishGame = (score: number, gaveUp: boolean) => {
     dispatchAppUpdate({ action: 'exitMaze' });
     emitFinishGame(score, gaveUp);
@@ -455,7 +456,15 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
   const [currentMazeCompletionList, setCurrentMazeCompletionList] = useState<MazeCompletionInfo[]>(
     [],
   );
-  const { emitFinishGame, sessionToken, toggleQuit, showInstructions, showLeaderboard, apiClient, nearbyPlayers } = appState;
+  const {
+    emitFinishGame,
+    sessionToken,
+    toggleQuit,
+    showInstructions,
+    showLeaderboard,
+    apiClient,
+    nearbyPlayers,
+  } = appState;
 
   const setupGameController = useCallback(
     async (initData: TownJoinResponse) => {
@@ -535,9 +544,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
   return (
     <CoveyAppContext.Provider value={appState}>
       <VideoContext.Provider value={Video.instance()}>
-        <NearbyPlayersContext.Provider value={nearbyPlayers}>
-          {page}
-        </NearbyPlayersContext.Provider>
+        <NearbyPlayersContext.Provider value={nearbyPlayers}>{page}</NearbyPlayersContext.Provider>
       </VideoContext.Provider>
     </CoveyAppContext.Provider>
   );

@@ -543,7 +543,6 @@ export default function WorldMap(): JSX.Element {
     emitMovement,
     players,
     quitGame,
-    gameStarted,
     showInstructions,
     gameInfo,
     toggleShowLeaderboard,
