@@ -1,6 +1,5 @@
 import { nanoid } from 'nanoid';
 import { UserLocation } from '../CoveyTypes';
-import Maze from '../lib/Maze';
 import Game from './Game';
 
 /**
@@ -28,6 +27,9 @@ export default class Player {
   /** The Game that this Player is part of */
   private _game?: Game;
 
+  /** Whether the player has ever completed the maze */
+  private _hasCompletedMaze: boolean;
+
   constructor(userName: string) {
     this.location = {
       x: 0,
@@ -40,6 +42,7 @@ export default class Player {
     this._enableInvite = true;
     this._inMaze = false;
     this._invitePending = false;
+    this._hasCompletedMaze = false;
   }
 
   get userName(): string {
@@ -50,47 +53,57 @@ export default class Player {
     return this._id;
   }
 
+  get enableInvite(): boolean {
+    return this._enableInvite;
+  }
+
+  set enableInvite(enabled: boolean) {
+    this._enableInvite = enabled;
+  }
+
+  get hasCompletedMaze(): boolean {
+    return this._hasCompletedMaze;
+  }
+
+  set hasCompletedMaze(hasCompletedMaze: boolean) {
+    this._hasCompletedMaze = hasCompletedMaze;
+  }
+
   updateLocation(location: UserLocation): void {
     this.location = location;
   }
 
   /**
-   * Sends an invite to a player within the town
-   * @param player Player to invite
-   */
-  // sendInvite(recipient: Player): void {}
-
-  /**
-   * Removes player from Game
-   */
-  async giveUp(): Promise<void> {
-    if (this._game) {
-      await this._game.updateScore({ userID: this.id, userName: this.userName }, -1);
-      this.resetPlayer();
-    } else {
-      throw new Error('game not defined');
-    }
-  }
-
-  /**
    * Called when player has completed the maze
+   * Returns the player id of the opposing player if the game exists
    */
-  async finish(timeScore: number): Promise<void> {
-    if (timeScore > 0 && this._game) {
-      await this._game.updateScore({ userID: this.id, userName: this.userName }, timeScore);
-      this.resetPlayer();
+  async finish(
+    timeScore: number,
+    gaveUp: boolean,
+  ): Promise<
+    { opposingPlayerID: string; bothPlayersFinished: boolean; gameID: string } | undefined
+    > {
+    const game = this._game;
+    this.resetPlayer(); // make sure that game is removed so that race conditions can't occur trying to remove multiple times
+    if (game !== undefined) {
+      await game.playerFinish({ userID: this.id, userName: this.userName }, timeScore, gaveUp);
+      const opposingPlayerID = game.getOpposingPlayerID(this._id);
+      const bothPlayersFinished = game.bothPlayersFinished();
+      const gameID = game.getGameId();
+      return { opposingPlayerID, bothPlayersFinished, gameID };
     }
-    throw new Error('start time and game not defined');
+    return undefined;
   }
 
   /**
    * Accepts an invite to a Game
+   * @returns the game id
    */
-  acceptInvite(sender: Player): void {
+  acceptInvite(sender: Player): string {
     const newGame = new Game(this.id, sender.id);
     this._game = newGame;
     sender.onInviteAccepted(newGame);
-    Maze.getInstance().addGame(newGame.getGameId());
+    return newGame.getGameId();
   }
 
   onInviteAccepted(game: Game): void {

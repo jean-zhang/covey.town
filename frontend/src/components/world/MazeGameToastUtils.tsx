@@ -63,6 +63,26 @@ export function displayMazeGameResponseToast(recipientPlayer: Player, gameRespon
   });
 }
 
+export function displayPlayerFinishedToast(
+  finishedPlayer: Player,
+  score: number,
+  gaveUp: boolean,
+): void {
+  const toastTitle = gaveUp
+    ? `${finishedPlayer.userName} has given up and left the maze`
+    : `${finishedPlayer.userName} has completed the maze!`;
+  const toastDescription = gaveUp || score <= 0 ? undefined : `Score is ${score / 1000}s`;
+  const duration = gaveUp ? 3000 : 6000;
+  const toast = createStandaloneToast();
+  toast({
+    title: toastTitle,
+    description: toastDescription,
+    status: 'info',
+    duration,
+    isClosable: true,
+  });
+}
+
 export function displayMazeFullGameResponseToast(): void {
   const toastTitle = `Unable to send invite, the maze is full`;
   const toast = createStandaloneToast();
@@ -75,14 +95,15 @@ export function displayMazeFullGameResponseToast(): void {
 }
 
 export function displayInviteSentToast(recipientPlayer: Player): void {
+  const toast = createStandaloneToast();
   const TOAST_ID = recipientPlayer.id;
   const toastTitle = `Invited ${recipientPlayer.userName} to race`;
-  const toast = createStandaloneToast();
 
   if (!toast.isActive(TOAST_ID)) {
     toast({
       id: TOAST_ID,
       title: toastTitle,
+      description: 'Game invites auto-reject after 20 seconds',
       status: 'info',
       duration: null,
       isClosable: true,

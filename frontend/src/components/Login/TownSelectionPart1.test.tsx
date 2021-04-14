@@ -103,13 +103,17 @@ function wrappedTownSelection() {
           },
           emitMovement: () => {},
           emitGameInvite: () => {},
-          emitInviteResponse: () => {},
+          emitFinishGame: () => {},
+          emitRaceSettings: () => {},
           gameInfo: { gameStatus: 'noGame' },
           apiClient: new TownsServiceClient(),
           toggleQuit: false,
           quitGame: () => {},
+          finishGame: () => {},
           showInstructions: false,
-          gameStarted: false,
+          showLeaderboard: false,
+          updateGameInfoStatus: () => {},
+          enableInvite: true,
         }}>
         <TownSelection doLogin={doLoginMock} />
       </CoveyAppContext.Provider>

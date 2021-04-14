@@ -1,12 +1,6 @@
-import { QueryResult } from 'pg';
 import { PlayerInfo } from '../CoveyTypes';
 import pool from '../dbconnector/pool';
 import { insertMazeCompletionTime } from '../utils/queries';
-
-type FinishedPlayer = {
-  player: PlayerInfo;
-  score: number;
-};
 
 /**
  * Two Players competing in the Maze is represented by a Game object
@@ -17,45 +11,29 @@ export default class Game {
   private _player2ID: string;
 
   /** The winner and loser in this Game * */
-  private _pair: FinishedPlayer[];
+  private finishedPlayers: string[] = [];
 
   constructor(player1ID: string, player2ID: string) {
     this._player1ID = player1ID;
     this._player2ID = player2ID;
-    this._pair = [];
+  }
+
+  getOpposingPlayerID(playerID: string): string {
+    return playerID === this._player1ID ? this._player2ID : this._player1ID;
   }
 
   getGameId(): string {
     return this._player1ID + this._player2ID;
   }
 
-  async updateScore(playerID: PlayerInfo, score: number): Promise<void> {
-    this._pair.push({ player: playerID, score });
-    if (this._pair.length >= 2) {
-      await this.registerScore();
+  async playerFinish(playerInfo: PlayerInfo, score: number, gaveUp: boolean): Promise<void> {
+    this.finishedPlayers.push(playerInfo.userID);
+    if (!gaveUp && score > 0) {
+      await pool.query(insertMazeCompletionTime, [playerInfo.userID, playerInfo.userName, score]);
     }
   }
 
-  /**
-   * Registers the Winner's and Loser's scores
-   */
-  async registerScore(): Promise<void> {
-    const promises: Promise<QueryResult>[] = [];
-    this._pair.forEach(finishedPlayer => {
-      if (
-        finishedPlayer.player !== undefined &&
-        finishedPlayer.score !== undefined &&
-        finishedPlayer.score > 0
-      ) {
-        promises.push(
-          pool.query(insertMazeCompletionTime, [
-            finishedPlayer.player.userID,
-            finishedPlayer.player.userName,
-            finishedPlayer.score,
-          ]),
-        );
-      }
-    });
-    await Promise.all(promises);
+  bothPlayersFinished(): boolean {
+    return this.finishedPlayers.length >= 2;
   }
 }
