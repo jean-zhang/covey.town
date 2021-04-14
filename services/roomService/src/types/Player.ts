@@ -27,9 +27,6 @@ export default class Player {
   /** The Game that this Player is part of */
   private _game?: Game;
 
-  /** Whether the player has ever completed the maze */
-  private _hasCompletedMaze: boolean;
-
   constructor(userName: string) {
     this.location = {
       x: 0,
@@ -42,7 +39,6 @@ export default class Player {
     this._enableInvite = true;
     this._inMaze = false;
     this._invitePending = false;
-    this._hasCompletedMaze = false;
   }
 
   get userName(): string {
@@ -57,16 +53,8 @@ export default class Player {
     return this._enableInvite;
   }
 
-  set enableInvite(enabled: boolean) {
+  set enableInvite(enabled: boolean) { 
     this._enableInvite = enabled;
-  }
-
-  get hasCompletedMaze(): boolean {
-    return this._hasCompletedMaze;
-  }
-
-  set hasCompletedMaze(hasCompletedMaze: boolean) {
-    this._hasCompletedMaze = hasCompletedMaze;
   }
 
   updateLocation(location: UserLocation): void {
