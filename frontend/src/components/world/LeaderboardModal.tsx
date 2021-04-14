@@ -17,12 +17,15 @@ import {
 import React from 'react';
 import { MazeCompletionInfo } from '../../classes/TownsServiceClient';
 
+const DISPLAY_CUTOFF = 20;
+
 export default function LeaderboardModal(props: {
   isOpen: boolean;
   onClose: () => void;
   leaderboardData: MazeCompletionInfo[];
 }): JSX.Element {
   const { isOpen, onClose, leaderboardData } = props;
+  const leaderboardDataToDisplay = leaderboardData.slice(0, DISPLAY_CUTOFF);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size='4xl'>
@@ -34,17 +37,19 @@ export default function LeaderboardModal(props: {
           <Table variant='simple' size='sm'>
             <Thead>
               <Tr>
+                <Th />
                 <Th>Player ID</Th>
                 <Th>Username</Th>
                 <Th isNumeric>Completion Time (seconds)</Th>
               </Tr>
             </Thead>
             <Tbody>
-              {leaderboardData.map(row => (
+              {leaderboardDataToDisplay.map((row, index) => (
                 <Tr key={row.playerID}>
+                  <Td>{`${index + 1}.`}</Td>
                   <Td>{row.playerID}</Td>
                   <Td>{row.username}</Td>
-                  <Td isNumeric>{row.time}</Td>
+                  <Td isNumeric>{row.time / 1000}</Td>
                 </Tr>
               ))}
             </Tbody>
