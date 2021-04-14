@@ -197,6 +197,8 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       updatePlayer = nextState.players.find(p => p.id === update.player.id);
       if (updatePlayer) {
         updatePlayer.location = update.player.location;
+        // hacky fix -- while we have the server player, lets update their completed maze status here
+        updatePlayer.hasCompletedMaze = update.player.hasCompletedMaze;
       } else {
         nextState.players = nextState.players.concat([update.player]);
       }

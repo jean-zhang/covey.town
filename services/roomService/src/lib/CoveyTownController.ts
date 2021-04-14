@@ -216,7 +216,7 @@ export default class CoveyTownController {
     if (!finishedPlayer) {
       return false;
     }
-    finishedPlayer.hasCompletedMaze = true;
+    finishedPlayer.hasCompletedMaze = !gaveUp;
     
     try {
       const playStatus = await finishedPlayer.finish(score, gaveUp);

@@ -115,6 +115,18 @@ class CoveyGameScene extends Phaser.Scene {
     }
   }
 
+  updatePlayersLabels(players: Player[]) {
+    if (!this.ready) {
+      this.players = players;
+      return;
+    }
+    this.players.forEach((p) => {
+      if (p.label) {
+        p.label.setText(generateDisplayUserName(p.hasCompletedMaze, p.userName));
+      }
+    })
+  }
+
   updatePlayerLocation(player: Player) {
     let myPlayer = this.players.find((p) => p.id === player.id);
     if (!myPlayer) {
@@ -140,7 +152,7 @@ class CoveyGameScene extends Phaser.Scene {
           .setSize(30, 30)
           .setOffset(0, 30);
         // Tried here
-        const label = this.add.text(0, 0, myPlayer.userName, {
+        const label = this.add.text(0, 0, generateDisplayUserName(player.hasCompletedMaze, player.userName), {
           font: '18px monospace',
           color: '#000000',
           backgroundColor: '#ffffff',
@@ -465,7 +477,7 @@ class CoveyGameScene extends Phaser.Scene {
     if (this.players.length) {
       // Some players got added to the queue before we were ready, make sure that they have
       // sprites....
-      this.players.forEach((p) => this.updatePlayerLocation(p));
+      this.players.forEach((p) => {this.updatePlayerLocation(p)});
     }
   }
 
@@ -552,9 +564,12 @@ export default function WorldMap(): JSX.Element {
     };
   }, [video, emitMovement, quitGame, finishGame]);
 
+  // if this is outside a useEffect, does it ever actually update?
   const deepPlayers = JSON.stringify(players);
   useEffect(() => {
     gameScene?.updatePlayersLocations(players);
+    // players doesn't appear to sync up with appState.players, but this does get called often
+    gameScene?.updatePlayersLabels(players);
   }, [players, deepPlayers, gameScene]);
   useEffect(() => {
     if (gameInfo.gameStatus === 'gameStarted') {
