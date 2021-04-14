@@ -4,6 +4,8 @@ import Player, { UserLocation } from '../../classes/Player';
 import Video from '../../classes/Video/Video';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 
+const generateDisplayUserName = (hasCompletedMaze: boolean, userName: string) => hasCompletedMaze ? `🌽 ${userName} 🌽` : userName;
+
 // https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
 class CoveyGameScene extends Phaser.Scene {
   private player?: {
@@ -91,6 +93,7 @@ class CoveyGameScene extends Phaser.Scene {
     }
     players.forEach((p) => {
       this.updatePlayerLocation(p);
+      // Tried here
     });
     // Remove disconnected players from board
     const disconnectedPlayers = this.players.filter(
@@ -124,7 +127,7 @@ class CoveyGameScene extends Phaser.Scene {
           y: 0,
         };
       }
-      myPlayer = new Player(player.id, player.userName, location, true);
+      myPlayer = new Player(player.id, player.userName, location, player.enableInvite, player.hasCompletedMaze);
       this.players.push(myPlayer);
     }
     if (this.id !== myPlayer.id && this.physics && player.location) {
@@ -136,6 +139,7 @@ class CoveyGameScene extends Phaser.Scene {
           .sprite(0, 0, 'atlas', 'misa-front')
           .setSize(30, 30)
           .setOffset(0, 30);
+        // Tried here
         const label = this.add.text(0, 0, myPlayer.userName, {
           font: '18px monospace',
           color: '#000000',
@@ -149,6 +153,7 @@ class CoveyGameScene extends Phaser.Scene {
       sprite.setY(player.location.y);
       myPlayer.label?.setX(player.location.x);
       myPlayer.label?.setY(player.location.y - 20);
+      // Tried here
       if (player.location.moving) {
         sprite.anims.play(`misa-${player.location.rotation}-walk`, true);
       } else {
@@ -196,12 +201,16 @@ class CoveyGameScene extends Phaser.Scene {
     } else {
       this.timeLabel.setVisible(false);
     }
-    if (this.lastLocation && this.mazeFinish &&
+    if (this.lastLocation && this.mazeFinish && this.player && 
         Math.abs(this.lastLocation.x - this.mazeFinish.x) < 10 &&
         Math.abs(this.lastLocation.y - 1181) < 10) { // TODO: change 1181 to this.mazeFinish.y after Linda merges her changes
       this.finishMaze(false);
+      const displayUserName = generateDisplayUserName(true, '(You)');
+      this.player.label.setText(displayUserName);
       return;
     }
+
+    // Tried here
 
     if (this.player && this.cursors) {
       const speed = 175;
@@ -250,6 +259,7 @@ class CoveyGameScene extends Phaser.Scene {
       const isMoving = primaryDirection !== undefined;
       this.player.label.setX(body.x);
       this.player.label.setY(body.y - 20);
+      // Tried here
       if (!this.lastLocation
         || this.lastLocation.x !== body.x
         || this.lastLocation.y !== body.y
