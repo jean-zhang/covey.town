@@ -119,7 +119,6 @@ function defaultAppState(): CoveyAppState {
     showInstructions: false,
     showLeaderboard: false,
     toggleShowLeaderboard: () => {},
-    gameStarted: false,
     updateGameInfoStatus: () => {},
     enableInvite: true,
   };
@@ -149,7 +148,6 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     showInstructions: state.showInstructions,
     showLeaderboard: state.showLeaderboard,
     toggleShowLeaderboard: state.toggleShowLeaderboard,
-    gameStarted: state.gameStarted,
     updateGameInfoStatus: state.updateGameInfoStatus,
     enableInvite: state.enableInvite,
   };

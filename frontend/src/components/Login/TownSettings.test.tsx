@@ -64,7 +64,6 @@ function wrappedTownSettings() {
           showInstructions: false,
           showLeaderboard: false,
           toggleShowLeaderboard: () => {},
-          gameStarted: false,
           finishGame: () => {},
           updateGameInfoStatus: () => {},
           enableInvite: true,
