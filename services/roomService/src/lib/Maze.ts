@@ -6,19 +6,10 @@ export default class Maze {
   public static readonly CAPACITY: number = 10;
 
   /** The Games in this Maze * */
-  private _gameIds = new Set<string>();
+  private _gameIDs = new Set<string>();
 
   /** The leaderboard that keeps track of the Player username and Score * */
   private _leaderboard: Map<string, number>;
-
-  private static _instance: Maze;
-
-  static getInstance(): Maze {
-    if (Maze._instance === undefined) {
-      Maze._instance = new Maze();
-    }
-    return Maze._instance;
-  }
 
   constructor() {
     this._leaderboard = new Map();
@@ -28,7 +19,7 @@ export default class Maze {
    * Checks whether the maze is full
    */
   reachedCapacity(): boolean {
-    return this._gameIds.size >= Maze.CAPACITY / 2;
+    return this._gameIDs.size >= Maze.CAPACITY / 2;
   }
 
   /**
@@ -39,9 +30,9 @@ export default class Maze {
   /**
    * Adds a game to the Maze
    */
-  addGame(gameId: string): void {
+  addGame(gameID: string): void {
     if (!this.reachedCapacity()) {
-      this._gameIds.add(gameId);
+      this._gameIDs.add(gameID);
     } else {
       throw new Error('Maze is over capacity');
     }
@@ -50,7 +41,14 @@ export default class Maze {
   /**
    * Removes a game from the Maze
    */
-  removeGame(gameId: string): void {
-    this._gameIds.delete(gameId);
+  removeGame(gameID: string): void {
+    this._gameIDs.delete(gameID);
+  }
+
+  /**
+   * Returns true if the maze contains the specified game
+   */
+  hasGame(gameID: string): boolean {
+    return this._gameIDs.has(gameID);
   }
 }

@@ -281,6 +281,8 @@ export default function ParticipantInfo({
                   }
                 }
               }}
+              isDisabled={(appState.gameInfo.gameStatus !== 'noGame' ||
+                !(appState.players.find(player => player.id === profile?.id)?.enableInvite))}
               size='sm'
               width='100px'>
               Invite to race
