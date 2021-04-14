@@ -35,6 +35,7 @@ import {
   displayMazeFullGameResponse,
   displayMazeGameInviteToast,
   displayMazeGameResponseToast,
+  displayPlayerFinishedToast,
 } from './components/world/MazeGameToastUtils';
 import QuitGame from './components/world/QuitGame';
 import WorldMap from './components/world/WorldMap';
@@ -57,10 +58,13 @@ type CoveyAppUpdate =
         players: Player[];
         emitMovement: (location: UserLocation) => void;
         emitGameInvite: (senderPlayer: Player, recipientPlayer: Player) => void;
-        emitRaceSettings: (myPlayerID: string, enableInvite: boolean) => void;
+        emitFinishGame: (score: number, gaveUp: boolean) => void;
         gameInfo: GameInfo;
         toggleQuit: boolean;
         quitGame: () => void;
+        finishGame: (score: number, gaveUp: boolean) => void;
+        updateGameInfoStatus: (gameStatus: GameStatus) => void;
+        emitRaceSettings: (myPlayerID: string, enableInvite: boolean) => void;
         enableInvite: boolean,
       };
     }
@@ -70,6 +74,7 @@ type CoveyAppUpdate =
   | { action: 'weMoved'; location: UserLocation }
   | { action: 'disconnect' }
   | { action: 'toggleQuit' }
+  | { action: 'updateGameInfoStatus'; gameStatus: GameStatus }
   | { action: 'exitMaze' }
   | { action: 'closeInstructions' }
   | { action: 'toggleRaceSettings' }
@@ -103,14 +108,16 @@ function defaultAppState(): CoveyAppState {
     },
     emitMovement: () => {},
     emitGameInvite: () => {},
+    emitFinishGame: () => {},
     emitRaceSettings: () => {},
     gameInfo: { gameStatus: 'noGame' },
     apiClient: new TownsServiceClient(),
     toggleQuit: false,
     quitGame: () => {},
+    finishGame: () => {},
     showInstructions: false,
     showLeaderboard: false,
-    gameStarted: false,
+    updateGameInfoStatus: () => {},
     enableInvite: true,
   };
 }
@@ -129,14 +136,16 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     socket: state.socket,
     emitMovement: state.emitMovement,
     emitGameInvite: state.emitGameInvite,
+    emitFinishGame: state.emitFinishGame,
     emitRaceSettings: state.emitRaceSettings,
     gameInfo: state.gameInfo,
     apiClient: state.apiClient,
     toggleQuit: state.toggleQuit,
     quitGame: state.quitGame,
+    finishGame: state.finishGame,
     showInstructions: state.showInstructions,
     showLeaderboard: state.showLeaderboard,
-    gameStarted: state.gameStarted,
+    updateGameInfoStatus: state.updateGameInfoStatus,
     enableInvite: state.enableInvite,
   };
 
@@ -171,12 +180,15 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.userName = update.data.userName;
       nextState.emitMovement = update.data.emitMovement;
       nextState.emitGameInvite = update.data.emitGameInvite;
+      nextState.emitFinishGame = update.data.emitFinishGame;
       nextState.emitRaceSettings = update.data.emitRaceSettings;
       nextState.gameInfo = update.data.gameInfo;
       nextState.socket = update.data.socket;
       nextState.players = update.data.players;
       nextState.toggleQuit = update.data.toggleQuit;
       nextState.quitGame = update.data.quitGame;
+      nextState.finishGame = update.data.finishGame;
+      nextState.updateGameInfoStatus = update.data.updateGameInfoStatus;
       break;
     case 'addPlayer':
       nextState.players = nextState.players.concat([update.player]);
@@ -226,24 +238,31 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     case 'closeInstructions':
       nextState.showInstructions = false;
       closedInstructions = true;
-      nextState.gameStarted = true;
+      nextState.gameInfo.gameStatus = 'gameStarted';
       break;
     case 'toggleLeaderboard':
       nextState.showLeaderboard = !state.showLeaderboard;
       break;
     case 'disconnect':
+      state.socket?.emit('finishGame', state.myPlayerID, -1, true);
       state.socket?.disconnect();
+      closedInstructions = false;
       return defaultAppState();
     case 'toggleQuit':
-      nextState.toggleQuit = !state.toggleQuit;
+      if (state.gameInfo.gameStatus === 'gameStarted') {
+        nextState.toggleQuit = !state.toggleQuit;
+      }
       break;
     case 'toggleRaceSettings':
       nextState.enableInvite = !state.enableInvite;
       break;
     case 'exitMaze':
       nextState.toggleQuit = false;
-      // TODO: have this call Player.giveUp() in the backend
-      // state.socket?.emit('giveUp');
+      nextState.gameInfo.gameStatus = 'gameEnded';
+      closedInstructions = false;
+      break;
+    case 'updateGameInfoStatus':
+      nextState.gameInfo.gameStatus = update.gameStatus;
       break;
     case 'updateGameInfo':
       nextState.gameInfo = {
@@ -323,6 +342,9 @@ async function GameController(
   ) => {
     socket.emit('sendGameInviteResponse', senderPlayer.id, recipientPlayer.id, gameAcceptance);
   };
+  const emitFinishGame = (score: number, gaveUp: boolean) => {
+    socket.emit('finishGame', gamePlayerID, score, gaveUp);
+  };
   const emitRaceSettings = (
     myPlayerID: string,
     enableInvite: boolean,
@@ -332,6 +354,13 @@ async function GameController(
   };
   const quitGame = () => {
     dispatchAppUpdate({ action: 'toggleQuit' });
+  };
+  const finishGame = (score: number, gaveUp: boolean) => {
+    dispatchAppUpdate({ action: 'exitMaze' });
+    emitFinishGame(score, gaveUp);
+  };
+  const updateGameInfoStatus = (gameStatus: GameStatus) => {
+    dispatchAppUpdate({ action: 'updateGameInfoStatus', gameStatus });
   };
   socket.on('receivedGameInvite', (senderPlayer: ServerPlayer, recipientPlayer: ServerPlayer) => {
     const sender = Player.fromServerPlayer(senderPlayer);
@@ -381,6 +410,10 @@ async function GameController(
       });
     },
   );
+  socket.on('playerFinished', (finishedPlayer: ServerPlayer, score: number, gaveUp: boolean) => {
+    const player = Player.fromServerPlayer(finishedPlayer);
+    displayPlayerFinishedToast(player, score, gaveUp);
+  });
 
   dispatchAppUpdate({
     action: 'doConnect',
@@ -393,12 +426,15 @@ async function GameController(
       townIsPubliclyListed: video.isPubliclyListed,
       emitMovement,
       emitGameInvite,
+      emitFinishGame,
       emitRaceSettings,
       gameInfo: { gameStatus: 'noGame' },
       socket,
       players: initData.currentPlayers.map(sp => Player.fromServerPlayer(sp)),
       toggleQuit: false,
       quitGame,
+      finishGame,
+      updateGameInfoStatus,
       enableInvite: true,
     },
   });
@@ -410,6 +446,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
   const [currentMazeCompletionList, setCurrentMazeCompletionList] = useState<MazeCompletionInfo[]>(
     [],
   );
+  const { emitFinishGame, sessionToken, toggleQuit, showInstructions, showLeaderboard, apiClient, nearbyPlayers } = appState;
 
   const setupGameController = useCallback(
     async (initData: TownJoinResponse) => {
@@ -430,10 +467,10 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
   }, [dispatchAppUpdate, setOnDisconnect]);
 
   const updateMazeCompletionTimes = useCallback(() => {
-    appState.apiClient.getMazeCompletionTimes().then(times => {
+    apiClient.getMazeCompletionTimes().then(times => {
       setCurrentMazeCompletionList(times.mazeCompletionTimes);
     });
-  }, [setCurrentMazeCompletionList, appState.apiClient]);
+  }, [setCurrentMazeCompletionList, apiClient]);
 
   useEffect(() => {
     updateMazeCompletionTimes();
@@ -444,7 +481,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
   }, [updateMazeCompletionTimes]);
 
   const page = useMemo(() => {
-    if (!appState.sessionToken) {
+    if (!sessionToken) {
       return <Login doLogin={setupGameController} />;
     }
     if (!videoInstance) {
@@ -458,16 +495,19 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
         </Button>
         <VideoOverlay preferredMode='fullwidth' />
         <QuitGame
-          isOpen={appState.toggleQuit}
+          isOpen={toggleQuit}
           onClose={() => dispatchAppUpdate({ action: 'toggleQuit' })}
-          onQuit={() => dispatchAppUpdate({ action: 'exitMaze' })}
+          onQuit={() => {
+            dispatchAppUpdate({ action: 'exitMaze' });
+            emitFinishGame(-1, true);
+          }}
         />
         <Instructions
-          isOpen={appState.showInstructions}
+          isOpen={showInstructions}
           onClose={() => dispatchAppUpdate({ action: 'closeInstructions' })}
         />
         <LeaderboardModal
-          isOpen={appState.showLeaderboard}
+          isOpen={showLeaderboard}
           onClose={() => dispatchAppUpdate({ action: 'toggleLeaderboard' })}
           leaderboardData={currentMazeCompletionList}
         />
@@ -475,17 +515,18 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
     );
   }, [
     setupGameController,
-    appState.sessionToken,
+    sessionToken,
     videoInstance,
-    appState.showInstructions,
-    appState.showLeaderboard,
-    appState.toggleQuit,
+    showInstructions,
+    showLeaderboard,
+    toggleQuit,
+    emitFinishGame,
     currentMazeCompletionList,
   ]);
   return (
     <CoveyAppContext.Provider value={appState}>
       <VideoContext.Provider value={Video.instance()}>
-        <NearbyPlayersContext.Provider value={appState.nearbyPlayers}>
+        <NearbyPlayersContext.Provider value={nearbyPlayers}>
           {page}
         </NearbyPlayersContext.Provider>
       </VideoContext.Provider>

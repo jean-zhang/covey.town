@@ -37,6 +37,8 @@ class CoveyGameScene extends Phaser.Scene {
 
   private quitGame: () => void;
 
+  private finishGame: (score: number, gaveUp: boolean) => void;
+
   private timeLabel?: Phaser.GameObjects.Text;
 
   private mazeStartTime: number;
@@ -58,11 +60,12 @@ class CoveyGameScene extends Phaser.Scene {
     backgroundColor: '#ffffff',
   };
 
-  constructor(video: Video, emitMovement: (loc: UserLocation) => void, quitGame: () => void) {
+  constructor(video: Video, emitMovement: (loc: UserLocation) => void, quitGame: () => void, finishGame: (score: number, gaveUp: boolean) => void) {
     super('PlayGame');
     this.video = video;
     this.emitMovement = emitMovement;
     this.quitGame = quitGame;
+    this.finishGame = finishGame;
     this.mazeStartTime = -1;
   }
 
@@ -171,22 +174,33 @@ class CoveyGameScene extends Phaser.Scene {
     return undefined;
   }
 
+  private getFormattedMazeScore(time: number) {
+    return Number.parseFloat(((time - this.mazeStartTime) / 1000).toString()).toFixed(2);
+  }
+
   update(time: number) {
     if (this.paused) {
       return;
     }
+    if (!this.timeLabel) {
+      this.timeLabel = this.add
+      .text(16, 100, '', this.textStyle)
+      .setScrollFactor(0)
+      .setDepth(31);
+    }
     if (this.mazeStartTime >= 0) {
-      const timeTaken = Number.parseFloat(((time - this.mazeStartTime) / 1000).toString()).toFixed(2);
+      this.timeLabel.setVisible(true);
+      const timeTaken = this.getFormattedMazeScore(time);
       const timeTakenString = `TIME TAKEN: ${timeTaken}s`
-      if (!this.timeLabel) {
-        this.timeLabel = this.add
-        .text(16, 100, timeTakenString, this.textStyle)
-        .setScrollFactor(0)
-        .setDepth(31);
-      }
-      else {
-        this.timeLabel.setText(timeTakenString);
-      }
+      this.timeLabel.setText(timeTakenString);
+    } else {
+      this.timeLabel.setVisible(false);
+    }
+    if (this.lastLocation && this.mazeFinish &&
+        Math.abs(this.lastLocation.x - this.mazeFinish.x) < 10 &&
+        Math.abs(this.lastLocation.y - 1181) < 10) { // TODO: change 1181 to this.mazeFinish.y after Linda merges her changes
+      this.finishMaze(false);
+      return;
     }
 
     if (this.player && this.cursors) {
@@ -457,6 +471,10 @@ class CoveyGameScene extends Phaser.Scene {
     this.previouslyCapturedKeys = [];
   }
 
+  resetStartTime() {
+    this.mazeStartTime = -1;
+  }
+
   teleport(intoMaze: boolean) {
     if(this.player && this.lastLocation) {
       if(intoMaze && this.mazeStart) {
@@ -476,12 +494,21 @@ class CoveyGameScene extends Phaser.Scene {
     }
   }
 
+  public finishMaze(gaveUp: boolean) {
+    if (gaveUp) {
+      this.finishGame(-1, true);
+    } else {
+      const score = Math.round(this.time.now - this.mazeStartTime);
+      this.finishGame(score, false);
+    }
+    this.mazeStartTime = -1;
+  }
 }
 
 export default function WorldMap(): JSX.Element {
   const video = Video.instance();
   const {
-    emitMovement, players, quitGame, gameStarted, showInstructions, gameInfo
+    emitMovement, players, quitGame, showInstructions, gameInfo, finishGame, updateGameInfoStatus,
   } = useCoveyAppState();
   const [gameScene, setGameScene] = useState<CoveyGameScene>();
   useEffect(() => {
@@ -500,7 +527,7 @@ export default function WorldMap(): JSX.Element {
 
     const game = new Phaser.Game(config);
     if (video) {
-      const newGameScene = new CoveyGameScene(video, emitMovement, quitGame);
+      const newGameScene = new CoveyGameScene(video, emitMovement, quitGame, finishGame);
       setGameScene(newGameScene);
       game.scene.add('coveyBoard', newGameScene, true);
       video.pauseGame = () => {
@@ -513,17 +540,17 @@ export default function WorldMap(): JSX.Element {
     return () => {
       game.destroy(true);
     };
-  }, [video, emitMovement, quitGame]);
+  }, [video, emitMovement, quitGame, finishGame]);
 
   const deepPlayers = JSON.stringify(players);
   useEffect(() => {
     gameScene?.updatePlayersLocations(players);
   }, [players, deepPlayers, gameScene]);
   useEffect(() => {
-    if (gameStarted) {
-    gameScene?.startMazeTimer();
+    if (gameInfo.gameStatus === 'gameStarted') {
+      gameScene?.startMazeTimer();
     }
-  }, [gameStarted, gameScene]);
+  }, [gameInfo.gameStatus, gameScene]);
 
   // pauses the game and prevents movement while instructions are shown
   // use effect to catch when game info updates to playingGame -> teleport to maze start
@@ -539,14 +566,14 @@ export default function WorldMap(): JSX.Element {
             gameScene.pause();
           }
         }
-        // TODO: depends on how we implement finish game
-        // if (gameStarted && gameInfo.gameStatus === 'noGame') {
-        //   gameScene.teleport(false);
-        //   gameStarted = false;
-        // }
+        if (gameInfo.gameStatus === 'gameEnded') {
+          gameScene.teleport(false);
+          gameScene.resetStartTime();
+          updateGameInfoStatus('noGame');
+        }
       }
     }
-  }, [gameScene, gameInfo, showInstructions]);
+  }, [gameScene, gameInfo.gameStatus, showInstructions, updateGameInfoStatus]);
 
   return <div id="map-container"/>;
 }

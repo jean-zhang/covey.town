@@ -50,8 +50,12 @@ export default class CoveyTownController {
     return this._coveyTownID;
   }
 
+  get maze(): Maze {
+    return this._maze;
+  }
+
   /** The maze in the town */
-  private _maze: Maze = Maze.getInstance();
+  private _maze: Maze;
 
   /** The list of players currently in the town * */
   private _players: Player[] = [];
@@ -81,6 +85,7 @@ export default class CoveyTownController {
     this._townUpdatePassword = nanoid(24);
     this._isPubliclyListed = isPubliclyListed;
     this._friendlyName = friendlyName;
+    this._maze = new Maze();
   }
 
   /**
@@ -189,7 +194,8 @@ export default class CoveyTownController {
       .forEach(listener => listener.onMazeGameResponded(sender, recipient, gameAcceptance));
 
     if (gameAcceptance) {
-      recipient.acceptInvite(sender);
+      const gameID = recipient.acceptInvite(sender);
+      this._maze.addGame(gameID);
     }
     return true;
   }
@@ -205,6 +211,39 @@ export default class CoveyTownController {
   /**
    * returns true if succeeded
    */
+  async playerFinish(playerID: string, score: number, gaveUp: boolean): Promise<boolean> {
+    const finishedPlayer = this._players.find(player => player.id === playerID);
+    if (!finishedPlayer) {
+      return false;
+    }
+    try {
+      const playStatus = await finishedPlayer.finish(score, gaveUp);
+      if (!playStatus) {
+        return false;
+      }
+      const { opposingPlayerID, bothPlayersFinished, gameID } = playStatus;
+
+      const listeners = this._listeners.filter(
+        listener =>
+          listener.listeningPlayerID === opposingPlayerID ||
+          listener.listeningPlayerID === playerID,
+      );
+      if (listeners.length !== 2) {
+        return false;
+      }
+      if (bothPlayersFinished) {
+        this._maze.removeGame(gameID);
+      }
+      listeners.forEach(listener => listener.onFinishGame(finishedPlayer, score, gaveUp));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /**
+   * returns true if succeeded
+   */
   onGameRequested(senderPlayerID: string, recipientPlayerID: string): boolean {
     const sender = this._players.find(player => player.id === senderPlayerID);
     const recipient = this._players.find(player => player.id === recipientPlayerID);
@@ -214,10 +253,12 @@ export default class CoveyTownController {
     }
 
     let listeners = this._listeners.filter(
-      listener => listener.listeningPlayerID === recipientPlayerID ||
-        listener.listeningPlayerID === senderPlayerID);
+      listener =>
+        listener.listeningPlayerID === recipientPlayerID ||
+        listener.listeningPlayerID === senderPlayerID,
+    );
 
-    if (!Maze.getInstance().reachedCapacity()) {
+    if (!this._maze.reachedCapacity()) {
       listeners.forEach(listener => listener.onMazeGameRequested(sender, recipient));
     } else {
       listeners = listeners.filter(listener => listener.listeningPlayerID === senderPlayerID);

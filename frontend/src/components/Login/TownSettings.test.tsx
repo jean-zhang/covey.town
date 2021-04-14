@@ -55,6 +55,7 @@ function wrappedTownSettings() {
           },
           emitMovement: () => {},
           emitGameInvite: () => {},
+          emitFinishGame: () => {},
           emitRaceSettings: () => {},
           gameInfo: { gameStatus: 'noGame' },
           apiClient: new TownsServiceClient(),
@@ -62,7 +63,8 @@ function wrappedTownSettings() {
           quitGame: () => {},
           showInstructions: false,
           showLeaderboard: false,
-          gameStarted: false,
+          finishGame: () => {},
+          updateGameInfoStatus: () => {},
           enableInvite: true,
         }}>
         <TownSettings />

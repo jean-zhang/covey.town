@@ -104,6 +104,7 @@ function wrappedTownSelection() {
           },
           emitMovement: () => {},
           emitGameInvite: () => {},
+          emitFinishGame: () => {},
           emitRaceSettings: () => {},
           gameInfo: { gameStatus: 'noGame' },
           apiClient: new TownsServiceClient(),
@@ -111,7 +112,8 @@ function wrappedTownSelection() {
           quitGame: () => {},
           showInstructions: false,
           showLeaderboard: false,
-          gameStarted: false,
+          finishGame: () => {},
+          updateGameInfoStatus: () => {},
           enableInvite: true,
         }}>
         <TownSelection doLogin={doLoginMock} />
