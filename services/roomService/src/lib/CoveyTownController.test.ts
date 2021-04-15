@@ -138,7 +138,7 @@ describe('CoveyTownController', () => {
       mockOnMazeGameRequested1, mockMazeGameResponded1, mockOnFinishGame1, 
       mockOnFullMazeGameRequested1, mockOnUpdatePlayerRaceSettings1,
       mockOnMazeGameRequested2, mockMazeGameResponded2, mockOnFinishGame2, 
-      mockOnFullMazeGameRequested2, mockOnUpdatePlayerRaceSettings2
+      mockOnFullMazeGameRequested2, mockOnUpdatePlayerRaceSettings2,
     ];
     beforeEach(() => {
       const townName = `town listeners and events tests ${nanoid()}`;
@@ -252,12 +252,18 @@ describe('CoveyTownController', () => {
       testingTown.addTownListener(mockListener1);
       testingTown.addTownListener(mockListener2);
 
-      for (let i = 0; i < 5; i++) {
+      const addPlayerPromises: Promise<PlayerSession> [] = [];
+      for (let i = 0; i < 5; i+=1) {
         const player1ToAddToGame = new Player(`testGamePlayer${i}a`);
         const player2ToAddToGame = new Player(`testGamePlayer${i}b`);
-        await testingTown.addPlayer(player1ToAddToGame);
-        await testingTown.addPlayer(player2ToAddToGame);
-        testingTown.respondToGameInvite(player1ToAddToGame.id, player2ToAddToGame.id, true); 
+        addPlayerPromises.push(testingTown.addPlayer(player1ToAddToGame));
+        addPlayerPromises.push(testingTown.addPlayer(player2ToAddToGame));
+      }
+      const playerSessions = await Promise.all(addPlayerPromises);
+      for (let i = 0; i < 5; i+=1) {
+        const player1 = playerSessions[2*i].player;
+        const player2 = playerSessions[2*i + 1].player;
+        testingTown.respondToGameInvite(player1.id, player2.id, true); 
       }
       testingTown.onGameRequested(player1.id, player2.id);
       expect(mockOnFullMazeGameRequested1).toBeCalledWith(player1);
@@ -316,11 +322,11 @@ describe('CoveyTownController', () => {
       await testingTown.addPlayer(player1);
 
       mockListeners.forEach(listener => testingTown.addTownListener(listener));
-      //toggle true
+      // toggle true
       testingTown.updatePlayerRaceSettings(player1.id, true);
       mockListeners.forEach(listener => expect(listener.onUpdatePlayerRaceSettings).toBeCalledWith(player1, true));
       
-      //toggle false
+      // toggle false
       testingTown.updatePlayerRaceSettings(player1.id, false);
       mockListeners.forEach(listener => expect(listener.onUpdatePlayerRaceSettings).toBeCalledWith(player1, false));
     });
