@@ -121,6 +121,7 @@ export default class CoveyTownController {
    * @param session PlayerSession to destroy
    */
   destroySession(session: PlayerSession): void {
+    this.playerFinish(session.player.id, -1, true);
     this._players = this._players.filter(p => p.id !== session.player.id);
     this._sessions = this._sessions.filter(s => s.sessionToken !== session.sessionToken);
     this._listeners.forEach(listener => listener.onPlayerDisconnected(session.player));
@@ -237,16 +238,12 @@ export default class CoveyTownController {
     const { opposingPlayerID, bothPlayersFinished, gameID } = playStatus;
     const opposingPlayer = this._players.find(player => player.id === opposingPlayerID);
 
-    if (!finishedPlayer || !opposingPlayer) {
-      return false;
-    }
-
     if (bothPlayersFinished) {
       this._maze.removeGame(gameID);
     }
 
     this._listeners.forEach(listener =>
-      listener.onFinishGame(finishedPlayer, opposingPlayer, score, gaveUp),
+      listener.onFinishGame(finishedPlayer, opposingPlayer || null, score, gaveUp),
     );
     return true;
   }

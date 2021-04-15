@@ -449,10 +449,10 @@ async function GameController(
   );
   socket.on(
     'playerFinished',
-    (finishedPlayer: ServerPlayer, partnerPlayer: ServerPlayer, score: number, gaveUp: boolean) => {
+    (finishedPlayer: ServerPlayer, partnerPlayer: ServerPlayer | null, score: number, gaveUp: boolean) => {
       const finished = Player.fromServerPlayer(finishedPlayer);
-      const partner = Player.fromServerPlayer(partnerPlayer);
-      if (gamePlayerID === finished.id || gamePlayerID === partner.id) {
+      const partner = partnerPlayer ? Player.fromServerPlayer(partnerPlayer) : null;
+      if (gamePlayerID === finished.id || gamePlayerID === partner?.id) {
         displayPlayerFinishedToast(finished, score, gaveUp);
       }
       dispatchAppUpdate({

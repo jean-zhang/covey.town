@@ -239,7 +239,7 @@ function townSocketAdapter(socket: Socket, listeningPlayerID?: string): CoveyTow
     onMazeGameResponded(senderPlayer: Player, recipientPlayer: Player, gameAcceptance: boolean) {
       socket.emit('mazeGameResponse', senderPlayer, recipientPlayer, gameAcceptance);
     },
-    onFinishGame(finishedPlayer: Player, partnerPlayer: Player, score: number, gaveUp: boolean) {
+    onFinishGame(finishedPlayer: Player, partnerPlayer: Player | null, score: number, gaveUp: boolean) {
       socket.emit('playerFinished', finishedPlayer, partnerPlayer, score, gaveUp);
     },
     onUpdatePlayerRaceSettings(senderPlayer: Player, enabled: boolean) {
