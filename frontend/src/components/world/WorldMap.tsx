@@ -153,8 +153,8 @@ class CoveyGameScene extends Phaser.Scene {
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore - JB todo
           .sprite(0, 0, 'atlas', 'misa-front')
-          .setSize(30, 30)
-          .setOffset(0, 30);
+          .setSize(16, 20)
+          .setOffset(0, 20);
         const displayUserName = generateDisplayUserName(
           myPlayer.hasCompletedMaze,
           myPlayer.userName,
