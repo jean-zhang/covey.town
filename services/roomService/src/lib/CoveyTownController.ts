@@ -15,6 +15,7 @@ const AUTO_REJECT_GAME_SECONDS = 20;
  * can occur (e.g. joining a town, moving, leaving a town)
  */
 export default class CoveyTownController {
+
   get capacity(): number {
     return this._capacity;
   }
