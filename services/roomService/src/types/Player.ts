@@ -15,14 +15,8 @@ export default class Player {
   /** The player's username, which is not guaranteed to be unique within the town * */
   private readonly _userName: string;
 
-  /** Whether the Player is in the Maze * */
-  private _inMaze: boolean;
-
   /** Whether the Player can be invited to a Game * */
   private _enableInvite: boolean;
-
-  /** Whether the Player has an invite pending * */
-  private _invitePending: boolean;
 
   /** The Game that this Player is part of */
   private _game?: Game;
@@ -37,8 +31,6 @@ export default class Player {
     this._userName = userName;
     this._id = nanoid();
     this._enableInvite = true;
-    this._inMaze = false;
-    this._invitePending = false;
   }
 
   get userName(): string {
@@ -95,7 +87,6 @@ export default class Player {
   }
 
   onInviteAccepted(game: Game): void {
-    this._invitePending = false;
     this._game = game;
   }
 
@@ -103,7 +94,6 @@ export default class Player {
    * Resets fields of this player
    */
   resetPlayer(): void {
-    this._inMaze = false;
     this._game = undefined;
   }
 }
