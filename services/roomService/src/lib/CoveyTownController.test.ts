@@ -259,7 +259,6 @@ describe('CoveyTownController', () => {
         await testingTown.addPlayer(player2ToAddToGame);
         testingTown.respondToGameInvite(player1ToAddToGame.id, player2ToAddToGame.id, true); 
       }
-      console.log('GAME NUMBER OF PPL:', testingTown.maze._gameIDs.size);
       testingTown.onGameRequested(player1.id, player2.id);
       expect(mockOnFullMazeGameRequested1).toBeCalledWith(player1);
       expect(mockOnMazeGameRequested1).not.toBeCalled();
