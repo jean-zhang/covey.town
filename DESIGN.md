@@ -1,9 +1,7 @@
 # Design
 
-## Database Design
-![Class diagram (2)](https://user-images.githubusercontent.com/42978150/114910175-8fc72300-9deb-11eb-8758-c460291a30d8.png)
-
 ## High level architecture
+![Project Plan](https://user-images.githubusercontent.com/42978150/114911832-60b1b100-9ded-11eb-8365-7329e4366491.png)
 
 ### Frontend Component
 
@@ -14,6 +12,8 @@ We added to the existing frontend component by adding the ability to race within
 We added to the existing backend by connecting API requests for the global leaderboard to the database.
 We used sockets for the creation of game/starting a game, completing a game, joining a game, and other interactions related to the game.
 We created additional classes to represent the game and the two players within it
+![Class diagram (2)](https://user-images.githubusercontent.com/42978150/114910175-8fc72300-9deb-11eb-8758-c460291a30d8.png)
+
 
 ### Database Component
 
