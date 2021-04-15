@@ -261,9 +261,9 @@ describe('CoveyTownController', () => {
       }
       const playerSessions = await Promise.all(addPlayerPromises);
       for (let i = 0; i < 5; i+=1) {
-        const player1 = playerSessions[2*i].player;
-        const player2 = playerSessions[2*i + 1].player;
-        testingTown.respondToGameInvite(player1.id, player2.id, true); 
+        const player1ToAddToMaze = playerSessions[2*i].player;
+        const player2ToAddToMaze = playerSessions[2*i + 1].player;
+        testingTown.respondToGameInvite(player1ToAddToMaze.id, player2ToAddToMaze.id, true); 
       }
       testingTown.onGameRequested(player1.id, player2.id);
       expect(mockOnFullMazeGameRequested1).toBeCalledWith(player1);
