@@ -602,10 +602,10 @@ export default function WorldMap(): JSX.Element {
       const newGameScene = new CoveyGameScene(
         video,
         emitMovement,
+        myPlayerID,
         quitGame,
         finishGame,
         toggleShowLeaderboard,
-        myPlayerID,
       );
       setGameScene(newGameScene);
       game.scene.add('coveyBoard', newGameScene, true);
