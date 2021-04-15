@@ -34,8 +34,8 @@ import {
   dismissAllToasts,
   dismissToastById,
   displayInviteExpiredResponse,
-  displayInviteSent,
-  displayMazeFullGameResponse,
+  displayInviteSentToast,
+  displayMazeFullGameResponseToast,
   displayMazeGameInviteToast,
   displayMazeGameResponseToast,
   displayPlayerFinishedToast,
@@ -236,8 +236,8 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
           displayInviteExpiredResponse(update.player);
         }
         nextState.gameInfo = {
-          gameStatus: 'noGame'
-        }
+          gameStatus: 'noGame',
+        };
       }
       if (
         state.gameInfo.recipientPlayer &&
@@ -247,8 +247,8 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
           displayInviteExpiredResponse(update.player);
         }
         nextState.gameInfo = {
-          gameStatus: 'noGame'
-        }
+          gameStatus: 'noGame',
+        };
       }
       nextState.nearbyPlayers = calculateNearbyPlayers(
         nextState.players,
@@ -397,8 +397,8 @@ async function GameController(
     const recipient = Player.fromServerPlayer(recipientPlayer);
     const onGameResponse = (gameAcceptance: boolean) =>
       emitInviteResponse(sender, recipient, gameAcceptance);
-    if (gamePlayerID === senderPlayer._id) {
-      displayInviteSent(recipient);
+    if (gamePlayerID === sender.id) {
+      displayInviteSentToast(recipient);
     } else {
       displayMazeGameInviteToast(sender, onGameResponse);
       dispatchAppUpdate({
@@ -413,7 +413,7 @@ async function GameController(
   });
   socket.on('mazeFullGameResponse', (senderPlayer: ServerPlayer) => {
     const sender = Player.fromServerPlayer(senderPlayer);
-    displayMazeFullGameResponse();
+    displayMazeFullGameResponseToast();
     dispatchAppUpdate({
       action: 'updateGameInfo',
       data: {

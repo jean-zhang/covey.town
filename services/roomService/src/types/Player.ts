@@ -69,6 +69,10 @@ export default class Player {
     this._hasCompletedMaze = hasCompletedMaze;
   }
 
+  get game(): Game | undefined {
+    return this._game;
+  }
+
   updateLocation(location: UserLocation): void {
     this.location = location;
   }
@@ -100,10 +104,13 @@ export default class Player {
    * @returns the game id
    */
   acceptInvite(sender: Player): string {
-    const newGame = new Game(this.id, sender.id);
-    this._game = newGame;
-    sender.onInviteAccepted(newGame);
-    return newGame.getGameId();
+    if (!this._game) {
+      const newGame = new Game(this.id, sender.id);
+      this._game = newGame;
+      sender.onInviteAccepted(newGame);
+      return newGame.getGameId();
+    }
+    return this._game.getGameId();
   }
 
   onInviteAccepted(game: Game): void {
