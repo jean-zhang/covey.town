@@ -4,7 +4,7 @@ Steps to use corn maze feature:
 
 ## Playing the game:
 
-- When you are near other players outside of the maze, you will see a button in the top right corner of their video with the text ‘invite player’.
+- When you are near other players outside of the maze, you will see a button in the top right corner of their video with the text ‘invite to race'.
 - Clicking it will prompt an invite to that player
 - The opponent player will receive the game invite, and has 20 seconds to accept or reject
 - Once accepted, both players will be teleported to the beginning of the maze, and the instructions will open above the game window
@@ -20,7 +20,7 @@ Steps to use corn maze feature:
 
 ## Disabling invites
 
-- There is a switch button next to ‘start video’ (under the videos) which will allow you to disable race invites from other players
+- There is a toggle button called 'Enable Race Invites` next to ‘start video’ (under the videos) which will allow you to disable race invites from other players
 - If you toggle it off, the 'invite player' button over your video displayed to other players will be disabled, and they will not be able to invite you
 - If you toggle it off after you have already received an invite, that invite is still active until you either respond or wait 20 seconds
 - You may toggle it back on at any time
