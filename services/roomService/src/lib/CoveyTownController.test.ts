@@ -59,10 +59,92 @@ describe('CoveyTownController', () => {
       mock<CoveyTownListener>(),
       mock<CoveyTownListener>(),
     ];
+    const mockCoveyListenerFns = jest.fn();
+    const mockOnMazeGameRequested1 = jest.fn();
+    const mockMazeGameResponded1 = jest.fn();
+    const mockOnFinishGame1 = jest.fn();
+    const mockOnFullMazeGameRequested1 = jest.fn();
+    const mockOnUpdatePlayerRaceSettings1 = jest.fn();
+    function mockCoveyListener1WithId(id: string): CoveyTownListener {
+      return {
+        listeningPlayerID: id,
+        onPlayerDisconnected(removedPlayer: Player): void {
+          mockCoveyListenerFns(removedPlayer);
+        },
+        onPlayerMoved(movedPlayer: Player): void {
+          mockCoveyListenerFns(movedPlayer);
+        },
+        onTownDestroyed() {
+          mockCoveyListenerFns();
+        },
+        onPlayerJoined(newPlayer: Player) {
+          mockCoveyListenerFns(newPlayer);
+        },
+        onMazeGameRequested(senderPlayer: Player, recipientPlayer: Player) {
+          mockOnMazeGameRequested1(senderPlayer, recipientPlayer);
+        },
+        onMazeGameResponded(senderPlayer: Player, recipientPlayer: Player, gameAcceptance: boolean) {
+          mockMazeGameResponded1(senderPlayer, recipientPlayer, gameAcceptance);
+        },
+        onFinishGame(finishedPlayer: Player, partnerPlayer: Player, score: number, gaveUp: boolean) {
+          mockOnFinishGame1(finishedPlayer, partnerPlayer, score, gaveUp);
+        },
+        onFullMazeGameRequested(senderPlayer: Player) {
+          mockOnFullMazeGameRequested1(senderPlayer);
+        },
+        onUpdatePlayerRaceSettings(senderPlayer: Player) {
+          mockOnUpdatePlayerRaceSettings1(senderPlayer);
+        },
+      };
+    }
+    const mockOnMazeGameRequested2 = jest.fn();
+    const mockMazeGameResponded2 = jest.fn();
+    const mockOnFinishGame2 = jest.fn();
+    const mockOnFullMazeGameRequested2 = jest.fn();
+    const mockOnUpdatePlayerRaceSettings2 = jest.fn();
+    function mockCoveyListener2WithId(id: string): CoveyTownListener {
+      return {
+        listeningPlayerID: id,
+        onPlayerDisconnected(removedPlayer: Player): void {
+          mockCoveyListenerFns(removedPlayer);
+        },
+        onPlayerMoved(movedPlayer: Player): void {
+          mockCoveyListenerFns(movedPlayer);
+        },
+        onTownDestroyed() {
+          mockCoveyListenerFns();
+        },
+        onPlayerJoined(newPlayer: Player) {
+          mockCoveyListenerFns(newPlayer);
+        },
+        onMazeGameRequested(senderPlayer: Player, recipientPlayer: Player) {
+          mockOnMazeGameRequested2(senderPlayer, recipientPlayer);
+        },
+        onMazeGameResponded(senderPlayer: Player, recipientPlayer: Player, gameAcceptance: boolean) {
+          mockMazeGameResponded2(senderPlayer, recipientPlayer, gameAcceptance);
+        },
+        onFinishGame(finishedPlayer: Player, partnerPlayer: Player, score: number, gaveUp: boolean) {
+          mockOnFinishGame2(finishedPlayer, partnerPlayer, score, gaveUp);
+        },
+        onFullMazeGameRequested(senderPlayer: Player) {
+          mockOnFullMazeGameRequested2(senderPlayer);
+        },
+        onUpdatePlayerRaceSettings(senderPlayer: Player) {
+          mockOnUpdatePlayerRaceSettings2(senderPlayer);
+        },
+      };
+    }
+    const mockFunctions = [
+      mockOnMazeGameRequested1, mockMazeGameResponded1, mockOnFinishGame1, 
+      mockOnFullMazeGameRequested1, mockOnUpdatePlayerRaceSettings1,
+      mockOnMazeGameRequested2, mockMazeGameResponded2, mockOnFinishGame2, 
+      mockOnFullMazeGameRequested2, mockOnUpdatePlayerRaceSettings2
+    ];
     beforeEach(() => {
       const townName = `town listeners and events tests ${nanoid()}`;
       testingTown = new CoveyTownController(townName, false);
       mockListeners.forEach(mockReset);
+      mockFunctions.forEach(mockReset);
     });
     it('should notify added listeners of player movement when updatePlayerLocation is called', async () => {
       const player = new Player('test player');
@@ -138,6 +220,110 @@ describe('CoveyTownController', () => {
       testingTown.removeTownListener(listenerRemoved);
       testingTown.disconnectAllPlayers();
       expect(listenerRemoved.onTownDestroyed).not.toBeCalled();
+    });
+
+    it('should notify only players involved when a player tries to start a game', async () => {
+      const player1 = new Player('test player1');
+      const player2 = new Player('test player2');
+      await testingTown.addPlayer(player1);
+      await testingTown.addPlayer(player2);
+      const mockListener1 = mockCoveyListener1WithId(player1.id);
+      const mockListener2 = mockCoveyListener2WithId(player2.id);
+
+      mockListeners.forEach(listener => testingTown.addTownListener(listener));
+      testingTown.addTownListener(mockListener1);
+      testingTown.addTownListener(mockListener2);
+
+      testingTown.onGameRequested(player1.id, player2.id);
+      expect(mockOnMazeGameRequested1).toBeCalledWith(player1, player2);
+      expect(mockOnMazeGameRequested2).toBeCalledWith(player1, player2);
+      mockListeners.forEach(listener => expect(listener.onMazeGameRequested).not.toBeCalled());
+    });
+
+    it('should notify invite sender when maze has reached capacity', async () => {
+      const player1 = new Player('test player1');
+      const player2 = new Player('test player2');
+      await testingTown.addPlayer(player1);
+      await testingTown.addPlayer(player2);
+      const mockListener1 = mockCoveyListener1WithId(player1.id);
+      const mockListener2 = mockCoveyListener2WithId(player2.id);
+
+      mockListeners.forEach(listener => testingTown.addTownListener(listener));
+      testingTown.addTownListener(mockListener1);
+      testingTown.addTownListener(mockListener2);
+
+      for (let i = 0; i < 5; i++) {
+        const player1ToAddToGame = new Player(`testGamePlayer${i}a`);
+        const player2ToAddToGame = new Player(`testGamePlayer${i}b`);
+        await testingTown.addPlayer(player1ToAddToGame);
+        await testingTown.addPlayer(player2ToAddToGame);
+        testingTown.respondToGameInvite(player1ToAddToGame.id, player2ToAddToGame.id, true); 
+      }
+      console.log('GAME NUMBER OF PPL:', testingTown.maze._gameIDs.size);
+      testingTown.onGameRequested(player1.id, player2.id);
+      expect(mockOnFullMazeGameRequested1).toBeCalledWith(player1);
+      expect(mockOnMazeGameRequested1).not.toBeCalled();
+      expect(mockOnMazeGameRequested2).not.toBeCalled();
+      expect(mockOnFullMazeGameRequested2).not.toBeCalled();
+      mockListeners.forEach(listener => expect(listener.onFullMazeGameRequested).not.toBeCalled());
+    });
+
+    it('should notify both players when a game request has been accepted or rejected', async () => {
+      const player1 = new Player('test player1');
+      const player2 = new Player('test player2');
+      await testingTown.addPlayer(player1);
+      await testingTown.addPlayer(player2);
+      const mockListener1 = mockCoveyListener1WithId(player1.id);
+      const mockListener2 = mockCoveyListener2WithId(player2.id);
+
+      mockListeners.forEach(listener => testingTown.addTownListener(listener));
+      testingTown.addTownListener(mockListener1);
+      testingTown.addTownListener(mockListener2);
+
+      // accept
+      testingTown.respondToGameInvite(player1.id, player2.id, true);
+
+      expect(mockMazeGameResponded1).toBeCalledWith(player1, player2, true);
+      expect(mockMazeGameResponded2).toBeCalledWith(player1, player2, true);
+      mockListeners.forEach(listener => expect(listener.onMazeGameResponded).not.toBeCalled());
+
+      // reject
+      testingTown.respondToGameInvite(player1.id, player2.id, false);
+
+      expect(mockMazeGameResponded1).toBeCalledWith(player1, player2, false);
+      expect(mockMazeGameResponded2).toBeCalledWith(player1, player2, false);
+      mockListeners.forEach(listener => expect(listener.onMazeGameResponded).not.toBeCalled());
+    });
+
+    it('should notify all players when a player finishes a game', async () => {
+      const score = 100;
+      const player1 = new Player('test player1');
+      const player2 = new Player('test player2');
+      await testingTown.addPlayer(player1);
+      await testingTown.addPlayer(player2);
+
+      mockListeners.forEach(listener => testingTown.addTownListener(listener));
+      testingTown.respondToGameInvite(player1.id, player2.id, true);
+      // finish case
+      await testingTown.playerFinish(player1.id, score, false);
+      mockListeners.forEach(listener => expect(listener.onFinishGame).toBeCalledWith(player1, player2, score, false));
+      // give up case
+      await testingTown.playerFinish(player2.id, -1, true);
+      mockListeners.forEach(listener => expect(listener.onFinishGame).toBeCalledWith(player2, player1, -1, true));
+    });
+
+    it('should notify all players when a player has changed their invite settings', async () => {
+      const player1 = new Player('test');
+      await testingTown.addPlayer(player1);
+
+      mockListeners.forEach(listener => testingTown.addTownListener(listener));
+      //toggle true
+      testingTown.updatePlayerRaceSettings(player1.id, true);
+      mockListeners.forEach(listener => expect(listener.onUpdatePlayerRaceSettings).toBeCalledWith(player1, true));
+      
+      //toggle false
+      testingTown.updatePlayerRaceSettings(player1.id, false);
+      mockListeners.forEach(listener => expect(listener.onUpdatePlayerRaceSettings).toBeCalledWith(player1, false));
     });
   });
   describe('townSubscriptionHandler', () => {
