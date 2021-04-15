@@ -1,4 +1,4 @@
-import { Button, ChakraProvider } from '@chakra-ui/react';
+import { ChakraProvider } from '@chakra-ui/react';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import assert from 'assert';
 import React, {
@@ -65,6 +65,7 @@ type CoveyAppUpdate =
         gameInfo: GameInfo;
         toggleQuit: boolean;
         quitGame: () => void;
+        toggleShowLeaderboard: () => void;
         finishGame: (score: number, gaveUp: boolean) => void;
         updateGameInfoStatus: (gameStatus: GameStatus) => void;
         emitRaceSettings: (myPlayerID: string, enableInvite: boolean) => void;
@@ -121,6 +122,7 @@ function defaultAppState(): CoveyAppState {
     finishGame: () => {},
     showInstructions: false,
     showLeaderboard: false,
+    toggleShowLeaderboard: () => {},
     updateGameInfoStatus: () => {},
     enableInvite: true,
   };
@@ -149,6 +151,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     finishGame: state.finishGame,
     showInstructions: state.showInstructions,
     showLeaderboard: state.showLeaderboard,
+    toggleShowLeaderboard: state.toggleShowLeaderboard,
     updateGameInfoStatus: state.updateGameInfoStatus,
     enableInvite: state.enableInvite,
   };
@@ -191,6 +194,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.players = update.data.players;
       nextState.toggleQuit = update.data.toggleQuit;
       nextState.quitGame = update.data.quitGame;
+      nextState.toggleShowLeaderboard = update.data.toggleShowLeaderboard;
       nextState.finishGame = update.data.finishGame;
       nextState.updateGameInfoStatus = update.data.updateGameInfoStatus;
       break;
@@ -385,6 +389,9 @@ async function GameController(
   const quitGame = () => {
     dispatchAppUpdate({ action: 'toggleQuit' });
   };
+  const toggleShowLeaderboard = () => {
+    dispatchAppUpdate({ action: 'toggleLeaderboard' });
+  };
   const finishGame = (score: number, gaveUp: boolean) => {
     dispatchAppUpdate({ action: 'exitMaze' });
     emitFinishGame(score, gaveUp);
@@ -473,6 +480,7 @@ async function GameController(
       players: initData.currentPlayers.map(sp => Player.fromServerPlayer(sp)),
       toggleQuit: false,
       quitGame,
+      toggleShowLeaderboard,
       finishGame,
       updateGameInfoStatus,
       enableInvite: true,
@@ -538,9 +546,6 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
     return (
       <div>
         <WorldMap />
-        <Button onClick={() => dispatchAppUpdate({ action: 'toggleLeaderboard' })}>
-          Show Leaderboard
-        </Button>
         <VideoOverlay preferredMode='fullwidth' />
         <QuitGame
           isOpen={toggleQuit}

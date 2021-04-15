@@ -113,6 +113,7 @@ function wrappedTownSelection() {
           finishGame: () => {},
           showInstructions: false,
           showLeaderboard: false,
+          toggleShowLeaderboard: () => {},
           updateGameInfoStatus: () => {},
           enableInvite: true,
         }}>

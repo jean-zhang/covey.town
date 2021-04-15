@@ -168,8 +168,7 @@ export default class TownsServiceClient {
 
   async getMazeCompletionTimes(): Promise<MazeCompletionTimesResponse> {
     const responseWrapper = await this._axios.get<ResponseEnvelope<MazeCompletionTimesResponse>>(
-      '/maze-completion-times',
-    );
+      '/maze-completion-times');
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 }
