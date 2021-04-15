@@ -14,7 +14,7 @@ class CoveyGameScene extends Phaser.Scene {
     label: Phaser.GameObjects.Text;
   };
 
-  private id?: string;
+  private myPlayerID: string;
 
   private players: Player[] = [];
 
@@ -66,12 +66,14 @@ class CoveyGameScene extends Phaser.Scene {
   constructor(
     video: Video,
     emitMovement: (loc: UserLocation) => void,
+    myPlayerID: string,
     quitGame: () => void,
     finishGame: (score: number, gaveUp: boolean) => void,
   ) {
     super('PlayGame');
     this.video = video;
     this.emitMovement = emitMovement;
+    this.myPlayerID = myPlayerID;
     this.quitGame = quitGame;
     this.finishGame = finishGame;
     this.mazeStartTime = -1;
@@ -139,7 +141,7 @@ class CoveyGameScene extends Phaser.Scene {
       );
       this.players.push(myPlayer);
     }
-    if (this.id !== myPlayer.id && this.physics && player.location) {
+    if (this.myPlayerID !== myPlayer.id && this.physics && player.location) {
       let { sprite } = myPlayer;
       if (!sprite) {
         sprite = this.physics.add
@@ -266,7 +268,6 @@ class CoveyGameScene extends Phaser.Scene {
       const isMoving = primaryDirection !== undefined;
       this.player.label.setX(body.x);
       this.player.label.setY(body.y - 20);
-
       if (
         !this.lastLocation ||
         this.lastLocation.x !== body.x ||
@@ -500,7 +501,10 @@ class CoveyGameScene extends Phaser.Scene {
 
   resume() {
     this.paused = false;
-    this.input.keyboard.addCapture(this.previouslyCapturedKeys);
+    if (Video.instance()) {
+      // If the game is also in process of being torn down, the keyboard could be undefined
+      this.input.keyboard.addCapture(this.previouslyCapturedKeys);
+    }
     this.previouslyCapturedKeys = [];
   }
 
@@ -542,6 +546,7 @@ export default function WorldMap(): JSX.Element {
   const video = Video.instance();
   const {
     emitMovement,
+    myPlayerID,
     players,
     quitGame,
     showInstructions,
@@ -566,7 +571,13 @@ export default function WorldMap(): JSX.Element {
 
     const game = new Phaser.Game(config);
     if (video) {
-      const newGameScene = new CoveyGameScene(video, emitMovement, quitGame, finishGame);
+      const newGameScene = new CoveyGameScene(
+        video,
+        emitMovement,
+        myPlayerID,
+        quitGame,
+        finishGame,
+      );
       setGameScene(newGameScene);
       game.scene.add('coveyBoard', newGameScene, true);
       video.pauseGame = () => {
@@ -579,7 +590,7 @@ export default function WorldMap(): JSX.Element {
     return () => {
       game.destroy(true);
     };
-  }, [video, emitMovement, quitGame, finishGame]);
+  }, [video, emitMovement, myPlayerID, quitGame, finishGame]);
 
   const deepPlayers = JSON.stringify(players);
   useEffect(() => {
