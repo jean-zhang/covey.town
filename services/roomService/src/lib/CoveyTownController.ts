@@ -15,7 +15,6 @@ const AUTO_REJECT_GAME_SECONDS = 20;
  * can occur (e.g. joining a town, moving, leaving a town)
  */
 export default class CoveyTownController {
-
   get capacity(): number {
     return this._capacity;
   }
@@ -80,6 +79,8 @@ export default class CoveyTownController {
   private _isPubliclyListed: boolean;
 
   private _capacity: number;
+
+  private _autoRejectSetTimeoutKey?: NodeJS.Timeout;
 
   constructor(friendlyName: string, isPubliclyListed: boolean) {
     this._coveyTownID = process.env.DEMO_TOWN_ID === friendlyName ? friendlyName : friendlyNanoID();
@@ -195,6 +196,10 @@ export default class CoveyTownController {
       )
       .forEach(listener => listener.onMazeGameResponded(sender, recipient, gameAcceptance));
 
+    if (this._autoRejectSetTimeoutKey) {
+      clearTimeout(this._autoRejectSetTimeoutKey);
+    }
+
     if (gameAcceptance) {
       const gameID = recipient.acceptInvite(sender);
       this._maze.addGame(gameID);
@@ -263,10 +268,8 @@ export default class CoveyTownController {
         listener.listeningPlayerID === senderPlayerID,
     );
 
-    setTimeout(() => {
-      if (!recipient.game) {
-        listeners.map(listener => listener.onMazeGameResponded(sender, recipient, false));
-      }
+    this._autoRejectSetTimeoutKey = setTimeout(() => {
+      listeners.map(listener => listener.onMazeGameResponded(sender, recipient, false));
     }, AUTO_REJECT_GAME_SECONDS * 1000);
 
     if (!this._maze.reachedCapacity()) {
