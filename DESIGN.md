@@ -1,6 +1,7 @@
 # Design
 
 ## Database Design
+![Class diagram (2)](https://user-images.githubusercontent.com/42978150/114910175-8fc72300-9deb-11eb-8758-c460291a30d8.png)
 
 ## High level architecture
 
