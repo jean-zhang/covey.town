@@ -155,7 +155,11 @@ class CoveyGameScene extends Phaser.Scene {
           .sprite(0, 0, 'atlas', 'misa-front')
           .setSize(30, 30)
           .setOffset(0, 30);
-        const label = this.add.text(0, 0, myPlayer.userName, {
+        const displayUserName = generateDisplayUserName(
+          myPlayer.hasCompletedMaze,
+          myPlayer.userName,
+        );
+        const label = this.add.text(0, 0, displayUserName, {
           font: '18px monospace',
           color: '#000000',
           backgroundColor: '#ffffff',
