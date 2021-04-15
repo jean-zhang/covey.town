@@ -15,7 +15,6 @@ const AUTO_REJECT_GAME_SECONDS = 20;
  * can occur (e.g. joining a town, moving, leaving a town)
  */
 export default class CoveyTownController {
-
   get capacity(): number {
     return this._capacity;
   }
@@ -81,6 +80,8 @@ export default class CoveyTownController {
 
   private _capacity: number;
 
+  private _autoRejectSetTimeoutKey?: NodeJS.Timeout;
+
   constructor(friendlyName: string, isPubliclyListed: boolean) {
     this._coveyTownID = process.env.DEMO_TOWN_ID === friendlyName ? friendlyName : friendlyNanoID();
     this._capacity = 50;
@@ -120,6 +121,7 @@ export default class CoveyTownController {
    * @param session PlayerSession to destroy
    */
   destroySession(session: PlayerSession): void {
+    this.playerFinish(session.player.id, -1, true);
     this._players = this._players.filter(p => p.id !== session.player.id);
     this._sessions = this._sessions.filter(s => s.sessionToken !== session.sessionToken);
     this._listeners.forEach(listener => listener.onPlayerDisconnected(session.player));
@@ -195,6 +197,10 @@ export default class CoveyTownController {
       )
       .forEach(listener => listener.onMazeGameResponded(sender, recipient, gameAcceptance));
 
+    if (this._autoRejectSetTimeoutKey) {
+      clearTimeout(this._autoRejectSetTimeoutKey);
+    }
+
     if (gameAcceptance) {
       const gameID = recipient.acceptInvite(sender);
       this._maze.addGame(gameID);
@@ -232,16 +238,12 @@ export default class CoveyTownController {
     const { opposingPlayerID, bothPlayersFinished, gameID } = playStatus;
     const opposingPlayer = this._players.find(player => player.id === opposingPlayerID);
 
-    if (!finishedPlayer || !opposingPlayer) {
-      return false;
-    }
-
     if (bothPlayersFinished) {
       this._maze.removeGame(gameID);
     }
 
     this._listeners.forEach(listener =>
-      listener.onFinishGame(finishedPlayer, opposingPlayer, score, gaveUp),
+      listener.onFinishGame(finishedPlayer, opposingPlayer || null, score, gaveUp),
     );
     return true;
   }
@@ -263,10 +265,8 @@ export default class CoveyTownController {
         listener.listeningPlayerID === senderPlayerID,
     );
 
-    setTimeout(() => {
-      if (!recipient.game) {
-        listeners.map(listener => listener.onMazeGameResponded(sender, recipient, false));
-      }
+    this._autoRejectSetTimeoutKey = setTimeout(() => {
+      listeners.map(listener => listener.onMazeGameResponded(sender, recipient, false));
     }, AUTO_REJECT_GAME_SECONDS * 1000);
 
     if (!this._maze.reachedCapacity()) {

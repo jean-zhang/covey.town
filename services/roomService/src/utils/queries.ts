@@ -7,5 +7,5 @@ VALUES ($1, $2, $3)
 `;
 
 export const deleteMazeCompletionTime = `
-DELETE FROM maze_completion_time WHERE username=$1
+DELETE FROM maze_completion_time WHERE player_id=$1
 `;

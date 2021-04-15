@@ -1,4 +1,5 @@
 import { nanoid } from 'nanoid';
+import { QueryResult } from 'pg';
 import { MazeCompletionTimeList } from '../CoveyTypes';
 import pool from '../dbconnector/pool';
 import CoveyTownController from '../lib/CoveyTownController';
@@ -51,12 +52,15 @@ async function getResults(): Promise<MazeCompletionTimeList> {
   return resultsMapped;
 }
 
-async function deleteFromDatabase(player1Name: string, player2Name: string) {
-  await pool.query(deleteMazeCompletionTime, [player1Name]);
-  await pool.query(deleteMazeCompletionTime, [player2Name]);
+async function deleteFromDatabase(playerIDs: string[]) {
+  const promises: Promise<QueryResult>[] = [];
+
+  playerIDs.forEach(playerID => {
+    promises.push(pool.query(deleteMazeCompletionTime, [playerID]));
+  });
+  await Promise.all(promises);
   const resultsMapped = await getResults();
-  expect(resultsMapped.find(result => result.username === player1Name)).toBeUndefined();
-  expect(resultsMapped.find(result => result.username === player2Name)).toBeUndefined();
+  playerIDs.forEach(playerID => expect(resultsMapped.find(result => result.playerID === playerID)).toBeUndefined());
 }
 
 describe('Maze game tests', () => {
@@ -84,6 +88,7 @@ describe('Maze game tests', () => {
     expect(townController.maze.hasGame(gameID)).toEqual(true);
     await townController.playerFinish(player2.id, 100, false);
     expect(townController.maze.hasGame(gameID)).toEqual(false);
+    deleteFromDatabase([ player1.id, player2.id ]);
   });
 
   it('Players should not be able to finish the same game multiple times', async () => {
@@ -112,6 +117,7 @@ describe('Maze game tests', () => {
     player2Status = await player2.finish(1000, false);
     expect(playerStatus).toBeUndefined();
     expect(player2Status).toBeUndefined();
+    deleteFromDatabase([ player1.id, player2.id ]);
   });
 
   it('Race where both give up should not push anything to database', async () => {
@@ -127,6 +133,7 @@ describe('Maze game tests', () => {
       tableEntry => tableEntry.playerID === player1.id || tableEntry.playerID === player2.id,
     );
     expect(playersResults).toHaveLength(0);
+    deleteFromDatabase([ player1.id, player2.id ]);
   });
 
   it('Race where one gives up (before) should only push winner entry to database', async () => {
@@ -145,7 +152,7 @@ describe('Maze game tests', () => {
     );
     expect(player1Results).toHaveLength(0);
     expect(player2Results).toHaveLength(1);
-    deleteFromDatabase(player1Name, player2Name);
+    deleteFromDatabase([ player1.id, player2.id ]);
   });
 
   it('Database should update when either player finishes', async () => {
@@ -176,6 +183,6 @@ describe('Maze game tests', () => {
     expect(player1Results).toHaveLength(1);
     expect(player2Results).toHaveLength(1);
 
-    deleteFromDatabase(player1Name, player2Name);
+    deleteFromDatabase([ player1.id, player2.id ]);
   });
 });
