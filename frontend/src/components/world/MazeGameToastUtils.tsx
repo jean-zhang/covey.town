@@ -1,4 +1,11 @@
-import { Button, createStandaloneToast, Heading, SimpleGrid, Text } from '@chakra-ui/react';
+import {
+  Button,
+  createStandaloneToast,
+  Heading,
+  SimpleGrid,
+  Text,
+  ToastId,
+} from '@chakra-ui/react';
 import React from 'react';
 import Player from '../../classes/Player';
 
@@ -89,6 +96,17 @@ export function displayMazeFullGameResponseToast(): void {
   });
 }
 
+export function displayInviteExpiredResponse(expiredPlayer: Player): void {
+  const toastTitle = `Invite expired, the other player ${expiredPlayer.userName} can no longer be found.`;
+  const toast = createStandaloneToast();
+  toast({
+    title: toastTitle,
+    status: 'info',
+    duration: 5000,
+    isClosable: true,
+  });
+}
+
 export function displayInviteSentToast(recipientPlayer: Player): void {
   const toast = createStandaloneToast();
   const TOAST_ID = recipientPlayer.id;
@@ -104,4 +122,14 @@ export function displayInviteSentToast(recipientPlayer: Player): void {
       isClosable: true,
     });
   }
+}
+
+export function dismissToastById(id: ToastId): void {
+  const toast = createStandaloneToast();
+  toast.close(id);
+}
+
+export function dismissAllToasts(): void {
+  const toast = createStandaloneToast();
+  toast.closeAll();
 }
