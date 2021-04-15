@@ -8,12 +8,14 @@ import Maze from './Maze';
 import TwilioVideo from './TwilioVideo';
 
 const friendlyNanoID = customAlphabet('1234567890ABCDEF', 8);
+const AUTO_REJECT_GAME_SECONDS = 20;
 
 /**
  * The CoveyTownController implements the logic for each town: managing the various events that
  * can occur (e.g. joining a town, moving, leaving a town)
  */
 export default class CoveyTownController {
+
   get capacity(): number {
     return this._capacity;
   }
@@ -260,6 +262,12 @@ export default class CoveyTownController {
         listener.listeningPlayerID === recipientPlayerID ||
         listener.listeningPlayerID === senderPlayerID,
     );
+
+    setTimeout(() => {
+      if (!recipient.game) {
+        listeners.map(listener => listener.onMazeGameResponded(sender, recipient, false));
+      }
+    }, AUTO_REJECT_GAME_SECONDS * 1000);
 
     if (!this._maze.reachedCapacity()) {
       listeners.forEach(listener => listener.onMazeGameRequested(sender, recipient));

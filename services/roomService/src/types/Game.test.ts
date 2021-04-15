@@ -3,8 +3,8 @@ import { MazeCompletionTimeList } from '../CoveyTypes';
 import pool from '../dbconnector/pool';
 import CoveyTownController from '../lib/CoveyTownController';
 import { MazeCompletionTimeRow } from '../requestHandlers/CoveyTownRequestHandlers';
-import CoveyTownListener from '../types/CoveyTownListener';
 import { deleteMazeCompletionTime, getMazeCompletionTime } from '../utils/queries';
+import CoveyTownListener from './CoveyTownListener';
 import Player from './Player';
 
 const mockCoveyListenerFns = jest.fn();
@@ -41,22 +41,6 @@ function mockCoveyListener(id: string): CoveyTownListener {
   };
 }
 
-async function deleteFromDatabase(player1Name: string, player2Name: string) {
-  await pool.query(deleteMazeCompletionTime, [player1Name]);
-  await pool.query(deleteMazeCompletionTime, [player2Name]);
-  const resultsMapped = await getResults();
-  expect(
-    resultsMapped.find(result => {
-      result.username === player1Name;
-    }),
-  ).toBeUndefined();
-  expect(
-    resultsMapped.find(result => {
-      result.username === player2Name;
-    }),
-  ).toBeUndefined();
-}
-
 async function getResults(): Promise<MazeCompletionTimeList> {
   const results = await pool.query(getMazeCompletionTime);
   const resultsMapped: MazeCompletionTimeList = results.rows.map((row: MazeCompletionTimeRow) => ({
@@ -65,6 +49,14 @@ async function getResults(): Promise<MazeCompletionTimeList> {
     time: row.time,
   }));
   return resultsMapped;
+}
+
+async function deleteFromDatabase(player1Name: string, player2Name: string) {
+  await pool.query(deleteMazeCompletionTime, [player1Name]);
+  await pool.query(deleteMazeCompletionTime, [player2Name]);
+  const resultsMapped = await getResults();
+  expect(resultsMapped.find(result => result.username === player1Name)).toBeUndefined();
+  expect(resultsMapped.find(result => result.username === player2Name)).toBeUndefined();
 }
 
 describe('Maze game tests', () => {
