@@ -4,6 +4,8 @@ import Player, { UserLocation } from '../../classes/Player';
 import Video from '../../classes/Video/Video';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 
+const generateDisplayUserName = (hasCompletedMaze: boolean, userName: string) => hasCompletedMaze ? `🌽 ${userName} 🌽` : userName;
+
 // https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
 class CoveyGameScene extends Phaser.Scene {
   private player?: {
@@ -131,7 +133,7 @@ class CoveyGameScene extends Phaser.Scene {
           y: 0,
         };
       }
-      myPlayer = new Player(player.id, player.userName, location, true);
+      myPlayer = new Player(player.id, player.userName, location, player.enableInvite, player.hasCompletedMaze);
       this.players.push(myPlayer);
     }
     if (this.id !== myPlayer.id && this.physics && player.location) {
@@ -156,6 +158,7 @@ class CoveyGameScene extends Phaser.Scene {
       sprite.setY(player.location.y);
       myPlayer.label?.setX(player.location.x);
       myPlayer.label?.setY(player.location.y - 20);
+      myPlayer.label?.setText(generateDisplayUserName(player.hasCompletedMaze, player.userName));
       if (player.location.moving) {
         sprite.anims.play(`misa-${player.location.rotation}-walk`, true);
       } else {
@@ -203,10 +206,12 @@ class CoveyGameScene extends Phaser.Scene {
     } else {
       this.timeLabel.setVisible(false);
     }
-    if (this.lastLocation && this.mazeFinish &&
+    if (this.lastLocation && this.mazeFinish && this.player && 
         Math.abs(this.lastLocation.x - this.mazeFinish.x) < 10 &&
         Math.abs(this.lastLocation.y - this.mazeFinish.y) < 50) {
       this.finishMaze(false);
+      const displayUserName = generateDisplayUserName(true, '(You)');
+      this.player.label.setText(displayUserName);
       return;
     }
 
@@ -256,13 +261,12 @@ class CoveyGameScene extends Phaser.Scene {
       const isMoving = primaryDirection !== undefined;
       this.player.label.setX(body.x);
       this.player.label.setY(body.y - 20);
-      if (
-        !this.lastLocation ||
-        this.lastLocation.x !== body.x ||
-        this.lastLocation.y !== body.y ||
-        (isMoving && this.lastLocation.rotation !== primaryDirection) ||
-        this.lastLocation.moving !== isMoving
-      ) {
+
+      if (!this.lastLocation
+        || this.lastLocation.x !== body.x
+        || this.lastLocation.y !== body.y
+        || (isMoving && this.lastLocation.rotation !== primaryDirection)
+        || this.lastLocation.moving !== isMoving) {
         if (!this.lastLocation) {
           this.lastLocation = {
             x: body.x,
@@ -585,6 +589,7 @@ export default function WorldMap(): JSX.Element {
   useEffect(() => {
     gameScene?.updatePlayersLocations(players);
   }, [players, deepPlayers, gameScene]);
+
   useEffect(() => {
     if (gameInfo.gameStatus === 'gameStarted') {
       gameScene?.startMazeTimer();

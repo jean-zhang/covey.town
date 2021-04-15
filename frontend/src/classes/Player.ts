@@ -9,15 +9,22 @@ export default class Player {
 
   public label?: Phaser.GameObjects.Text;
 
-  private _enableInvite?: boolean;
+  private _enableInvite: boolean;
 
-  constructor(id: string, userName: string, location: UserLocation, enableInvite?: boolean) {
+  private _hasCompletedMaze: boolean;
+
+  constructor(
+    id: string,
+    userName: string,
+    location: UserLocation,
+    enableInvite: boolean,
+    hasCompletedMaze: boolean,
+  ) {
     this._id = id;
     this._userName = userName;
     this.location = location;
-    if (enableInvite !== null) {
-      this._enableInvite = enableInvite;
-    }
+    this._enableInvite = enableInvite;
+    this._hasCompletedMaze = hasCompletedMaze;
   }
 
   get userName(): string {
@@ -28,19 +35,39 @@ export default class Player {
     return this._id;
   }
 
-  get enableInvite(): boolean | undefined {
+  get enableInvite(): boolean {
     return this._enableInvite;
   }
 
-  set enableInvite(enabled: boolean | undefined) {
+  set enableInvite(enabled: boolean) {
     this._enableInvite = enabled;
   }
 
+  get hasCompletedMaze(): boolean {
+    return this._hasCompletedMaze;
+  }
+
+  set hasCompletedMaze(hasCompletedMaze: boolean) {
+    this._hasCompletedMaze = hasCompletedMaze;
+  }
+
   static fromServerPlayer(playerFromServer: ServerPlayer): Player {
-    return new Player(playerFromServer._id, playerFromServer._userName, playerFromServer.location, playerFromServer._enableInvite);
+    return new Player(
+      playerFromServer._id,
+      playerFromServer._userName,
+      playerFromServer.location,
+      playerFromServer._enableInvite,
+      playerFromServer._hasCompletedMaze,
+    );
   }
 }
-export type ServerPlayer = { _id: string; _userName: string; _enableInvite: boolean; location: UserLocation };
+export type ServerPlayer = {
+  _id: string;
+  _userName: string;
+  _enableInvite: boolean;
+  _hasCompletedMaze: boolean;
+  location: UserLocation;
+};
 
 export type Direction = 'front' | 'back' | 'left' | 'right';
 
