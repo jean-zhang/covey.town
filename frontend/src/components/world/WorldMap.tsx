@@ -91,7 +91,8 @@ class CoveyGameScene extends Phaser.Scene {
   preload() {
     // this.load.image("logo", logoImg);
     this.load.image('tiles', '/assets/tilesets/tuxmon-sample-32px-extruded.png');
-    this.load.tilemapTiledJSON('map', '/assets/tilemaps/tuxemon-town-maze-F.json');
+    this.load.image('corn', '/assets/tilesets/crop_spritesheet-1.png');
+    this.load.tilemapTiledJSON('map', '/assets/tilemaps/tuxemon-town-maze-complex.json');
     this.load.atlas('atlas', '/assets/atlas/atlas.png', '/assets/atlas/atlas.json');
   }
 
@@ -297,10 +298,14 @@ class CoveyGameScene extends Phaser.Scene {
      tileset image in Phaser's cache (i.e. the name you used in preload)
      */
     const tileset = map.addTilesetImage('tuxmon-sample-32px-extruded', 'tiles');
+    const cornTileset = map.addTilesetImage('crop_spritesheet-1', 'corn');
+    
 
     // Parameters: layer name (or index) from Tiled, tileset, x, y
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const belowLayer = map.createLayer('Below Player', tileset, 0, 0);
+    const cornLayer = map.createLayer('Corn', cornTileset, 0, 0);
+    cornLayer.setCollisionByProperty({ collides: true });
     const worldLayer = map.createLayer('World', tileset, 0, 0);
     worldLayer.setCollisionByProperty({ collides: true });
     const aboveLayer = map.createLayer('Above Player', tileset, 0, 0);
@@ -412,6 +417,7 @@ class CoveyGameScene extends Phaser.Scene {
 
     // Watch the player and worldLayer for collisions, for the duration of the scene:
     this.physics.add.collider(sprite, worldLayer);
+    this.physics.add.collider(sprite, cornLayer);
 
     /* Configure physics overlap behavior for when the player steps into
     leaderboard hit area. If you're inside the hit area and press 'space', you'll
