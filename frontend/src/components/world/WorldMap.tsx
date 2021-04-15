@@ -4,7 +4,8 @@ import Player, { UserLocation } from '../../classes/Player';
 import Video from '../../classes/Video/Video';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 
-const generateDisplayUserName = (hasCompletedMaze: boolean, userName: string) => hasCompletedMaze ? `🌽 ${userName} 🌽` : userName;
+const generateDisplayUserName = (hasCompletedMaze: boolean, userName: string) =>
+  hasCompletedMaze ? `🌽 ${userName} 🌽` : userName;
 
 // https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
 class CoveyGameScene extends Phaser.Scene {
@@ -134,7 +135,13 @@ class CoveyGameScene extends Phaser.Scene {
           y: 0,
         };
       }
-      myPlayer = new Player(player.id, player.userName, location, player.enableInvite, player.hasCompletedMaze);
+      myPlayer = new Player(
+        player.id,
+        player.userName,
+        location,
+        player.enableInvite,
+        player.hasCompletedMaze,
+      );
       this.players.push(myPlayer);
     }
     if (this.id !== myPlayer.id && this.physics && player.location) {
@@ -194,15 +201,12 @@ class CoveyGameScene extends Phaser.Scene {
       return;
     }
     if (!this.timeLabel) {
-      this.timeLabel = this.add
-      .text(16, 100, '', this.textStyle)
-      .setScrollFactor(0)
-      .setDepth(31);
+      this.timeLabel = this.add.text(16, 100, '', this.textStyle).setScrollFactor(0).setDepth(31);
     }
     if (this.mazeStartTime >= 0) {
       this.timeLabel.setVisible(true);
       const timeTaken = this.getFormattedMazeScore(time);
-      const timeTakenString = `TIME TAKEN: ${timeTaken}s`
+      const timeTakenString = `TIME TAKEN: ${timeTaken}s`;
       this.timeLabel.setText(timeTakenString);
     } else {
       this.timeLabel.setVisible(false);
@@ -263,11 +267,13 @@ class CoveyGameScene extends Phaser.Scene {
       this.player.label.setX(body.x);
       this.player.label.setY(body.y - 20);
 
-      if (!this.lastLocation
-        || this.lastLocation.x !== body.x
-        || this.lastLocation.y !== body.y
-        || (isMoving && this.lastLocation.rotation !== primaryDirection)
-        || this.lastLocation.moving !== isMoving) {
+      if (
+        !this.lastLocation ||
+        this.lastLocation.x !== body.x ||
+        this.lastLocation.y !== body.y ||
+        (isMoving && this.lastLocation.rotation !== primaryDirection) ||
+        this.lastLocation.moving !== isMoving
+      ) {
         if (!this.lastLocation) {
           this.lastLocation = {
             x: body.x,
@@ -354,6 +360,16 @@ class CoveyGameScene extends Phaser.Scene {
       sprite.y += 2 * sprite.height; // Phaser and Tiled seem to disagree on which corner is y
       sprite.setVisible(false); // Comment this out to see the transporter rectangles drawn on
       // the map
+    });
+
+    const labels = map.filterObjects('Objects', obj => obj.name === 'label');
+    labels.forEach(label => {
+      if (label.x && label.y) {
+        this.add.text(label.x, label.y, label.text.text, {
+          color: '#FFFFFF',
+          backgroundColor: '#000000',
+        });
+      }
     });
 
     const cursorKeys = this.input.keyboard.createCursorKeys();
@@ -593,7 +609,6 @@ export default function WorldMap(): JSX.Element {
   useEffect(() => {
     gameScene?.updatePlayersLocations(players);
   }, [players, deepPlayers, gameScene]);
-
   useEffect(() => {
     if (gameInfo.gameStatus === 'gameStarted') {
       gameScene?.startMazeTimer();
