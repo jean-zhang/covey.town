@@ -44,6 +44,7 @@ export type CoveyAppState = {
   finishGame: (score: number, gaveUp: boolean) => void;
   showInstructions: boolean;
   showLeaderboard: boolean;
+  toggleShowLeaderboard: () => void;
   updateGameInfoStatus: (gameStatus: GameStatus) => void;
   enableInvite: boolean;
 };

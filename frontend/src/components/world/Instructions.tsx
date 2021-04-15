@@ -13,6 +13,8 @@ export default function Instructions(props: {isOpen: boolean, onClose: () => voi
                 <Text color="gray.500">
                     Find your way out of the corn maze before your opponent does! 
                     The timer will start once you click ok. 
+
+                    Once you finish the maze, press space while standing next to the blue sign in town to check the leaderboards.
                 </Text>
                 </ModalBody>
                 <ModalFooter>

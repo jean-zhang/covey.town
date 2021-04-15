@@ -1,8 +1,8 @@
 import React from 'react';
 import { Participant as IParticipant } from 'twilio-video';
+import { UserProfile } from '../../../../../CoveyTypes';
 import ParticipantInfo from '../ParticipantInfo/ParticipantInfo';
 import ParticipantTracks from '../ParticipantTracks/ParticipantTracks';
-import { UserProfile } from '../../../../../CoveyTypes';
 
 interface ParticipantProps {
   participant: IParticipant;
@@ -42,8 +42,7 @@ export default function Participant({
       hideParticipant={hideParticipant}
       slot={slot}
       insideGrid={insideGrid}
-      highlight={highlight}
-    >
+      highlight={highlight}>
       <ParticipantTracks
         participant={participant}
         videoOnly={videoOnly}

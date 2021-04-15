@@ -41,6 +41,8 @@ class CoveyGameScene extends Phaser.Scene {
 
   private quitGame: () => void;
 
+  private toggleShowLeaderboard: () => void;
+
   private finishGame: (score: number, gaveUp: boolean) => void;
 
   private timeLabel?: Phaser.GameObjects.Text;
@@ -69,6 +71,7 @@ class CoveyGameScene extends Phaser.Scene {
     myPlayerID: string,
     quitGame: () => void,
     finishGame: (score: number, gaveUp: boolean) => void,
+    toggleShowLeaderboard: () => void,
   ) {
     super('PlayGame');
     this.video = video;
@@ -77,6 +80,7 @@ class CoveyGameScene extends Phaser.Scene {
     this.quitGame = quitGame;
     this.finishGame = finishGame;
     this.mazeStartTime = -1;
+    this.toggleShowLeaderboard = toggleShowLeaderboard;
   }
 
   isPaused() {
@@ -90,7 +94,8 @@ class CoveyGameScene extends Phaser.Scene {
   preload() {
     // this.load.image("logo", logoImg);
     this.load.image('tiles', '/assets/tilesets/tuxmon-sample-32px-extruded.png');
-    this.load.tilemapTiledJSON('map', '/assets/tilemaps/tuxemon-town-maze-F.json');
+    this.load.image('corn', '/assets/tilesets/corn.png');
+    this.load.tilemapTiledJSON('map', '/assets/tilemaps/tuxemon-town-maze-complex.json');
     this.load.atlas('atlas', '/assets/atlas/atlas.png', '/assets/atlas/atlas.json');
   }
 
@@ -213,9 +218,8 @@ class CoveyGameScene extends Phaser.Scene {
       this.mazeFinish &&
       this.player &&
       Math.abs(this.lastLocation.x - this.mazeFinish.x) < 10 &&
-      Math.abs(this.lastLocation.y - 1181) < 10
+      Math.abs(this.lastLocation.y - this.mazeFinish.y) < 50
     ) {
-      // TODO: change 1181 to this.mazeFinish.y after Linda merges her changes
       this.finishMaze(false);
       const displayUserName = generateDisplayUserName(true, '(You)');
       this.player.label.setText(displayUserName);
@@ -305,12 +309,15 @@ class CoveyGameScene extends Phaser.Scene {
      tileset image in Phaser's cache (i.e. the name you used in preload)
      */
     const tileset = map.addTilesetImage('tuxmon-sample-32px-extruded', 'tiles');
+    const cornTileset = map.addTilesetImage('corn', 'corn');
 
     // Parameters: layer name (or index) from Tiled, tileset, x, y
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const belowLayer = map.createLayer('Below Player', tileset, 0, 0);
     const worldLayer = map.createLayer('World', tileset, 0, 0);
     worldLayer.setCollisionByProperty({ collides: true });
+    const cornLayer = map.createLayer('Corn', cornTileset, 5, 1);
+    cornLayer.setCollisionByProperty({ collides: true });
     const aboveLayer = map.createLayer('Above Player', tileset, 0, 0);
     /* By default, everything gets depth sorted on the screen in the order we created things.
      Here, we want the "Above Player" layer to sit on top of the player, so we explicitly give
@@ -336,6 +343,15 @@ class CoveyGameScene extends Phaser.Scene {
       'Objects',
       obj => obj.name === 'Maze Finish',
     ) as unknown) as Phaser.GameObjects.Components.Transform;
+
+    const leaderboard = map.createFromObjects('Objects', { name: 'Leaderboard' });
+    this.physics.world.enable(leaderboard, 0);
+    leaderboard.forEach(board => {
+      const sprite = board as Phaser.GameObjects.Sprite;
+      // make hitbox larger
+      sprite.setScale(1.3, 1.3);
+      sprite.setVisible(false);
+    });
 
     // Find all of the transporters, add them to the physics engine
     const transporters = map.createFromObjects('Objects', { name: 'transporter' });
@@ -397,8 +413,8 @@ class CoveyGameScene extends Phaser.Scene {
     // player's body.
     const sprite = this.physics.add
       .sprite(this.spawnPoint.x, this.spawnPoint.y, 'atlas', 'misa-front')
-      .setSize(30, 30)
-      .setOffset(0, 30);
+      .setSize(28, 28)
+      .setOffset(0, 28);
     const label = this.add.text(this.spawnPoint.x, this.spawnPoint.y - 20, '(You)', {
       font: '18px monospace',
       color: '#000000',
@@ -420,7 +436,18 @@ class CoveyGameScene extends Phaser.Scene {
     });
 
     // Watch the player and worldLayer for collisions, for the duration of the scene:
-    this.physics.add.collider(sprite, worldLayer);
+    this.physics.add.collider(sprite, [worldLayer, cornLayer]);
+
+    /* Configure physics overlap behavior for when the player steps into
+    leaderboard hit area. If you're inside the hit area and press 'space', you'll
+    open the leaderboard modal.
+     */
+
+    this.physics.add.overlap(sprite, leaderboard, () => {
+      if (cursorKeys.space.isDown && this.player) {
+        this.toggleShowLeaderboard();
+      }
+    });
 
     // Create the player's walking animations from the texture atlas. These are stored in the global
     // animation manager so any sprite can access them.
@@ -479,7 +506,7 @@ class CoveyGameScene extends Phaser.Scene {
       .text(
         16,
         16,
-        `Arrow keys to move, space to transport\nCurrent town: ${this.video.townFriendlyName} (${this.video.coveyTownID})`,
+        `Arrow keys to move\nCurrent town: ${this.video.townFriendlyName} (${this.video.coveyTownID})`,
         this.textStyle,
       )
       .setScrollFactor(0)
@@ -551,6 +578,7 @@ export default function WorldMap(): JSX.Element {
     quitGame,
     showInstructions,
     gameInfo,
+    toggleShowLeaderboard,
     finishGame,
     updateGameInfoStatus,
   } = useCoveyAppState();
@@ -577,6 +605,7 @@ export default function WorldMap(): JSX.Element {
         myPlayerID,
         quitGame,
         finishGame,
+        toggleShowLeaderboard,
       );
       setGameScene(newGameScene);
       game.scene.add('coveyBoard', newGameScene, true);
@@ -590,7 +619,7 @@ export default function WorldMap(): JSX.Element {
     return () => {
       game.destroy(true);
     };
-  }, [video, emitMovement, myPlayerID, quitGame, finishGame]);
+  }, [video, emitMovement, myPlayerID, quitGame, finishGame, toggleShowLeaderboard]);
 
   const deepPlayers = JSON.stringify(players);
   useEffect(() => {
