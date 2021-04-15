@@ -211,9 +211,13 @@ class CoveyGameScene extends Phaser.Scene {
     } else {
       this.timeLabel.setVisible(false);
     }
-    if (this.lastLocation && this.mazeFinish && this.player && 
-        Math.abs(this.lastLocation.x - this.mazeFinish.x) < 10 &&
-        Math.abs(this.lastLocation.y - this.mazeFinish.y) < 50) {
+    if (
+      this.lastLocation &&
+      this.mazeFinish &&
+      this.player &&
+      Math.abs(this.lastLocation.x - this.mazeFinish.x) < 10 &&
+      Math.abs(this.lastLocation.y - this.mazeFinish.y) < 50
+    ) {
       this.finishMaze(false);
       const displayUserName = generateDisplayUserName(true, '(You)');
       this.player.label.setText(displayUserName);
@@ -590,7 +594,13 @@ export default function WorldMap(): JSX.Element {
 
     const game = new Phaser.Game(config);
     if (video) {
-      const newGameScene = new CoveyGameScene(video, emitMovement, quitGame, finishGame, toggleShowLeaderboard);
+      const newGameScene = new CoveyGameScene(
+        video,
+        emitMovement,
+        quitGame,
+        finishGame,
+        toggleShowLeaderboard,
+      );
       setGameScene(newGameScene);
       game.scene.add('coveyBoard', newGameScene, true);
       video.pauseGame = () => {
